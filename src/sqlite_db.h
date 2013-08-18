@@ -1,0 +1,51 @@
+/*
+ * sqlite_db.h
+ */
+
+#ifndef sqlite_H
+#define sqlite_H
+
+#ifndef SQLITE3_LIB_H
+#define SQLITE3_LIB_H
+#include <sqlite3.h>
+#endif	/*	SQLITE3_LIB_H	*/
+
+#ifndef neon_H
+#include "neon.h"
+#define neon_H
+#endif	/*	neon_H		*/
+
+/*		sqlite_backend.c		*/
+extern void showAddressbooks(sqlite3 *ptr);
+extern void showContacts(sqlite3 *ptr);
+extern void showServer(sqlite3 *ptr);
+extern int countDuplicate(sqlite3 *ptr, char *tableName, int rows, char *row1, int value1, char *row2, char *value2, char *row3, char *value3);
+extern void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess);
+extern void cleanUpRequest(sqlite3 *ptr, int id, int type);
+extern void dbCreate(sqlite3 *ptr);
+extern void dbClose(sqlite3 *ptr);
+extern char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3, char *row4, int value4);
+extern int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2);
+extern GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2);
+extern void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path);
+extern void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url);
+extern void newServerOAuth(sqlite3 *ptr, char *desc, char *user, int oAuthType);
+extern void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret, char *davURI, char *scope, char *grantURI, char *tokenURI, char *responseType, char *redirURI, char *grantType);
+extern void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addressbookID, ne_session *sess);
+extern void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr);
+extern void remove_all_request(sqlite3 *ptr, char *tableName);
+extern void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *value1, char *row2, int value2);
+extern void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue, char *row1, int value1);
+extern void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, char *row1, int value1);
+extern void sync_addressbook(sqlite3 *ptr, int serverID);
+extern void updateContact(sqlite3 *ptr, int contactID, char *vData);
+extern void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value);
+extern void updateUri(sqlite3 *ptr, int serverID, char *newPath);
+extern void updateServerDetails(sqlite3 *ptr, int srvId, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw);
+extern void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken);
+
+/*		sqlite_frontend.c		*/
+extern void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list);
+extern void fillCombo(sqlite3 *ptr, GtkListStore *store);
+
+#endif	/*	sqlite_H	*/
