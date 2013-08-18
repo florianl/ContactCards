@@ -28,7 +28,7 @@ static void dialogAbout(void){
 	gtk_show_about_dialog(NULL,
 		"title", _("About ContactCards"),
 		"program-name", "ContactCards",
-		"comments", _("Adressbook written in C using DAV"),
+		"comments", _("Address book written in C using DAV"),
 		"website", "http://der-flo.net",
 		"license", "GNU General Public License, version 2\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
 		"version", VERSION,

@@ -1,7 +1,7 @@
 msgid "About ContactCards"
 msgstr "Über ContactCards"
 
-msgid "Adressbook written in C using DAV"
+msgid "Address book written in C using DAV"
 msgstr "Adressbuch, das in C geschrieben ist und DAV verwendet"
 
 msgid "Request Grant"
