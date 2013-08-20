@@ -74,3 +74,85 @@ void fillCombo(sqlite3 *ptr, GtkListStore *store){
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 }
+
+void pintGError(GError *error){
+	if (error != NULL) {
+		printf("[%s] %s \n", __func__, error->message);
+		g_clear_error (&error);
+	}
+}
+
+void exportContacts(sqlite3 *ptr, char *base){
+	printfunc(__func__);
+
+	GSList				*serverList;
+	GSList				*addressbookList;
+	GSList				*contactList;
+	char				*path;
+	GError 				*error = NULL;
+
+	serverList = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "");
+	while(serverList){
+		GSList				*next = serverList->next;
+		int					serverID = GPOINTER_TO_INT(serverList->data);
+		char				*serverLoc;
+		if(serverID == 0){
+			serverList = next;
+			continue;
+		}
+		path = g_strconcat(base, NULL);
+		if(g_chdir(path)){
+			return;
+		}
+		serverLoc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+		if (!g_file_test(serverLoc, G_FILE_TEST_EXISTS)){
+			g_mkdir(serverLoc, 0775);
+		}
+		addressbookList = getListInt(ptr, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "");
+		while(addressbookList){
+			GSList				*next = addressbookList->next;
+			int					addrbookID = GPOINTER_TO_INT(addressbookList->data);
+			char				*addrbookLoc;
+			if(addrbookID == 0){
+				addressbookList = next;
+				continue;
+			}
+			path = g_strconcat(base, "/", serverLoc, NULL);
+			if(g_chdir(path)){
+				return;
+			}
+			addrbookLoc = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", addrbookID, "", "", "", "", "", 0);
+			if (!g_file_test(addrbookLoc, G_FILE_TEST_EXISTS)){
+				g_mkdir(addrbookLoc, 0775);
+			}
+			contactList = getListInt(ptr, "contacts", "contactID", 1, "addressbookID", addrbookID, "", "");
+			while(contactList){
+				GSList				*next = contactList->next;
+				int					contactID = GPOINTER_TO_INT(contactList->data);
+				char				*contactName = NULL;
+				char				*contactFile = NULL;
+				char				*contactCard = NULL;
+				if(contactID == 0){
+					contactList = next;
+					continue;
+				}
+				path = g_strconcat(base, "/", serverLoc, "/", addrbookLoc, NULL);
+				if(g_chdir(path)){
+					return;
+				}
+				contactName = getSingleChar(ptr, "contacts", "displayname", 1, "contactID", contactID, "", "", "", "", "", 0);
+				contactFile = g_strconcat(contactName, ".vcf", NULL);
+				contactCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", contactID, "", "", "", "", "", 0);
+				g_build_filename(contactFile, NULL);
+				g_file_set_contents(contactFile, contactCard, strlen(contactCard), &error);
+				pintGError(error);
+				contactList = next;
+			}
+			g_slist_free(contactList);
+			addressbookList = next;
+		}
+		g_slist_free(addressbookList);
+		serverList = next;
+	}
+	g_slist_free(serverList);
+}

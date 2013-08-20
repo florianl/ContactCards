@@ -258,12 +258,41 @@ static void *syncingServer(void *trans){
 	return NULL;
 }
 
+static void dialogExportContacts(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	sqlite3						*ptr;
+	ContactCards_trans_t		*data = trans;
+	GtkWidget					*dirChooser;
+	int							result;
+	char						*path = NULL;
+
+	ptr = data->db;
+
+	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dirChooser), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+
+	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
+
+	switch(result){
+		case GTK_RESPONSE_ACCEPT:
+			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
+			exportContacts(ptr, path);
+			g_free(path);
+			break;
+		case GTK_RESPONSE_CANCEL:
+		default:
+			break;
+	}
+	gtk_widget_destroy(dirChooser);
+}
+
 static void syncAllServer(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	sqlite3				*ptr;
+	sqlite3						*ptr;
 	ContactCards_trans_t		*data = trans;
-	GSList				*retList;
+	GSList						*retList;
 
 	ptr = data->db;
 
@@ -638,7 +667,7 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*addressbookWindow;
 	GtkWidget			*contactBox, *contactWindow, *contactView;
 	GtkWidget			*serverCombo;
-	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem;
+	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GtkTextBuffer		*dataBuffer;
 	GSList 				*cleanUpList = g_slist_alloc();
@@ -664,6 +693,9 @@ void guiInit(sqlite3 *ptr){
 
 	prefItem = gtk_tool_button_new_from_stock(GTK_STOCK_PREFERENCES);
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), prefItem, -1);
+
+	exportItem = gtk_tool_button_new_from_stock(GTK_STOCK_SAVE);
+	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
 	syncItem = gtk_tool_button_new_from_stock(GTK_STOCK_REFRESH);
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), syncItem, -1);
@@ -737,6 +769,7 @@ void guiInit(sqlite3 *ptr){
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(dialogNewServer), transNew);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncAllServer), transPref);
+	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
 
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);

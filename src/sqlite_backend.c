@@ -253,7 +253,6 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
-		printf("[%s] append: %d\n", __func__, sqlite3_column_int(vm, 0));
 		list = g_slist_append(list,  GINT_TO_POINTER(sqlite3_column_int(vm, 0)));
 	}
 
