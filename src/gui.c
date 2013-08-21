@@ -22,6 +22,16 @@ void guiExit(GtkWidget *widget, gpointer data){
 	g_slist_free_full(cleanUpList, g_free);
 }
 
+
+void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
+	printfunc(__func__);
+
+	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
+		printf("ctrl-w was pressed\n");
+		guiExit(gui, data);
+	}
+}
+
 static void dialogAbout(void){
 	printfunc(__func__);
 
@@ -760,6 +770,7 @@ void guiInit(sqlite3 *ptr){
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE); 
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
 
+	g_signal_connect(G_OBJECT(mainWindow), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
 	g_signal_connect(G_OBJECT(mainWindow), "destroy", G_CALLBACK(guiExit), cleanUpList);
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
