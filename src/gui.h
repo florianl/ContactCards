@@ -8,7 +8,6 @@
 #ifndef	GTK_LIB_H
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
-#include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #define GTK_LIB_H
 #endif	/*	GTK_LIB_H	*/

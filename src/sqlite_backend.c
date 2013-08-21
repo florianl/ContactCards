@@ -375,7 +375,6 @@ void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret
 	char		 		*sql_query;
 
 	if(countDuplicate(ptr, "oAuthServer", 2, "", 0, "desc", desc, "", "") !=0){
-				printf("[%s] \t\tthere is something similar\n", __func__);
 				return;
 	}
 

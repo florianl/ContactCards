@@ -27,8 +27,15 @@ void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
 	printfunc(__func__);
 
 	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
-		printf("ctrl-w was pressed\n");
 		guiExit(gui, data);
+	}
+}
+
+void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
+	printfunc(__func__);
+
+	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
+		gtk_dialog_response(widget, GTK_RESPONSE_DELETE_EVENT);
 	}
 }
 
@@ -281,6 +288,8 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 
 	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
+	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
 	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
 
 	switch(result){
@@ -289,7 +298,6 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 			exportContacts(ptr, path);
 			g_free(path);
 			break;
-		case GTK_RESPONSE_CANCEL:
 		default:
 			break;
 	}
@@ -434,6 +442,8 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 
 	gtk_box_pack_start(GTK_BOX(area), box, FALSE, FALSE, 2);
 
+	g_signal_connect(G_OBJECT(dialog), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
 	gtk_widget_show_all(dialog);
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -530,6 +540,8 @@ void dialogNewServer(GtkWidget *widget, gpointer trans){
 	label = gtk_label_new(_("oAuth2"));
 	oAuthNote = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), oAuthFrame, label);
 
+	g_signal_connect(G_OBJECT(dialog), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
 	gtk_widget_show_all(dialog);
 	result = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -546,11 +558,11 @@ void dialogNewServer(GtkWidget *widget, gpointer trans){
 				if(gtk_entry_buffer_get_length(user2)== 0) break;
 				newServerOAuth(ptr, g_strdup(gtk_entry_buffer_get_text(desc2)), g_strdup(gtk_entry_buffer_get_text(user2)), 1);
 			}
+			fillCombo(ptr, comboList);
 			break;
 		default:
 			break;
 	}
-	fillCombo(ptr, comboList);
 	gtk_widget_destroy(dialog);
 }
 
