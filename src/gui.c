@@ -270,7 +270,6 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	ptr = data->db;
 
 	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dirChooser), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
 	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
 
@@ -441,10 +440,8 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 			g_free(newGrant);
 			oAuthAccess(ptr, serverID, entity, DAV_REQ_GET_TOKEN);
 			break;
-		case GTK_RESPONSE_CANCEL:
-			dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", serverID);
-			break;
 		default:
+			dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", serverID);
 			break;
 	}
 	g_free(uri);
@@ -540,7 +537,6 @@ void dialogNewServer(GtkWidget *widget, gpointer trans){
 				newServerOAuth(ptr, g_strdup(gtk_entry_buffer_get_text(desc2)), g_strdup(gtk_entry_buffer_get_text(user2)), 1);
 			}
 			break;
-		case GTK_RESPONSE_CANCEL:
 		default:
 			break;
 	}
