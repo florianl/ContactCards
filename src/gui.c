@@ -224,10 +224,20 @@ static void *syncingServer(void *trans){
 	ne_session 			*sess = NULL;
 	ContactCards_trans_t		*data = trans;
 	sqlite3 			*ptr = data->db;
-
-	serverID = GPOINTER_TO_INT(data->element);
+	GtkWidget			*statusBar;
+	char				*srv = NULL;
+	char				*msg = NULL;
+	int					ctxID;
 
 	g_mutex_lock(&mutex);
+
+	serverID = GPOINTER_TO_INT(data->element);
+	statusBar = data->element2;
+
+	srv = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+	msg = g_strconcat(_("syncing "), srv, NULL);
+	ctxID = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusBar), "info");
+	gtk_statusbar_push(GTK_STATUSBAR(statusBar), ctxID, msg);
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
@@ -268,6 +278,8 @@ static void *syncingServer(void *trans){
 	requestPropfind(serverID, sess, ptr);
 	checkAddressbooks(ptr, serverID, 20, sess);
 	serverDisconnect(sess, ptr);
+
+	gtk_statusbar_pop(GTK_STATUSBAR(statusBar), ctxID);
 
 	g_free(data);
 	g_mutex_unlock(&mutex);
@@ -310,8 +322,10 @@ static void syncAllServer(GtkWidget *widget, gpointer trans){
 	sqlite3						*ptr;
 	ContactCards_trans_t		*data = trans;
 	GSList						*retList;
+	GtkWidget					*statusBar;
 
 	ptr = data->db;
+	statusBar = data->element;
 
 	retList = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "");
 
@@ -327,6 +341,7 @@ static void syncAllServer(GtkWidget *widget, gpointer trans){
 		buff = g_new(ContactCards_trans_t, 1);
 		buff->db = ptr;
 		buff->element = GINT_TO_POINTER(serverID);
+		buff->element2 = statusBar;
 		g_thread_try_new("syncingServer", syncingServer, buff, &error);
 		if(error){
 			printf("[%s] something has gone wrong with threads\n", __func__);
@@ -693,6 +708,7 @@ void guiInit(sqlite3 *ptr){
 	ContactCards_trans_t		*transContact = NULL;
 	ContactCards_trans_t		*transPref = NULL;
 	ContactCards_trans_t		*transNew = NULL;
+	ContactCards_trans_t		*transSync = NULL;
 
 	gtk_init(NULL, NULL);
 
@@ -766,6 +782,12 @@ void guiInit(sqlite3 *ptr){
 	transNew->db = ptr;
 	cleanUpList = g_slist_append(cleanUpList, transNew);
 
+	/*		sync Server 			*/
+	transSync = g_new(ContactCards_trans_t, 1);
+	transSync->db = ptr;
+	transSync->element = mainStatusbar;
+	cleanUpList = g_slist_append(cleanUpList, transSync);
+
 	/*		Connect Signales		*/
 	transBook = g_new(ContactCards_trans_t, 1);
 	transBook->db = ptr;
@@ -787,7 +809,7 @@ void guiInit(sqlite3 *ptr){
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(dialogNewServer), transNew);
-	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncAllServer), transPref);
+	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncAllServer), transSync);
 	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
 
 	/*		Put it all together		*/

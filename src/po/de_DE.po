@@ -39,3 +39,6 @@ msgstr "Server löschen"
 
 msgid "Save changes"
 msgstr "Änderungen speichern"
+
+msgid "syncing "
+msgstr "synchronisiere "
