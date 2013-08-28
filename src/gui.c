@@ -204,12 +204,18 @@ void listInit(GtkWidget *list){
 	GtkListStore		*store;
 	GtkTreeViewColumn	*column;
 	GtkCellRenderer		*renderer;
+	GtkTreeSortable		*sortable;
+
 
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", TEXT_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
 	store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_UINT);
+
+	sortable = GTK_TREE_SORTABLE(store);
+
+	gtk_tree_sortable_set_sort_column_id(sortable, 0, GTK_SORT_ASCENDING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
 
