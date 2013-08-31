@@ -10,5 +10,9 @@ The following packages are required:
 - libsqlite3-dev
 - libneon27-dev
 
+Build instructions:
+    
+    $ sh autogen.sh
+
 License: GPLv2
 Contact: dev (AT) der-flo.net
