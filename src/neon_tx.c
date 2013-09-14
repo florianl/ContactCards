@@ -25,6 +25,8 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 
 	readCardServerCredits(id, key, ptr);
 
+	if(key->user == NULL) return;
+
 	g_stpcpy(username, key->user);
 	g_stpcpy(password, key->passwd);
 

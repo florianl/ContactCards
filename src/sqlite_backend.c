@@ -567,6 +567,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 
 	if (ret != SQLITE_OK){
 		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
