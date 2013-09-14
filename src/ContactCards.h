@@ -32,6 +32,7 @@ GtkWidget				*addressbookList, *contactList;
 GtkListStore			*comboList;
 GMutex 					mutex;
 GtkWidget				*mainWindow;
+int						selectedSrv;
 
 // #define ContactCards_DEBUG
 #ifdef ContactCards_DEBUG

@@ -222,7 +222,7 @@ void listInit(GtkWidget *list){
 	g_object_unref(store);
 }
 
-static void *syncingServer(void *trans){
+static void *syncOneServer(void *trans){
 	printfunc(__func__);
 
 	int					serverID = 0;
@@ -322,40 +322,51 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	gtk_widget_destroy(dirChooser);
 }
 
-static void syncAllServer(GtkWidget *widget, gpointer trans){
+static void syncServer(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
 	sqlite3						*ptr;
 	ContactCards_trans_t		*data = trans;
 	GSList						*retList;
 	GtkWidget					*statusBar;
+	GError		 				*error = NULL;
+	ContactCards_trans_t		*buff = NULL;
 
 	ptr = data->db;
 	statusBar = data->element;
 
-	retList = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "");
-
-	while(retList){
-		GSList				*next = retList->next;
-		int					serverID = GPOINTER_TO_INT(retList->data);
-		ContactCards_trans_t		*buff = NULL;
-		GError 				*error = NULL;
-		if(serverID == 0){
-			retList = next;
-			continue;
-		}
+	if(selectedSrv != 0){
 		buff = g_new(ContactCards_trans_t, 1);
 		buff->db = ptr;
-		buff->element = GINT_TO_POINTER(serverID);
+		buff->element = GINT_TO_POINTER(selectedSrv);
 		buff->element2 = statusBar;
-		g_thread_try_new("syncingServer", syncingServer, buff, &error);
+		g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
 			printf("[%s] something has gone wrong with threads\n", __func__);
 		}
-		retList = next;
-	}
-	g_slist_free(retList);
+	} else {
 
+		retList = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "");
+
+		while(retList){
+			GSList				*next = retList->next;
+			int					serverID = GPOINTER_TO_INT(retList->data);
+			if(serverID == 0){
+				retList = next;
+				continue;
+			}
+			buff = g_new(ContactCards_trans_t, 1);
+			buff->db = ptr;
+			buff->element = GINT_TO_POINTER(serverID);
+			buff->element2 = statusBar;
+			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+			if(error){
+				printf("[%s] something has gone wrong with threads\n", __func__);
+			}
+			retList = next;
+		}
+		g_slist_free(retList);
+	}
 }
 
 static void comboChanged(GtkComboBox *combo, gpointer trans){
@@ -379,8 +390,10 @@ static void comboChanged(GtkComboBox *combo, gpointer trans){
 
 	if(counter == 1) {
 		fillList(ptr, 1, id, addressbookList);
+		selectedSrv = id;
 	} else {
 		fillList(ptr, 1, 0, addressbookList);
+		selectedSrv = 0;
 	}
 }
 
@@ -431,7 +444,6 @@ GtkWidget *comboInit(sqlite3 *ptr){
 	trans->db = ptr;
 
 	g_signal_connect(combo, "changed", G_CALLBACK(comboChanged), trans);
-
 
 	return combo;
 }
@@ -815,7 +827,7 @@ void guiInit(sqlite3 *ptr){
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(dialogNewServer), transNew);
-	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncAllServer), transSync);
+	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), transSync);
 	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
 
 	/*		Put it all together		*/
