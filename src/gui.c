@@ -605,6 +605,14 @@ void prefExit(GtkWidget *widget, gpointer data){
 	g_free(data);
 }
 
+void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
+	printfunc(__func__);
+
+	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
+		gtk_widget_destroy(window);
+	}
+}
+
 void prefWindow(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -704,6 +712,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	g_signal_connect(buffers->btnDel, "clicked", G_CALLBACK(prefServerDelete), data);
 	g_signal_connect(buffers->btnSave, "clicked", G_CALLBACK(prefServerSave), data);
+
+	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), buffers);
 
 	gtk_container_add(GTK_CONTAINER(prefView), prefList);
 	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
