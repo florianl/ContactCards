@@ -25,7 +25,7 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 
 	readCardServerCredits(id, key, ptr);
 
-	if(key->user == NULL) return;
+	if(key->user == NULL) return 5;
 
 	g_stpcpy(username, key->user);
 	g_stpcpy(password, key->passwd);
@@ -421,30 +421,24 @@ sendAgain:
 	ne_add_request_header(req, "Connection", "Keep-Alive");
 	ne_set_useragent(sess, ContactCardsIdent);
 
-	switch(method){
-		case DAV_REQ_GET_GRANT:
-		case DAV_REQ_GET_TOKEN:
-		case DAV_REQ_GET_REFRESH:
-			break;
-		default:
-			if(isOAuth) {
-				char 		*authToken = NULL;
-				oAuthSession = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
-				authToken = g_strconcat(" Bearer ", oAuthSession, NULL);
-				printf("[%s] adding:Authorization %s\n", __func__, authToken);
-				ne_add_request_header(req, "Authorization", authToken);
-			} else {
-				ne_set_server_auth(sess, getUserAuth, trans);
-			}
-
-			if(davCookie != NULL){
-						printf("add Cookie %s to header\n", davCookie);
-						ne_add_request_header(req, "Cookie", davCookie);
-						ne_add_request_header(req, "Cookie2", "$Version=1");
-			} else {
-				printf("cookie not set\n");
-			}
+	if(isOAuth) {
+		char 		*authToken = NULL;
+		oAuthSession = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
+		authToken = g_strconcat(" Bearer ", oAuthSession, NULL);
+		printf("[%s] adding:Authorization %s\n", __func__, authToken);
+		ne_add_request_header(req, "Authorization", authToken);
+	} else {
+		ne_set_server_auth(sess, getUserAuth, trans);
 	}
+
+	if(davCookie != NULL){
+		printf("add Cookie %s to header\n", davCookie);
+		ne_add_request_header(req, "Cookie", davCookie);
+		ne_add_request_header(req, "Cookie2", "$Version=1");
+	} else {
+		printf("cookie not set\n");
+	}
+
 	ne_set_request_body_buffer(req, req_buffer->data, ne_buffer_size(req_buffer));
 	ne_set_read_timeout(sess, 30);
 	ne_set_connect_timeout(sess, 30);

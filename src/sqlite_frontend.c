@@ -75,7 +75,7 @@ void fillCombo(sqlite3 *ptr, GtkListStore *store){
 	sqlite3_free(sql_query);
 }
 
-void pintGError(GError *error){
+void printGError(GError *error){
 	if (error != NULL) {
 		printf("[%s] %s \n", __func__, error->message);
 		g_clear_error (&error);
@@ -145,7 +145,7 @@ void exportContacts(sqlite3 *ptr, char *base){
 				contactCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", contactID, "", "", "", "", "", 0);
 				g_build_filename(contactFile, NULL);
 				g_file_set_contents(contactFile, contactCard, strlen(contactCard), &error);
-				pintGError(error);
+				printGError(error);
 				contactList = next;
 			}
 			g_slist_free(contactList);
