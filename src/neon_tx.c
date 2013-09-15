@@ -264,11 +264,11 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
+sendAgain:
 	trans = g_new(ContactCards_trans_t, 1);
 	trans->db = ptr;
 	trans->element = GINT_TO_POINTER(serverID);
 
-sendAgain:
 	ne_buffer_clear(req_buffer);
 	switch(method){
 		/*
