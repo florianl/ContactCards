@@ -132,6 +132,7 @@ extern ne_session *serverConnect(int serverID, sqlite3 *ptr);
 extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr);
 extern void serverDisconnect(ne_session *sess, sqlite3 *ptr);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);
+extern void requestOptions(int serverID, ne_session *sess, sqlite3 *ptr);
 extern void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr);
 extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
