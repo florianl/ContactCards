@@ -156,7 +156,7 @@ GSList *multiCheck(sqlite3 *ptr, char *tableName, int rows, char *sel, char *row
  * returns 0 if it does not exist
  */
 
-int countDuplicate(sqlite3 *ptr, char *tableName, int rows, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
+int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
 	printfunc(__func__);
 
 	sqlite3_stmt 		*vm;
@@ -374,7 +374,7 @@ void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret
 
 	char		 		*sql_query;
 
-	if(countDuplicate(ptr, "oAuthServer", 2, "", 0, "desc", desc, "", "") !=0){
+	if(countElements(ptr, "oAuthServer", 2, "", 0, "desc", desc, "", "") !=0){
 				return;
 	}
 
@@ -436,17 +436,17 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 		while(retList){
 			GSList *next = retList->next;
 			printf("[%s] checking: %d\n", __func__, GPOINTER_TO_INT(retList->data));
-			if(countDuplicate(ptr, "addressbooks", 12, "cardServer", GPOINTER_TO_INT(retList->data), "path", uri.path, "", "") !=0){
+			if(countElements(ptr, "addressbooks", 12, "cardServer", GPOINTER_TO_INT(retList->data), "path", uri.path, "", "") !=0){
 				printf("[%s] \t\tthere is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
-			if(countDuplicate(ptr, "cardServer", 23, "", 0, "user", user, "srvUrl", url) !=0){
+			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "srvUrl", url) !=0){
 				printf("[%s] \t\tthere is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
-			if(countDuplicate(ptr, "cardServer", 23, "", 0, "user", user, "authority", uri.host) !=0){
+			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "authority", uri.host) !=0){
 				printf("[%s] \t\tthere is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
@@ -592,11 +592,11 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 		return;
 	}
 
-	if(countDuplicate(ptr, "contacts", 123, "addressbookID", addressbookID, "etag", etag, "href", href) != 0){
+	if(countElements(ptr, "contacts", 123, "addressbookID", addressbookID, "etag", etag, "href", href) != 0){
 		return;
 	}
 
-	if(countDuplicate(ptr, "contacts", 12, "addressbookID", addressbookID, "href", href, "", "") != 0){
+	if(countElements(ptr, "contacts", 12, "addressbookID", addressbookID, "href", href, "", "") != 0){
 		sql_query = sqlite3_mprintf("UPDATE contacts SET etag = %Q WHERE addressbookID = %d AND href = %Q;", etag, addressbookID, href);
 	} else {
 		sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, etag, href) VALUES ('%d', %Q, %Q);", addressbookID, etag, href);
@@ -617,7 +617,7 @@ void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path)
 
 	char		 		*sql_query;
 
-	if(countDuplicate(ptr, "addressbooks", 123, "cardServer", cardServer, "displayname", displayname, "path", path) != 0){
+	if(countElements(ptr, "addressbooks", 123, "cardServer", cardServer, "displayname", displayname, "path", path) != 0){
 		return;
 	}
 

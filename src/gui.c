@@ -386,7 +386,7 @@ static void comboChanged(GtkComboBox *combo, gpointer trans){
 		gtk_tree_model_get( model, &iter, 1, &id, -1);
 	}
 
-	counter = countDuplicate(ptr, "cardServer", 1, "serverID", id, "", "", "", "");
+	counter = countElements(ptr, "cardServer", 1, "serverID", id, "", "", "", "");
 
 	if(counter == 1) {
 		fillList(ptr, 1, id, addressbookList);
