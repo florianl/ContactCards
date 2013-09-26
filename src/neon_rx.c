@@ -268,8 +268,7 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 				reportHandle(branch, addressbookID, serverID, sess, ptr);
 				break;
 			default:
-				printf("HELP! Get me out of here\n");
-				printf("Can't handle %d\n", reqMethod);
+				dbgCC("Can't handle %d\n", reqMethod);
 		}
 
 	branchDestroy(branch);
@@ -281,7 +280,7 @@ void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr)
 	GNode				*child;
 
 	if(stack->statuscode != 207){
-		printf(">> statuscode: %d <<\n", stack->statuscode);
+		dbgCC(">> statuscode: %d <<\n", stack->statuscode);
 		return;
 	}
 
@@ -317,7 +316,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		g_strstrip(ptr[i]);
 		item = g_shell_unquote(ptr[i], NULL);
 		if(g_strcmp0(item, "error") == 0){
-			printf("[%s] had to handle: %s - %s\n", __func__, item, ptr[++i]);
+			dbgCC("[%s] had to handle: %s - %s\n", __func__, item, ptr[++i]);
 			break;
 		} else if(g_strcmp0(item, "access_token") == 0){
 			tokenType = OAUTH_ACCESS_TOKEN;
@@ -328,7 +327,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		} else if(g_strcmp0(item, "expires_in") == 0){
 			tokenType = OAUTH_EXPIRES_IN;
 		} else {
-			printf("[%s] had to handle: %s\n", __func__, item);
+			dbgCC("[%s] had to handle: %s\n", __func__, item);
 			break;
 		}
 		g_free(item);

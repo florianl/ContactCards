@@ -30,14 +30,14 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 			sql_query = sqlite3_mprintf("SELECT serverID, desc FROM cardServer;");
 			break;
 		default:
-			printf("[%s] can't handle this type: %d\n", __func__, type);
+			dbgCC("[%s] can't handle this type: %d\n", __func__, type);
 			return;
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
@@ -61,7 +61,7 @@ void fillCombo(sqlite3 *ptr, GtkListStore *store){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 

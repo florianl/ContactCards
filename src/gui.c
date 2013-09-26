@@ -66,7 +66,7 @@ static void selBook(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
-		printf("[%s] %d\n",__func__, selID);
+		dbgCC("[%s] %d\n",__func__, selID);
 		fillList(ptr, 2, selID, contactList);
 		g_free(selText);
 	}
@@ -82,7 +82,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	ptr = data->db;
 	buffers = data->element2;
 
-	printf("[%s] %d\n", __func__, buffers->srvID);
+	dbgCC("[%s] %d\n", __func__, buffers->srvID);
 	
 	dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(ptr, buffers->srvID, 0);
@@ -123,7 +123,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		printf("[%s] %d\n",__func__, selID);
+		dbgCC("[%s] %d\n",__func__, selID);
 		frameTitle = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), frameTitle, -1);
@@ -161,7 +161,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		printf("[%s] %d\n",__func__, selID);
+		dbgCC("[%s] %d\n",__func__, selID);
 		vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
 		if(vData == NULL) return;
 		dataBuffer = gtk_text_view_get_buffer(data->element);
@@ -255,25 +255,25 @@ static void *syncOneServer(void *trans){
 
 		oAuthGrant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
 		oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
-		printf("[%s] connecting to a oAuth-Server\n", __func__);
+		dbgCC("[%s] connecting to a oAuth-Server\n", __func__);
 		if(strlen(oAuthGrant) == 1){
 			char		*newuser = NULL;
 			newuser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
 			dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
 		} else {
-			printf("[%s] there is already a grant\n", __func__);
+			dbgCC("[%s] there is already a grant\n", __func__);
 		}
 		oAuthRefresh = getSingleChar(ptr, "cardServer", "oAuthRefreshToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 		if(strlen(oAuthRefresh) == 1){
-			printf("[%s] there is no refresh_token\n", __func__);
+			dbgCC("[%s] there is no refresh_token\n", __func__);
 			oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 		} else {
-			printf("[%s] there is already a refresh_token\n", __func__);
+			dbgCC("[%s] there is already a refresh_token\n", __func__);
 			oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_REFRESH);
 		}
 		oAuthToken = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 		if(strlen(oAuthToken) == 1){
-			printf("[%s] there is no oAuthToken\n", __func__);
+			dbgCC("[%s] there is no oAuthToken\n", __func__);
 			g_free(data);
 			g_mutex_unlock(&mutex);
 			return NULL;
@@ -345,7 +345,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 		buff->element2 = statusBar;
 		g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
-			printf("[%s] something has gone wrong with threads\n", __func__);
+			dbgCC("[%s] something has gone wrong with threads\n", __func__);
 		}
 	} else {
 
@@ -364,7 +364,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			buff->element2 = statusBar;
 			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 			if(error){
-				printf("[%s] something has gone wrong with threads\n", __func__);
+				dbgCC("[%s] something has gone wrong with threads\n", __func__);
 			}
 			retList = next;
 		}

@@ -15,13 +15,13 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	ret = sqlite3_step(vm);
 
 	if (ret != SQLITE_DONE){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	sqlite3_finalize(vm);
@@ -94,7 +94,7 @@ void dbCreate(sqlite3 *ptr){
 	return;
 
 sqlError:
-	printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+	dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	return;
 }
 
@@ -131,18 +131,18 @@ GSList *multiCheck(sqlite3 *ptr, char *tableName, int rows, char *sel, char *row
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", sel, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, rows);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, rows);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return list;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
-		printf("[%s] append: %d\n", __func__, sqlite3_column_int(vm, 0));
+		dbgCC("[%s] append: %d\n", __func__, sqlite3_column_int(vm, 0));
 		list = g_slist_append(list,  GINT_TO_POINTER(sqlite3_column_int(vm, 0)));
 	}
 
@@ -181,13 +181,13 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 			sql_query = sqlite3_mprintf("SELECT COUNT(*) FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, rows);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, rows);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
@@ -242,13 +242,13 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q;", selValue, tableName);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, selRow);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return list;
 	}
 
@@ -283,16 +283,14 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, value2);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, selRow);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
-
-//	printf("%s\n", sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		if(sqlite3_column_text(vm, 0) == NULL){
@@ -304,7 +302,7 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	}
 
 	if(count != 1){
-		printf("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
+		dbgCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
 		return -1;
 	}
 
@@ -340,13 +338,13 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, selRow);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
@@ -359,7 +357,7 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	}
 
 	if(count != 1){
-		printf("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
+		dbgCC("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
 		return NULL;
 	}
 
@@ -399,7 +397,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, int oAuthEntity){
 	retList = multiCheck(ptr, "cardServer", 12, "serverID", "oAuthType", oAuthEntity, "user", newuser, "", "");
 
 	if(g_slist_length(retList) != 1) {
-		printf("[%s] \t\tthere is something similar\n", __func__);
+		dbgCC("[%s] there is something similar\n", __func__);
 		g_slist_free(retList);
 		return;
 	}
@@ -435,19 +433,19 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	if(g_slist_length(retList) != 1){
 		while(retList){
 			GSList *next = retList->next;
-			printf("[%s] checking: %d\n", __func__, GPOINTER_TO_INT(retList->data));
+			dbgCC("[%s] checking: %d\n", __func__, GPOINTER_TO_INT(retList->data));
 			if(countElements(ptr, "addressbooks", 12, "cardServer", GPOINTER_TO_INT(retList->data), "path", uri.path, "", "") !=0){
-				printf("[%s] \t\tthere is something similar\n", __func__);
+				dbgCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
 			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "srvUrl", url) !=0){
-				printf("[%s] \t\tthere is something similar\n", __func__);
+				dbgCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
 			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "authority", uri.host) !=0){
-				printf("[%s] \t\tthere is something similar\n", __func__);
+				dbgCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
@@ -509,7 +507,7 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
@@ -546,7 +544,7 @@ void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *v
 			sql_query = sqlite3_mprintf("DELETE FROM %q WHERE %q = '%q' AND %q = '%d';", tableName, row1, value1, row2, value2);
 			break;
 		default:
-			printf("[%s] can't handle this number: %d\n", __func__, selRow);
+			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
 			return;
 	}
 
@@ -566,7 +564,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		printf("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
@@ -715,7 +713,7 @@ void updateUri(sqlite3 *ptr, int serverID, char *new){
 
 	old = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
-	printf("[%s] %s - %s\n", __func__, old, new);
+	dbgCC("[%s] %s - %s\n", __func__, old, new);
 
 	ne_uri_parse(new, &newUri);
 	ne_uri_parse(old, &oldUri);
@@ -793,7 +791,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				responseHandle(stack, sess, ptr);
 				break;
 			default:
-				printf("[%s] can't handle this number: %d\n", __func__, type);
+				dbgCC("[%s] can't handle this number: %d\n", __func__, type);
 				return;
 		}
 		retList = next;

@@ -15,7 +15,8 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 	ContactCards_trans_t		*data = trans;
 
 	if (attempts > 4){
-		printf("[%s] must EXIT now\n", __func__);
+		dbgCC("[%s] must EXIT now\n", __func__);
+		return 5;
 	}
 
 	id = GPOINTER_TO_INT(data->element);
@@ -50,12 +51,10 @@ ne_session *serverConnect(int serverID, sqlite3 *ptr){
 
 	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
 
-	#ifdef ContactCards_DEBUG
-	printf("[%s] %s %s %d\n", __func__, uri.scheme, uri.host, uri.port);
-	#endif
+	dbgCC("[%s] %s %s %d\n", __func__, uri.scheme, uri.host, uri.port);
 
 	 if (ne_sock_init() != 0){
-		printf("[%s] failed to init socket library \n", __func__);
+		dbgCC("[%s] failed to init socket library \n", __func__);
 		return NULL;
 	}
 
@@ -153,12 +152,12 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 	char				*ctxName = NULL;
 
 	while(atts[i] != NULL){
-		printf("\tatts[%d]: %s\n",i, nspace);
+		dbgCC("\tatts[%d]: %s\n",i, nspace);
 		i++;
 	}
 
 	if(parent == NE_XML_STATEROOT){
-		printf(" >> ROOT <<\n");
+		dbgCC(" >> ROOT <<\n");
 		stack->tree = g_node_new(ctx);
 		stack->lastBranch = stack->tree;
 	} else {
@@ -171,6 +170,8 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 
 	ctxName = g_strdup(name);
 	((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->name = ctxName;
+
+	dbgCC("[%s]\t%s\n", __func__, ctxName);
 
 	return 1;
 }
@@ -194,6 +195,8 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 		concat = g_strconcat(existingCtx, newCtx, NULL);
 		((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->content = concat;
 	}
+
+	dbgCC("[%s]\t\t%s\n", __func__, newCtx);
 
 	return 0;
 }
@@ -276,7 +279,7 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	davPath = g_strndup(uri.path, strlen(uri.path));
 	ne_uri_free(&uri);
 
-	printf("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
+	dbgCC("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
@@ -429,7 +432,7 @@ sendAgain:
 			}
 			break;
 		default:
-			printf("no request without method\n");
+			dbgCC("no request without method\n");
 			goto failedRequest;
 	}
 
@@ -441,18 +444,18 @@ sendAgain:
 		char 		*authToken = NULL;
 		oAuthSession = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 		authToken = g_strconcat(" Bearer ", oAuthSession, NULL);
-		printf("[%s] adding:Authorization %s\n", __func__, authToken);
+		dbgCC("[%s] adding:Authorization %s\n", __func__, authToken);
 		ne_add_request_header(req, "Authorization", authToken);
 	} else {
 		ne_set_server_auth(sess, getUserAuth, trans);
 	}
 
 	if(davCookie != NULL){
-		printf("add Cookie %s to header\n", davCookie);
+		dbgCC("[%s] add Cookie %s to header\n", __func__, davCookie);
 		ne_add_request_header(req, "Cookie", davCookie);
 		ne_add_request_header(req, "Cookie2", "$Version=1");
 	} else {
-		printf("cookie not set\n");
+		dbgCC("[%s] cookie not set\n", __func__);
 	}
 
 	ne_set_request_body_buffer(req, req_buffer->data, ne_buffer_size(req_buffer));
@@ -464,7 +467,7 @@ sendAgain:
 	((ContactCards_stack_t *)userdata)->addressbookID = itemID;
 
 	if (ne_request_dispatch(req)) {
-		printf("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
+		dbgCC("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
 		goto failedRequest;
 	}
 
@@ -473,59 +476,59 @@ sendAgain:
 
 	switch(statuscode){
 		case 100 ... 199:
-			printf("==\t1xx Informational\t==\n");
+			dbgCC("==\t1xx Informational\t==\n");
 			break;
 		case 207:
-			printf("==\t207\t==\n");
+			dbgCC("==\t207\t==\n");
 			break;
 		case 200 ... 206:
 		case 208 ... 299:
-			printf("==\t2xx Success\t==\n");
+			dbgCC("==\t2xx Success\t==\n");
 			break;
 		case 301:
-			printf("==\t301 Moved Permanently\t==\n");
-			printf("%s\n", ne_get_response_header(req, "Location"));
+			dbgCC("==\t301 Moved Permanently\t==\n");
+			dbgCC("%s\n", ne_get_response_header(req, "Location"));
 			updateUri(ptr, serverID, g_strdup(ne_get_response_header(req, "Location")));
 			if(failed++ > 3) break;
 			goto sendAgain;
 			break;
 		case 300:
 		case 302 ... 399:
-			printf("==\t3xx Redirection\t==\n");
+			dbgCC("==\t3xx Redirection\t==\n");
 			break;
 		case 401:
-			printf("==\t401\t==\n");
-			printf("Unauthorized\n");
+			dbgCC("==\t401\t==\n");
+			dbgCC("Unauthorized\n");
 			if(failed++ > 3) break;
 			goto sendAgain;
 			break;
 		case 405:
-			printf("==\t405\t==\n");
-			printf("Method not Allowed\n");
+			dbgCC("==\t405\t==\n");
+			dbgCC("Method not Allowed\n");
 			break;
 		case 400:
 		case 402 ... 404:
 		case 406 ... 499:
-			printf("==\t4xx Client Error\t==\n");
-			printf("\t\t%d\n", statuscode);
+			dbgCC("==\t4xx Client Error\t==\n");
+			dbgCC("\t\t%d\n", statuscode);
 			if(failed++ > 3) break;
 
 			const char *srvTx = NULL;
 			srvTx = ne_get_response_header(req, "Set-Cookie");
 
 			if(srvTx != NULL) {
-				printf("Set-Cookie\t%s\n", srvTx);
+				dbgCC("[%s] Set-Cookie\t%s\n", __func__, srvTx);
 			} else {
 				srvTx = ne_get_response_header(req, "Set-Cookie2");
 				if(srvTx != NULL){
-					printf("Set-Cookie2\t%s\n", srvTx);
+					dbgCC("[%s] Set-Cookie2\t%s\n", __func__, srvTx);
 				} else {
 					goto sendAgain;
 				}
 			}
 			if(srvTx){
 				davCookie =  cookieSet(srvTx);
-				printf("=> %s\n", davCookie);
+				dbgCC("[%s] => %s\n", __func__, davCookie);
 			}
 
 			error = ne_get_error(sess);
@@ -533,12 +536,12 @@ sendAgain:
 			goto sendAgain;
 			break;
 		case 500 ... 599:
-			printf("==\t5xx Server Error\t==\n");
+			dbgCC("==\t5xx Server Error\t==\n");
 			error = ne_get_error(sess);
-			printf("%s\n", error);
+			dbgCC("%s\n", error);
 			break;
 		default:
-			printf("[%s] Can't handle %d\n", __func__, statuscode);
+			dbgCC("[%s] Can't handle %d\n", __func__, statuscode);
 	}
 
 failedRequest:
@@ -575,7 +578,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	grant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
 
 	if(strlen(grant) < 5){
-		printf("[%s] there is no oAuthAccessGrant\n", __func__);
+		dbgCC("[%s] there is no oAuthAccessGrant\n", __func__);
 		return;
 	}
 
@@ -596,7 +599,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	ne_uri_parse(srvURI, &uri);
 
 	if (ne_sock_init() != 0){
-		printf("[%s] failed to init socket library \n", __func__);
+		dbgCC("[%s] failed to init socket library \n", __func__);
 		return;
 	}
 
