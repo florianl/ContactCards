@@ -16,12 +16,14 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 
 	if (ret != SQLITE_OK){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return;
 	}
 
 	ret = sqlite3_step(vm);
 
 	if (ret != SQLITE_DONE){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return;
 	}
 
 	sqlite3_finalize(vm);
@@ -188,6 +190,7 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 
 	if (ret != SQLITE_OK){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return 0;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
@@ -290,6 +293,7 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 
 	if (ret != SQLITE_OK){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return count;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
@@ -345,6 +349,7 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 
 	if (ret != SQLITE_OK){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return NULL;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
@@ -508,6 +513,7 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 
 	if (ret != SQLITE_OK){
 		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		return;
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
