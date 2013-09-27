@@ -708,7 +708,7 @@ void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	setDisplayname(ptr, contactID, dbData);
 }
 
-void updateUri(sqlite3 *ptr, int serverID, char *new){
+void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	printfunc(__func__);
 
 	char				*sql_query = NULL;
@@ -719,10 +719,20 @@ void updateUri(sqlite3 *ptr, int serverID, char *new){
 
 	old = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
-	dbgCC("[%s] %s - %s\n", __func__, old, new);
-
 	ne_uri_parse(new, &newUri);
 	ne_uri_parse(old, &oldUri);
+
+	if(force == FALSE){
+		dbgCC("[%s] %s - %s\n", __func__, oldUri.path, newUri.path);
+		if(strlen(oldUri.path) > strlen(newUri.path)){
+			dbgCC("[%s] will not update URI\n", __func__);
+			return;
+		} else {
+			dbgCC("[%s] update URI\n", __func__);
+		}
+	} else {
+		dbgCC("[%s] %s%s - %s%s\n", __func__, oldUri.host, oldUri.path, newUri.host, newUri.path);
+	}
 
 	newUri.scheme = newUri.scheme ? newUri.scheme : "https";
 	newUri.port = newUri.port ? newUri.port : ne_uri_defaultport(newUri.scheme);

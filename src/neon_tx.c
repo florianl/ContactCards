@@ -489,7 +489,7 @@ sendAgain:
 		case 301:
 			dbgCC("==\t301 Moved Permanently\t==\n");
 			dbgCC("%s\n", ne_get_response_header(req, "Location"));
-			updateUri(ptr, serverID, g_strdup(ne_get_response_header(req, "Location")));
+			updateUri(ptr, serverID, g_strdup(ne_get_response_header(req, "Location")), TRUE);
 			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 			break;

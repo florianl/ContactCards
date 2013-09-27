@@ -40,7 +40,7 @@ extern void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newV
 extern void sync_addressbook(sqlite3 *ptr, int serverID);
 extern void updateContact(sqlite3 *ptr, int contactID, char *vData);
 extern void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value);
-extern void updateUri(sqlite3 *ptr, int serverID, char *newPath);
+extern void updateUri(sqlite3 *ptr, int serverID, char *newPath, gboolean force);
 extern void updateServerDetails(sqlite3 *ptr, int srvId, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw);
 extern void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken);
 

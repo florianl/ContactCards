@@ -139,7 +139,7 @@ void uriHandle(GNode *tree, int serverID, sqlite3 *ptr){
 	printfunc(__func__);
 
 	if(!strncmp(((ContactCards_node_t *)tree->data)->name, "href", 4)){
-		updateUri(ptr, serverID, ((ContactCards_node_t *)tree->data)->content);
+		updateUri(ptr, serverID, ((ContactCards_node_t *)tree->data)->content, FALSE);
 		return;
 	}
 
