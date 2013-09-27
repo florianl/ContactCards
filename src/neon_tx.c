@@ -295,7 +295,7 @@ sendAgain:
 		 */
 		case DAV_REQ_OPT:
 			req = ne_request_create(sess, "OPTIONS", davPath);
-			ne_add_response_body_reader(req, ne_accept_2xx, responseRead, &userdata);
+			ne_add_response_body_reader(req, ne_accept_always, responseRead, req);
 
 			break;
 		/*
@@ -468,7 +468,8 @@ sendAgain:
 
 	if (ne_request_dispatch(req)) {
 		dbgCC("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
-		goto failedRequest;
+		if(failed++ > 3) goto failedRequest;
+		goto sendAgain;
 	}
 
 	statuscode = ne_get_status(req)->code;
@@ -489,7 +490,7 @@ sendAgain:
 			dbgCC("==\t301 Moved Permanently\t==\n");
 			dbgCC("%s\n", ne_get_response_header(req, "Location"));
 			updateUri(ptr, serverID, g_strdup(ne_get_response_header(req, "Location")));
-			if(failed++ > 3) break;
+			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 			break;
 		case 300:
@@ -499,7 +500,7 @@ sendAgain:
 		case 401:
 			dbgCC("==\t401\t==\n");
 			dbgCC("Unauthorized\n");
-			if(failed++ > 3) break;
+			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 			break;
 		case 405:
@@ -511,7 +512,7 @@ sendAgain:
 		case 406 ... 499:
 			dbgCC("==\t4xx Client Error\t==\n");
 			dbgCC("\t\t%d\n", statuscode);
-			if(failed++ > 3) break;
+			if(failed++ > 3) goto failedRequest;
 
 			const char *srvTx = NULL;
 			srvTx = ne_get_response_header(req, "Set-Cookie");
