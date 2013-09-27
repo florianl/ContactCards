@@ -101,12 +101,12 @@ static int vDataFetch(void *trans, const char *block, size_t len){
 }
 
 void requestOptions(int serverID, ne_session *sess, sqlite3 *ptr){
-    printfunc(__func__);
+	printfunc(__func__);
 
-    ContactCards_stack_t        *stack;
+	ContactCards_stack_t        *stack;
 
-    stack = serverRequest(DAV_REQ_OPT, serverID, 0, sess, ptr);
-    responseHandle(stack, sess, ptr);
+	stack = serverRequest(DAV_REQ_OPT, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
 }
 
 void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
@@ -117,12 +117,12 @@ void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 	stack = serverRequest(DAV_REQ_PROP_1, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
 
-    switch(stack->statuscode){
-        case 200 ... 299:
-            break;
-        default:
-            return;
-    }
+	switch(stack->statuscode){
+		case 200 ... 299:
+			break;
+		default:
+			return;
+	}
 
 	stack = serverRequest(DAV_REQ_PROP_3, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
