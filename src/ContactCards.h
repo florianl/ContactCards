@@ -49,7 +49,7 @@ int						selectedSrv;
 #define dbgCC(...)	do { } while (0)
 #endif
 
-#define VERSION			"0.02-devel"
+#define VERSION			"0.03"
 #define DATABASE		"ContactCards.sql"
 
 typedef struct ContactCards_trans {

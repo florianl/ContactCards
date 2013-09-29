@@ -1,6 +1,6 @@
-AC_INIT([ContactCards], [0.02-devel], [dev@der-flo.net], [https://github.com/florianl/ContactCards/issues])
+AC_INIT([ContactCards], [0.03], [https://github.com/florianl/ContactCards/issues])
 AC_CONFIG_SRCDIR([src/ContactCards.c])
-AM_INIT_AUTOMAKE([-Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_C99
 
 # Checks for programs.

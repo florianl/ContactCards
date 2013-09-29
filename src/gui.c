@@ -46,7 +46,7 @@ static void dialogAbout(void){
 		"title", _("About ContactCards"),
 		"program-name", "ContactCards",
 		"comments", _("Address book written in C using DAV"),
-		"website", "http://der-flo.net",
+		"website", "https://www.der-flo.net/ContactCards.html",
 		"license", "GNU General Public License, version 2\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
 		"version", VERSION,
 		NULL);
