@@ -240,7 +240,6 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	printfunc(__func__);
 
 	ne_request			*req = NULL;
-	const char			*error = NULL;
 	ne_buffer			*req_buffer = ne_buffer_create();
 	int 				statuscode = 0;
 	int					failed = 0;
@@ -528,14 +527,13 @@ sendAgain:
 				dbgCC("[%s] => %s\n", __func__, davCookie);
 			}
 
-			error = ne_get_error(sess);
+			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
 
 			goto sendAgain;
 			break;
 		case 500 ... 599:
 			dbgCC("==\t5xx Server Error\t==\n");
-			error = ne_get_error(sess);
-			dbgCC("%s\n", error);
+			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
 			break;
 		default:
 			dbgCC("[%s] Can't handle %d\n", __func__, statuscode);
