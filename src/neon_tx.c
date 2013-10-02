@@ -86,11 +86,7 @@ static int vDataFetch(void *trans, const char *block, size_t len){
 	contactID = GPOINTER_TO_INT(data->element);
 	ptr = data->db;
 
-	if (!(tmp = calloc(1, len + 1))) {
-		return -1;
-	}
-
-	memcpy(tmp, block, len);
+	tmp = g_memdup(block, len);
 
 	updateContact(ptr, contactID, tmp);
 
