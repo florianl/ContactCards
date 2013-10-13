@@ -256,6 +256,7 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 			case DAV_REQ_PROP_1:
 				locateCurUserPrincipal(branch, serverID, ptr);
 				break;
+			case DAV_REQ_PROP_2:
 			case DAV_REQ_PROP_3:
 				locateAddressbook(branch, serverID, ptr);
 				break;

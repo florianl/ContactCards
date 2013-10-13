@@ -120,6 +120,9 @@ void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 			return;
 	}
 
+	stack = serverRequest(DAV_REQ_PROP_2, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
+
 	stack = serverRequest(DAV_REQ_PROP_3, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
 
@@ -299,6 +302,17 @@ sendAgain:
 		case DAV_REQ_PROP_1:
 			req = ne_request_create(sess, "PROPFIND", davPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START_EMPTY, DAV_PROP_STD, DAV_PROPFIND_END, NULL);
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+			break;
+
+		/*
+		 * PROPFIND-Request to find the addressbook of the current user
+		 */
+		case DAV_REQ_PROP_2:
+			req = ne_request_create(sess, "PROPFIND", davPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROPFIND_END, NULL);
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
 			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
