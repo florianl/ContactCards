@@ -86,7 +86,7 @@ static int vDataFetch(void *trans, const char *block, size_t len){
 	contactID = GPOINTER_TO_INT(data->element);
 	ptr = data->db;
 
-	tmp = g_memdup(block, len);
+	tmp = g_memdup(g_strstrip((char *)block), len);
 
 	updateContact(ptr, contactID, tmp);
 
@@ -303,6 +303,7 @@ sendAgain:
 			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 			break;
+
 		/*
 		 * PROPFIND-Request to find the Addressbook in all the dav-collections
 		 */
