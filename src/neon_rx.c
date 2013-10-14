@@ -85,6 +85,7 @@ gboolean elementCheck(GNode *branch, int elementType){
 								break;
 							}
 					default:
+							dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 							break;
 				}
 				branch = branch->next;
@@ -127,6 +128,7 @@ char *elementGet(GNode *branch, int elementType){
 						}
 					}
 				default:
+					dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 					break;
 			}
 		branch = branch->next;

@@ -608,7 +608,7 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
-	contactID = getSingleInt(ptr, "contacts", "contactID", 2, "", 0, "href", href);
+	contactID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", href);
 
 	if(contactID == -1) return;
 
