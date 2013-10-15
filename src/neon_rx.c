@@ -194,29 +194,29 @@ void locateAddressbook(GNode *branch, int serverID, sqlite3 *ptr){
 void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
 	printfunc(__func__);
 
-	int			synMethod;
+	int			synMethod = 0;
+	int			synDB = 0;
+
+	synDB = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
+	if(synDB == -1) return;
 
 	if(elementCheck(branch, DAV_ELE_ADDRBOOK_MULTIGET) == TRUE){
-		synMethod = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
-		if(synMethod == -1) return;
 		synMethod |= DAV_ADDRBOOK_MULTIGET;
-		setSingleInt(ptr, "addressbooks", "syncMethod", synMethod, "addressbookID", addressbookID);
 	}
 
 	if(elementCheck(branch, DAV_ELE_ADDRBOOK_QUERY) == TRUE){
-		synMethod = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
-		if(synMethod == -1) return;
 		synMethod |= DAV_ADDRBOOK_QUERY;
-		setSingleInt(ptr, "addressbooks", "syncMethod", synMethod, "addressbookID", addressbookID);
 	}
 
 	if(elementCheck(branch, DAV_ELE_SYNC_COLLECTION) == TRUE){
-		synMethod = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
-		if(synMethod == -1) return;
 		synMethod |= DAV_SYNC_COLLECTION;
-		setSingleInt(ptr, "addressbooks", "syncMethod", synMethod, "addressbookID", addressbookID);
 	}
 
+	if(synDB == synMethod){
+		return;
+	}
+
+	setSingleInt(ptr, "addressbooks", "syncMethod", synMethod, "addressbookID", addressbookID);
 }
 
 void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *sess, sqlite3 *ptr){
