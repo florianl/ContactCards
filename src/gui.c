@@ -307,7 +307,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 
 	ptr = data->db;
 
-	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
 
 	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
 
@@ -463,7 +463,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 
 	grant = gtk_entry_buffer_new(NULL, -1);
 
-	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
 
 	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
 
@@ -527,7 +527,7 @@ void dialogNewServer(GtkWidget *widget, gpointer trans){
 	desc2 = gtk_entry_buffer_new(NULL, -1);
 	user2 = gtk_entry_buffer_new(NULL, -1);
 
-	dialog = gtk_dialog_new_with_buttons(_("New Server"), GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+	dialog = gtk_dialog_new_with_buttons(_("New Server"), GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
 	notebook = gtk_notebook_new();
 
 	area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
@@ -753,16 +753,20 @@ void guiInit(sqlite3 *ptr){
 	mainToolbar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(mainToolbar), GTK_TOOLBAR_ICONS);
 
-	newServer = gtk_tool_button_new_from_stock(GTK_STOCK_NEW);
+	newServer = gtk_tool_button_new(NULL, _("_New"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (newServer), "document-new");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), newServer, -1);
 
-	prefItem = gtk_tool_button_new_from_stock(GTK_STOCK_PREFERENCES);
+	prefItem = gtk_tool_button_new(NULL, _("_Preferences"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (prefItem), "preferences-system");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), prefItem, -1);
 
-	exportItem = gtk_tool_button_new_from_stock(GTK_STOCK_SAVE);
+	exportItem = gtk_tool_button_new(NULL, _("_Save"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (exportItem), "document-save");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
-	syncItem = gtk_tool_button_new_from_stock(GTK_STOCK_REFRESH);
+	syncItem = gtk_tool_button_new(NULL, _("_Refresh"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), syncItem, -1);
 
 	serverCombo = comboInit(ptr);
@@ -774,7 +778,8 @@ void guiInit(sqlite3 *ptr){
 	gtk_tool_item_set_expand(sep, TRUE);
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(sep), FALSE);
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), sep, -1);
-	aboutItem = gtk_tool_button_new_from_stock(GTK_STOCK_ABOUT);
+	aboutItem = gtk_tool_button_new(NULL, _("_About"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (aboutItem), "help-about");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), aboutItem, -1);
 
 	/*		Statusbar				*/
