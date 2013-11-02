@@ -40,6 +40,7 @@ typedef struct ContactCards_pref {
 	GtkWidget			*btnDel;
 	GtkWidget			*btnSave;
 	GtkWidget			*srvPrefList;
+	GtkWidget			*resSel;
 	int					srvID;
 } ContactCards_pref_t;
 

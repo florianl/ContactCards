@@ -75,6 +75,7 @@ void dbCreate(sqlite3 *ptr){
 	passwd TEXT, \
 	srvUrl TEXT,\
 	authority TEXT,\
+	resources INTEGER default 1,\
 	isOAuth INTEGER default 0,\
 	oAuthType INTEGER,\
 	oAuthAccessGrant TEXT,\
@@ -672,14 +673,16 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	g_free(displayName-=strlen("FN:"));
 }
 
-void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw){
+void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean resSel){
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
+	gboolean			oldResSel;
 
 	oldDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUrl = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldPw =  getSingleChar(ptr, "cardServer", "passwd", 1, "serverID", srvID, "", "", "", "", "", 0);
+	oldResSel = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", srvID, "", "");
 
 	if(g_strcmp0(oldDesc, newDesc))
 		setSingleChar(ptr, "cardServer", "desc", (char *) newDesc, "serverID", srvID);
@@ -689,6 +692,8 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleChar(ptr, "cardServer", "user", (char *) newUser, "serverID", srvID);
 	if(g_strcmp0(oldPw, newPw))
 		setSingleChar(ptr, "cardServer", "passwd", (char *) newPw, "serverID", srvID);
+	if(resSel != oldResSel)
+		setSingleInt(ptr, "cardServer", "resources", (int) resSel, "serverID", srvID);
 }
 
 void updateContact(sqlite3 *ptr, int contactID, char *vData){

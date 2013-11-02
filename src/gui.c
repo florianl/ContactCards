@@ -101,7 +101,8 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 	buffers = data->element2;
 
 	updateServerDetails(ptr, buffers->srvID,
-						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf));
+						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
+						gtk_switch_get_active(GTK_SWITCH(buffers->resSel)));
 }
 
 void prefServerSelect(GtkWidget *widget, gpointer trans){
@@ -116,6 +117,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	ContactCards_pref_t		*buffers;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL, *url = NULL;
 	int					isOAuth;
+	gboolean			res = 0;
 
 	ptr = data->db;
 	prefFrame = data->element;
@@ -143,6 +145,9 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 
 		url = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
+
+		res = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", selID, "", "");
+		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
 	}
 }
 
@@ -624,6 +629,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*vbox, *hbox;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn;
+	GtkWidget			*resSwitch;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkTreeSelection	*serverSel;
 	sqlite3				*ptr;
@@ -688,6 +694,13 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("AllAddressBooks"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	resSwitch = gtk_switch_new();
+	gtk_box_pack_start(GTK_BOX(hbox), resSwitch, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	deleteBtn = gtk_button_new_with_label(_("Delete Server"));
 	gtk_box_pack_start(GTK_BOX(hbox), deleteBtn, FALSE, FALSE, 2);
 	saveBtn = gtk_button_new_with_label(_("Save changes"));
@@ -705,6 +718,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->btnDel = deleteBtn;
 	buffers->btnSave = saveBtn;
 	buffers->srvPrefList = serverPrefList;
+	buffers->resSel = resSwitch;
 	data->element2 = buffers;
 
 	/*		Connect Signales		*/

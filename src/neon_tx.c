@@ -109,6 +109,7 @@ void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
 	ContactCards_stack_t		*stack;
+	int							resSel = 0;
 
 	stack = serverRequest(DAV_REQ_PROP_1, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
@@ -120,10 +121,16 @@ void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 			return;
 	}
 
-	stack = serverRequest(DAV_REQ_PROP_2, serverID, 0, sess, ptr);
-	responseHandle(stack, sess, ptr);
+	resSel = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", serverID, "", "");
 
-	stack = serverRequest(DAV_REQ_PROP_3, serverID, 0, sess, ptr);
+	if(resSel){
+		/*	get all address books	*/
+		stack = serverRequest(DAV_REQ_PROP_3, serverID, 0, sess, ptr);
+	} else {
+		/* get only the address books of the user	*/
+		stack = serverRequest(DAV_REQ_PROP_2, serverID, 0, sess, ptr);
+	}
+
 	responseHandle(stack, sess, ptr);
 
 	checkAddressbooks(ptr, serverID, 10, sess);
@@ -324,7 +331,7 @@ sendAgain:
 		case DAV_REQ_PROP_3:
 			req = ne_request_create(sess, "PROPFIND", davPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_FIND_ADDRESSBOOK, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_add_depth_header(req, NE_DEPTH_INFINITE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
