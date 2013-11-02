@@ -753,19 +753,23 @@ void guiInit(sqlite3 *ptr){
 	mainToolbar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(mainToolbar), GTK_TOOLBAR_ICONS);
 
-	newServer = gtk_tool_button_new(NULL, _("_New"));
+	newServer = gtk_tool_button_new(NULL, _("New"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(newServer), _("New"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (newServer), "document-new");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), newServer, -1);
 
-	prefItem = gtk_tool_button_new(NULL, _("_Preferences"));
+	prefItem = gtk_tool_button_new(NULL, _("Preferences"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(prefItem), _("Preferences"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (prefItem), "preferences-system");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), prefItem, -1);
 
-	exportItem = gtk_tool_button_new(NULL, _("_Save"));
+	exportItem = gtk_tool_button_new(NULL, _("Export"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(exportItem), _("Export"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (exportItem), "document-save");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
-	syncItem = gtk_tool_button_new(NULL, _("_Refresh"));
+	syncItem = gtk_tool_button_new(NULL, _("Refresh"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(syncItem), _("Refresh"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), syncItem, -1);
 
@@ -778,7 +782,8 @@ void guiInit(sqlite3 *ptr){
 	gtk_tool_item_set_expand(sep, TRUE);
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(sep), FALSE);
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), sep, -1);
-	aboutItem = gtk_tool_button_new(NULL, _("_About"));
+	aboutItem = gtk_tool_button_new(NULL, _("About"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(aboutItem), _("About"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (aboutItem), "help-about");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), aboutItem, -1);
 
