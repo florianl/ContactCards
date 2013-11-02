@@ -349,7 +349,7 @@ sendAgain:
 			if(addrbookPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "PROPFIND", addrbookPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_SYNC_ADDRESSBOOK, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_add_depth_header(req, NE_DEPTH_INFINITE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
@@ -363,8 +363,8 @@ sendAgain:
 			davPath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", itemID, "", "", "", "", "", 0);
 			if(davPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "PROPFIND", davPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_SYNC_CONTACTS, NULL);
-			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START_EMPTY, DAV_PROPFIND_SYNC_CONTACTS, DAV_PROPFIND_END, NULL);
+			ne_add_depth_header(req, NE_DEPTH_INFINITE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);

@@ -73,7 +73,7 @@
 #define	DAV_PROP_ADDRESSBOOK_SETS		"<prop><supported-report-set/></prop>"
 #define DAV_PROP_FIND_ADDRESSBOOK		"<prop><displayname/><resourcetype/></prop>"
 #define DAV_PROP_SYNC_ADDRESSBOOK		"<prop><displayname/><resourcetype/><supported-report-set/></prop>"
-#define DAV_PROPFIND_SYNC_CONTACTS		"<propfind xmlns=\"DAV:\"><prop><getetag /></prop></propfind>"
+#define DAV_PROPFIND_SYNC_CONTACTS		"<prop><getetag /></prop>"
 
 
 /*
