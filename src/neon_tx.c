@@ -36,12 +36,59 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 	return attempts;
 }
 
-ne_session *serverConnect(int serverID, sqlite3 *ptr){
+static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert){
+	printfunc(__func__);
+
+	ContactCards_trans_t		*data = trans;
+	char						*digest = calloc(1, NE_SSL_DIGESTLEN);
+	char						*dbDigest = NULL;
+	int							flag = 0;
+	int							serverID;
+	sqlite3						*ptr;
+
+	ptr = data->db;
+	serverID = GPOINTER_TO_INT(data->element);
+
+	ne_ssl_cert_digest(cert, digest);
+
+	dbDigest = getSingleChar(ptr, "cardServer", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(g_strcmp0(digest, dbDigest) == 0){
+		dbgCC("[%s] same Certs\n", __func__);
+		/* certificate hasn't changed so far	*/
+		free(digest);
+		flag = getSingleInt(ptr, "cardServer", "digestFlag", 1, "serverID", serverID, "", "");
+		if(flag == ContactCards_DIGEST_UNTRUSTED){
+			dbgCC("[%s] CERT IS NOT TRUSTED\n", __func__);
+			return ContactCards_DIGEST_UNTRUSTED;
+		} else if(flag == ContactCards_DIGEST_TRUSTED) {
+			dbgCC("[%s] CERT IS TRUSTED\n", __func__);
+			return ContactCards_DIGEST_TRUSTED;
+		} else {
+			dbgCC("[%s] CERT IS NEW\n", __func__);
+			return ContactCards_DIGEST_NEW;
+		}
+	}
+
+	setSingleChar(ptr, "cardServer", "digest", digest, "serverID", serverID);
+	setSingleInt(ptr, "cardServer", "digestFlag", ContactCards_DIGEST_NEW, "serverID", serverID);
+
+	free(digest);
+
+	return ContactCards_DIGEST_NEW;
+}
+
+ne_session *serverConnect(void *trans){
 	printfunc(__func__);
 
 	char				*davServer = NULL;
 	ne_uri				uri;
 	ne_session			*sess = NULL;
+	ContactCards_trans_t		*data = trans;
+	int							serverID;
+	sqlite3						*ptr;
+
+	ptr = data->db;
+	serverID = GPOINTER_TO_INT(data->element);
 
 	davServer = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
@@ -60,10 +107,9 @@ ne_session *serverConnect(int serverID, sqlite3 *ptr){
 
 	sess = ne_session_create(uri.scheme, uri.host, uri.port);
 
-	if(uri.port == 443){
-		ne_ssl_trust_default_ca(sess);
-		// what to do, if CA is not trusted by default?
-	}
+	dbgCC("[%s] %d\n", __func__, serverID);
+
+	ne_ssl_set_verify(sess, verifyCert, data);
 
 	return sess;
 }
@@ -483,10 +529,13 @@ sendAgain:
 	((ContactCards_stack_t *)userdata)->serverID = serverID;
 	((ContactCards_stack_t *)userdata)->addressbookID = itemID;
 
-	if (ne_request_dispatch(req)) {
-		dbgCC("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
-		if(failed++ > 3) goto failedRequest;
-		goto sendAgain;
+	switch(ne_request_dispatch(req)){
+		case NE_OK:
+			break;
+		default:
+			dbgCC("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
+			if(failed++ > 3) goto failedRequest;
+			goto sendAgain;
 	}
 
 	statuscode = ne_get_status(req)->code;

@@ -101,6 +101,13 @@
 #define DAV_ELE_ADDRBOOK_QUERY			808
 #define DAV_ELE_SYNC_COLLECTION			809
 
+/*
+ * Certificate stuff
+ */
+#define	ContactCards_DIGEST_TRUSTED		0
+#define	ContactCards_DIGEST_NEW			1
+#define	ContactCards_DIGEST_UNTRUSTED	2
+
 typedef struct ContactCards_stack {
 	GNode			*tree;
 	GNode			*lastBranch;
@@ -128,7 +135,7 @@ typedef struct credits{
 } credits_t;
 
 
-extern ne_session *serverConnect(int serverID, sqlite3 *ptr);
+extern ne_session *serverConnect(void *trans);
 extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr);
 extern void serverDisconnect(ne_session *sess, sqlite3 *ptr);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);

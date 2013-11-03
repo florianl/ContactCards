@@ -102,7 +102,8 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 
 	updateServerDetails(ptr, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
-						gtk_switch_get_active(GTK_SWITCH(buffers->resSel)));
+						gtk_switch_get_active(GTK_SWITCH(buffers->resSel)),
+						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
 }
 
 void prefServerSelect(GtkWidget *widget, gpointer trans){
@@ -115,7 +116,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	sqlite3				*ptr;
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
-	char				*frameTitle = NULL, *user = NULL, *passwd = NULL, *url = NULL;
+	char				*frameTitle = NULL, *user = NULL, *passwd = NULL, *url = NULL, *digest = NULL;
 	int					isOAuth;
 	gboolean			res = 0;
 
@@ -148,6 +149,17 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 
 		res = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", selID, "", "");
 		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
+
+		digest = getSingleChar(ptr, "cardServer", "digest", 1, "serverID", selID, "", "", "", "", "", 0);
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->digestBuf), digest, -1);
+
+
+		res = getSingleInt(ptr, "cardServer", "digestFlag", 1, "serverID", selID, "", "");
+		if(res == ContactCards_DIGEST_TRUSTED){
+			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
+		} else {
+			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+		}
 	}
 }
 
@@ -285,7 +297,7 @@ static void *syncOneServer(void *trans){
 		}
 	}
 
-	sess = serverConnect(serverID, ptr);
+	sess = serverConnect(data);
 	if(countElements(ptr, "addressbooks", 1, "cardServer", serverID, "", "", "", "") ==0){
 		requestOptions(serverID, sess, ptr);
 	}
@@ -629,8 +641,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*vbox, *hbox;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn;
-	GtkWidget			*resSwitch;
-	GtkEntryBuffer		*desc, *url, *user, *passwd;
+	GtkWidget			*resSwitch, *digSwitch;
+	GtkEntryBuffer		*desc, *url, *user, *passwd, *digest;
 	GtkTreeSelection	*serverSel;
 	sqlite3				*ptr;
 	ContactCards_trans_t		*data = trans;
@@ -640,6 +652,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	url = gtk_entry_buffer_new(NULL, -1);
 	user = gtk_entry_buffer_new(NULL, -1);
 	passwd = gtk_entry_buffer_new(NULL, -1);
+	digest = gtk_entry_buffer_new(NULL, -1);
 
 	buffers = g_new(ContactCards_pref_t, 1);
 
@@ -701,6 +714,15 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("TrustCert"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	input = gtk_entry_new_with_buffer(digest);
+	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
+	digSwitch = gtk_switch_new();
+	gtk_box_pack_start(GTK_BOX(hbox), digSwitch, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	deleteBtn = gtk_button_new_with_label(_("Delete Server"));
 	gtk_box_pack_start(GTK_BOX(hbox), deleteBtn, FALSE, FALSE, 2);
 	saveBtn = gtk_button_new_with_label(_("Save changes"));
@@ -715,10 +737,12 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->urlBuf = url;
 	buffers->userBuf = user;
 	buffers->passwdBuf = passwd;
+	buffers->digestBuf = digest;
 	buffers->btnDel = deleteBtn;
 	buffers->btnSave = saveBtn;
 	buffers->srvPrefList = serverPrefList;
 	buffers->resSel = resSwitch;
+	buffers->certSel = digSwitch;
 	data->element2 = buffers;
 
 	/*		Connect Signales		*/

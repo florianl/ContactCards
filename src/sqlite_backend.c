@@ -76,6 +76,8 @@ void dbCreate(sqlite3 *ptr){
 	srvUrl TEXT,\
 	authority TEXT,\
 	resources INTEGER default 1,\
+	digest TEXT, \
+	digestFlag INTEGER default 2,\
 	isOAuth INTEGER default 0,\
 	oAuthType INTEGER,\
 	oAuthAccessGrant TEXT,\
@@ -673,7 +675,7 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	g_free(displayName-=strlen("FN:"));
 }
 
-void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean resSel){
+void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean resSel, gboolean certSel){
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
 	gboolean			oldResSel;
@@ -694,6 +696,10 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleChar(ptr, "cardServer", "passwd", (char *) newPw, "serverID", srvID);
 	if(resSel != oldResSel)
 		setSingleInt(ptr, "cardServer", "resources", (int) resSel, "serverID", srvID);
+	if(certSel == TRUE)
+		setSingleInt(ptr, "cardServer", "digestFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
+	if(certSel == FALSE)
+		setSingleInt(ptr, "cardServer", "digestFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
 }
 
 void updateContact(sqlite3 *ptr, int contactID, char *vData){

@@ -17,6 +17,15 @@
 #include <sqlite3.h>
 #endif	/*	SQLITE3_LIB_H	*/
 
+#ifndef	CC_trans
+#define CC_trans
+typedef struct ContactCards_trans {
+	sqlite3				*db;
+	void				*element;
+	void				*element2;
+} ContactCards_trans_t;
+#endif	/*	CC_trans			*/
+
 enum {
 	TEXT_COLUMN = 0,
 	ID_COLUMN,
@@ -37,10 +46,12 @@ typedef struct ContactCards_pref {
 	GtkEntryBuffer		*urlBuf;
 	GtkEntryBuffer		*userBuf;
 	GtkEntryBuffer		*passwdBuf;
+	GtkEntryBuffer		*digestBuf;
 	GtkWidget			*btnDel;
 	GtkWidget			*btnSave;
 	GtkWidget			*srvPrefList;
 	GtkWidget			*resSel;
+	GtkWidget			*certSel;
 	int					srvID;
 } ContactCards_pref_t;
 
