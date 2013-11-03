@@ -58,13 +58,10 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		free(digest);
 		flag = getSingleInt(ptr, "cardServer", "digestFlag", 1, "serverID", serverID, "", "");
 		if(flag == ContactCards_DIGEST_UNTRUSTED){
-			dbgCC("[%s] CERT IS NOT TRUSTED\n", __func__);
 			return ContactCards_DIGEST_UNTRUSTED;
 		} else if(flag == ContactCards_DIGEST_TRUSTED) {
-			dbgCC("[%s] CERT IS TRUSTED\n", __func__);
 			return ContactCards_DIGEST_TRUSTED;
 		} else {
-			dbgCC("[%s] CERT IS NEW\n", __func__);
 			return ContactCards_DIGEST_NEW;
 		}
 	}
@@ -106,8 +103,6 @@ ne_session *serverConnect(void *trans){
 	}
 
 	sess = ne_session_create(uri.scheme, uri.host, uri.port);
-
-	dbgCC("[%s] %d\n", __func__, serverID);
 
 	ne_ssl_set_verify(sess, verifyCert, data);
 
@@ -176,7 +171,6 @@ void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 		/* get only the address books of the user	*/
 		stack = serverRequest(DAV_REQ_PROP_2, serverID, 0, sess, ptr);
 	}
-
 	responseHandle(stack, sess, ptr);
 
 	checkAddressbooks(ptr, serverID, 10, sess);
@@ -395,7 +389,7 @@ sendAgain:
 			if(addrbookPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "PROPFIND", addrbookPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_SYNC_ADDRESSBOOK, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_INFINITE);
+			ne_add_depth_header(req, NE_DEPTH_ONE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
@@ -410,7 +404,7 @@ sendAgain:
 			if(davPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "PROPFIND", davPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START_EMPTY, DAV_PROPFIND_SYNC_CONTACTS, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_INFINITE);
+			ne_add_depth_header(req, NE_DEPTH_ONE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
