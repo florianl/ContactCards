@@ -76,8 +76,6 @@ void dbCreate(sqlite3 *ptr){
 	srvUrl TEXT,\
 	authority TEXT,\
 	resources INTEGER default 1,\
-	digest TEXT, \
-	digestFlag INTEGER default 2,\
 	isOAuth INTEGER default 0,\
 	oAuthType INTEGER,\
 	oAuthAccessGrant TEXT,\
