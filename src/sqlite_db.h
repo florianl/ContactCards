@@ -35,6 +35,7 @@ extern void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, in
 extern void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr);
 extern void remove_all_request(sqlite3 *ptr, char *tableName);
 extern void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *value1, char *row2, int value2);
+extern void setServerCert(sqlite3 *ptr, int serverID, int counter, char *cert, char *digest);
 extern void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue, char *row1, int value1);
 extern void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, char *row1, int value1);
 extern void sync_addressbook(sqlite3 *ptr, int serverID);

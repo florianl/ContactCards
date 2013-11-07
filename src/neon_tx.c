@@ -41,35 +41,49 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 	ContactCards_trans_t		*data = trans;
 	char						*digest = calloc(1, NE_SSL_DIGESTLEN);
-	char						*dbDigest = NULL;
-	int							flag = 0;
+	int							trust = 0;
+	int							exists = 0;
 	int							serverID;
 	sqlite3						*ptr;
+	char						*newCer = NULL;
+	char						*dbDigest = NULL;
 
 	ptr = data->db;
 	serverID = GPOINTER_TO_INT(data->element);
 
-	ne_ssl_cert_digest(cert, digest);
+	exists = countElements(ptr, "certs", 1, "serverID", serverID, "", "", "", "");
 
-	dbDigest = getSingleChar(ptr, "cardServer", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
-	if(g_strcmp0(digest, dbDigest) == 0){
-		dbgCC("[%s] same Certs\n", __func__);
-		/* certificate hasn't changed so far	*/
-		free(digest);
-		flag = getSingleInt(ptr, "cardServer", "digestFlag", 1, "serverID", serverID, "", "");
-		if(flag == ContactCards_DIGEST_UNTRUSTED){
+	if(exists == 0)
+		goto newCert;
+
+	trust = getSingleInt(ptr, "certs", "trustFlag", 1, "serverID", serverID, "", "");
+
+	switch(trust){
+		case ContactCards_DIGEST_TRUSTED:
+			goto simpleCheck;
+			break;
+		case ContactCards_DIGEST_UNTRUSTED:
 			return ContactCards_DIGEST_UNTRUSTED;
-		} else if(flag == ContactCards_DIGEST_TRUSTED) {
-			return ContactCards_DIGEST_TRUSTED;
-		} else {
+			break;
+		default:
+		case ContactCards_DIGEST_NEW:
 			return ContactCards_DIGEST_NEW;
-		}
+			break;
 	}
 
-	setSingleChar(ptr, "cardServer", "digest", digest, "serverID", serverID);
-	setSingleInt(ptr, "cardServer", "digestFlag", ContactCards_DIGEST_NEW, "serverID", serverID);
+simpleCheck:
+	ne_ssl_cert_digest(cert, digest);
+	dbDigest = getSingleChar(ptr, "cardServer", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(g_strcmp0(digest, dbDigest) == 0)
+		return ContactCards_DIGEST_TRUSTED;
+
+newCert:
+	newCer = ne_ssl_cert_export(cert);
+	ne_ssl_cert_digest(cert, digest);
+	setServerCert(ptr, serverID, exists, newCer, digest);
 
 	free(digest);
+	free(newCer);
 
 	return ContactCards_DIGEST_NEW;
 }
