@@ -704,9 +704,9 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 	if(resSel != oldResSel)
 		setSingleInt(ptr, "cardServer", "resources", (int) resSel, "serverID", srvID);
 	if(certSel == TRUE)
-		setSingleInt(ptr, "cardServer", "digestFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
+		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
 	if(certSel == FALSE)
-		setSingleInt(ptr, "cardServer", "digestFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
+		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
 }
 
 void updateContact(sqlite3 *ptr, int contactID, char *vData){
