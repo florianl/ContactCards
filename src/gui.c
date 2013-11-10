@@ -183,6 +183,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 		if(vData == NULL) return;
 		dataBuffer = gtk_text_view_get_buffer(data->element);
 		gtk_text_view_set_editable(data->element, FALSE);
+		gtk_text_view_set_wrap_mode(data->element, GTK_WRAP_CHAR);
 		gtk_text_buffer_set_text(dataBuffer, vData, -1);
 	}
 }
@@ -782,7 +783,7 @@ void guiInit(sqlite3 *ptr){
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;
-	GtkWidget			*contactBox, *contactWindow, *contactView;
+	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
 	GtkWidget			*serverCombo;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
@@ -862,6 +863,9 @@ void guiInit(sqlite3 *ptr){
 	dataBuffer = gtk_text_buffer_new(NULL);
 	contactView = gtk_text_view_new_with_buffer(dataBuffer);
 	gtk_container_set_border_width(GTK_CONTAINER(contactView), 10);
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+	gtk_container_add(GTK_CONTAINER(scroll), contactView);
 	contactList = gtk_tree_view_new();
 	listInit(contactList);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
@@ -912,7 +916,7 @@ void guiInit(sqlite3 *ptr){
 	gtk_container_add(GTK_CONTAINER(mainContent), addressbookWindow);
 	gtk_container_add(GTK_CONTAINER(contactWindow), contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactWindow);
-	gtk_container_add(GTK_CONTAINER(contactBox), contactView);
+	gtk_container_add(GTK_CONTAINER(contactBox), scroll);
 	gtk_container_add(GTK_CONTAINER(mainContent), contactBox);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainContent, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainStatusbar, FALSE, TRUE, 0);
