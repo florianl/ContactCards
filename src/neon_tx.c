@@ -73,15 +73,19 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 simpleCheck:
 	ne_ssl_cert_digest(cert, digest);
-	dbDigest = getSingleChar(ptr, "cardServer", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
-	if(g_strcmp0(digest, dbDigest) == 0)
+	dbDigest = getSingleChar(ptr, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(g_strcmp0(digest, dbDigest) == 0){
 		return ContactCards_DIGEST_TRUSTED;
+	} else {
+		trust = ContactCards_DIGEST_UNTRUSTED;
+	}
 
 newCert:
 	newCer = ne_ssl_cert_export(cert);
 	ne_ssl_cert_digest(cert, digest);
 	setServerCert(ptr, serverID, exists, newCer, digest);
 
+fastExit:
 	free(digest);
 	free(newCer);
 
