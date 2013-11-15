@@ -151,6 +151,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
 
 		cert = getSingleChar(ptr, "certs", "cert", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(cert = NULL) cert = "";
 		gtk_text_buffer_set_text(buffers->certBuf, cert, -1);
 
 
@@ -180,7 +181,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
 		vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-		if(vData == NULL) return;
+		if(vData == NULL) vData = "";
 		dataBuffer = gtk_text_view_get_buffer(data->element);
 		gtk_text_view_set_editable(data->element, FALSE);
 		gtk_text_view_set_wrap_mode(data->element, GTK_WRAP_CHAR);
