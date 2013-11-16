@@ -547,7 +547,7 @@ sendAgain:
 		case NE_OK:
 			break;
 		default:
-			dbgCC("[%s] Request failed - %s\n", __func__, ne_get_error(sess));
+			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
 			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 	}
