@@ -151,7 +151,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
 
 		cert = getSingleChar(ptr, "certs", "cert", 1, "serverID", selID, "", "", "", "", "", 0);
-		if(cert = NULL) cert = "";
+		if(cert == NULL) cert = "";
 		gtk_text_buffer_set_text(buffers->certBuf, cert, -1);
 
 
