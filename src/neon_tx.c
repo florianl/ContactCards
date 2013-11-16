@@ -75,21 +75,21 @@ simpleCheck:
 	ne_ssl_cert_digest(cert, digest);
 	dbDigest = getSingleChar(ptr, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(g_strcmp0(digest, dbDigest) == 0){
-		return ContactCards_DIGEST_TRUSTED;
-	} else {
-		trust = ContactCards_DIGEST_UNTRUSTED;
+		goto fastExit;
 	}
 
 newCert:
 	newCer = ne_ssl_cert_export(cert);
-	ne_ssl_cert_digest(cert, digest);
-	setServerCert(ptr, serverID, exists, newCer, digest);
+	if(!digest)
+		ne_ssl_cert_digest(cert, digest);
+	trust = ContactCards_DIGEST_NEW;
+	setServerCert(ptr, serverID, exists, trust, newCer, digest);
 
 fastExit:
 	free(digest);
 	free(newCer);
 
-	return ContactCards_DIGEST_NEW;
+	return trust;
 }
 
 ne_session *serverConnect(void *trans){

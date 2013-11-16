@@ -844,7 +844,7 @@ void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
-void setServerCert(sqlite3 *ptr, int serverID, int counter, char *cert, char *digest){
+void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char *cert, char *digest){
 	printfunc(__func__);
 
 	char 				*sql_query;
@@ -854,10 +854,10 @@ void setServerCert(sqlite3 *ptr, int serverID, int counter, char *cert, char *di
 
 	switch(counter){
 		case 0:
-			sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, cert) VALUES ('%d','%d','%q','%q');", serverID, 2, digest, cert);
+			sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, cert) VALUES ('%d','%d','%q','%q');", serverID, trustFlag, digest, cert);
 			break;
 		case 1:
-			sql_query = sqlite3_mprintf("UPDATE certs SET digest = '%q' AND cert = '%q' AND trustFlag = '%d'  WHERE serverID = '%d';", digest, cert, 2, serverID);
+			sql_query = sqlite3_mprintf("UPDATE certs SET digest = '%q' AND cert = '%q' AND trustFlag = '%d'  WHERE serverID = '%d';", digest, cert, trustFlag, serverID);
 			break;
 		default:
 			dbgCC("[%s] can't handle this number: %d\n", __func__, counter);
