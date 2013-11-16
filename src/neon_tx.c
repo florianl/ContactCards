@@ -53,8 +53,9 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 	exists = countElements(ptr, "certs", 1, "serverID", serverID, "", "", "", "");
 
-	if(exists == 0)
+	if(exists == 0){
 		goto newCert;
+	}
 
 	trust = getSingleInt(ptr, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 
@@ -74,14 +75,15 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 simpleCheck:
 	ne_ssl_cert_digest(cert, digest);
 	dbDigest = getSingleChar(ptr, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(dbDigest == NULL)
+		goto newCert;
 	if(g_strcmp0(digest, dbDigest) == 0){
 		goto fastExit;
 	}
 
 newCert:
 	newCer = ne_ssl_cert_export(cert);
-	if(!digest)
-		ne_ssl_cert_digest(cert, digest);
+	ne_ssl_cert_digest(cert, digest);
 	trust = ContactCards_DIGEST_NEW;
 	setServerCert(ptr, serverID, exists, trust, newCer, digest);
 
