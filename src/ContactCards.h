@@ -49,7 +49,7 @@ int						selectedSrv;
 #define dbgCC(...)	do { } while (0)
 #endif
 
-#define VERSION			"0.03"
+#define VERSION			"0.04"
 #define DATABASE		"ContactCards.sql"
 
 #ifndef	CC_trans
