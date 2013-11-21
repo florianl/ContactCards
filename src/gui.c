@@ -300,9 +300,6 @@ static void *syncOneServer(void *trans){
 	}
 
 	sess = serverConnect(data);
-	if(countElements(ptr, "addressbooks", 1, "cardServer", serverID, "", "", "", "") ==0){
-		requestOptions(serverID, sess, ptr);
-	}
 	requestPropfind(serverID, sess, ptr);
 	checkAddressbooks(ptr, serverID, 20, sess);
 	serverDisconnect(sess, ptr);

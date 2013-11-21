@@ -157,15 +157,6 @@ static int vDataFetch(void *trans, const char *block, size_t len){
 	return len;
 }
 
-void requestOptions(int serverID, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
-
-	ContactCards_stack_t        *stack;
-
-	stack = serverRequest(DAV_REQ_OPT, serverID, 0, sess, ptr);
-	responseHandle(stack, sess, ptr);
-}
-
 void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -288,24 +279,6 @@ int cbReader(void *userdata, const char *buf, size_t len){
 	return 0;
 }
 
-
-static int responseRead(void *data, const char *block, size_t len){
-	printfunc(__func__);
-
-	void 						*cursor = NULL;
-	const char 					*name, *value;
-	ne_request					*req = data;
-
-	printf("[%s] HEADER\n", __func__);
-	while ((cursor = ne_response_header_iterate(req, cursor, &name, &value))) {
-		printf("%s\t\t%s\n", name, value);
-	}
-	printf("[%s] BODY\n", __func__);
-	printf("%s\n%s\n%d\n", (char *)data, block, (int) len);
-
-	return len;
-}
-
 ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -355,14 +328,6 @@ sendAgain:
 
 	ne_buffer_clear(req_buffer);
 	switch(method){
-		/*
-		 * OPTIONS
-		 */
-		case DAV_REQ_OPT:
-			req = ne_request_create(sess, "OPTIONS", davPath);
-			ne_add_response_body_reader(req, ne_accept_always, responseRead, req);
-
-			break;
 		/*
 		 * PROPFIND-Request to find the baselocation of the dav-collection
 		 */
