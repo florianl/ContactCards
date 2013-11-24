@@ -25,30 +25,33 @@
  * Sync-Methods
  */
 #define	DAV_SYNC_COLLECTION				1
-#define DAV_ADDRBOOK_MULTIGET			2
-#define DAV_ADDRBOOK_QUERY				4
+#define	DAV_ADDRBOOK_MULTIGET			2
+#define	DAV_ADDRBOOK_QUERY				4
 
 /*
  * Request-Methods
  */
-#define	DAV_REQ_PROP_1					121
-#define	DAV_REQ_PROP_2					122
-#define	DAV_REQ_PROP_3					123
-#define DAV_REQ_PROP_4					124
-#define DAV_REQ_PROP_5					125
-#define DAV_REQ_REP_1					131
-#define DAV_REQ_REP_2					132
+#define	DAV_REQ_EMPTY					111
+#define	DAV_REQ_CUR_PRINCIPAL			112
+#define	DAV_REQ_ADDRBOOK_HOME			113
+#define	DAV_REQ_ADDRBOOKS				116
+#define	DAV_REQ_ADDRBOOK_SYNC			117
+
+#define	DAV_REQ_REP_1					131
+#define	DAV_REQ_REP_2					132
+#define	DAV_REQ_REP_3					133
+
 #define	DAV_REQ_LOCK					141
 #define	DAV_REQ_UNLOCK					151
 #define	DAV_REQ_GET						161
-#define DAV_REQ_GET_GRANT				171
+#define	DAV_REQ_GET_GRANT				171
 #define	DAV_REQ_GET_TOKEN				172
-#define DAV_REQ_GET_REFRESH				173
+#define	DAV_REQ_GET_REFRESH				173
 
 /*
  * OAuth-Elements
  */
-#define OAUTH_ACCESS_GRANT				200
+#define	OAUTH_ACCESS_GRANT				200
 #define	OAUTH_ACCESS_TOKEN				201
 #define	OAUTH_REFRESH_TOKEN				202
 #define	OAUTH_TOKEN_TYPE				203
@@ -57,48 +60,50 @@
 /*
  * general Stuff
  */
-#define BUFFERSIZE						8192
-#define DAV_XML_HEAD					"<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+#define	BUFFERSIZE						8192
+#define	DAV_XML_HEAD					"<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
 
 /*
  * PROPFIND
  */
-#define DAV_PROPFIND_START				"<propfind xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:carddav\">"
-#define DAV_PROPFIND_START_EMPTY		"<propfind xmlns=\"DAV:\">"
-#define DAV_PROPFIND_END				"</propfind>"
+#define	DAV_PROPFIND_START				"<d:propfind xmlns:d=\"DAV:\">"
+#define	DAV_PROPFIND_END				"</d:propfind>"
+#define	DAV_PROP_START					"<d:prop>"
+#define	DAV_PROP_END					"</d:prop>"
+#define	DAV_CUR_PRINCIPAL				"<d:current-user-principal />"
+#define	DAV_ADDRBOOK_HOME				"<e:addressbook-home-set xmlns:e=\"urn:ietf:params:xml:ns:carddav\" /><d:resourcetype/>"
+#define	DAV_ADDRBOOK_SETTING			"<d:allprop />"
+#define	DAV_ADDRBOOKS					"<d:displayname /><d:resourcetype/>"
+#define	DAV_ADDRBOOK_SYNC				"<d:supported-report-set/>"
 
-#define DAV_PROP_STD					"<prop><current-user-principal/></prop>"
-#define DAV_PROP_ADDRESSBOOK_HOME		"<prop><C:addressbook-home-set/></prop>"
-#define	DAV_PROP_ADDRESSBOOK_SETS		"<prop><supported-report-set/></prop>"
-#define DAV_PROP_FIND_ADDRESSBOOK		"<prop><displayname/><resourcetype/></prop>"
-#define DAV_PROP_SYNC_ADDRESSBOOK		"<prop><displayname/><resourcetype/><supported-report-set/></prop>"
-#define DAV_PROPFIND_SYNC_CONTACTS		"<prop><getetag /></prop>"
+#define	DAV_PRINCIPAL_SEARCH_START		"<d:principal-property-search xmlns:d=\"DAV:\">"
+#define	DAV_PRINCIPAL_SEARCH_END		"</d:principal-property-search>"
 
+#define	DAV_REP_SYNC_START				"<d:sync-collection xmlns:d=\"DAV:\">"
+#define	DAV_REP_SYNC_TOKEN				"<d:sync-token />"
+#define	DAV_REP_SYNC_TOKEN_START		"<d:sync-token>"
+#define	DAV_REP_SYNC_TOKEN_END			"</d:sync-token>"
+#define	DAV_REP_ETAG					"<d:getetag />"
+#define	DAV_REP_SYNC_END				"</d:sync-collection>"
 
-/*
- * REPORT
- */
-#define DAV_REP_SYNC_START				"<sync-collection xmlns=\"DAV:\">"
-#define DAV_REP_SYNC_BASE				"<sync-token/><prop><getetag/></prop>"
-#define DAV_REP_SYNC_END				"</sync-collection>"
-#define DAV_SYNC_TOKEN_START			"<D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>"
-#define DAV_SYNC_TOKEN_END     			"</D:sync-token><D:prop><D:getetag/></D:prop></D:sync-collection>"
-
-#define ContactCards_NO_LEAVE					512
-#define ContactCards_ELEMENT_END				513
+#define	ContactCards_NO_LEAVE					512
+#define	ContactCards_ELEMENT_END				513
 
 /*
  * DAV-Elementtypes
  */
 #define	DAV_ELE_HREF					801
-#define DAV_ELE_DISPLAYNAME				802
-#define DAV_ELE_STATUS_200				803
+#define	DAV_ELE_DISPLAYNAME				802
+#define	DAV_ELE_STATUS_200				803
 #define	DAV_ELE_ADDRESSBOOK				804
-#define DAV_ELE_ETAG					805
-#define DAV_ELE_SYNCTOKEN				806
-#define DAV_ELE_ADDRBOOK_MULTIGET		807
-#define DAV_ELE_ADDRBOOK_QUERY			808
-#define DAV_ELE_SYNC_COLLECTION			809
+#define	DAV_ELE_ETAG					805
+#define	DAV_ELE_SYNCTOKEN				806
+#define	DAV_ELE_ADDRBOOK_MULTIGET		807
+#define	DAV_ELE_ADDRBOOK_QUERY			808
+#define	DAV_ELE_SYNC_COLLECTION			809
+#define	DAV_ELE_ADDRBOOK_HOME			810
+#define	DAV_ELE_CUR_PRINCIPAL			811
+#define	DAV_ELE_PROXY					812
 
 /*
  * Certificate stuff
@@ -138,8 +143,8 @@ extern ne_session *serverConnect(void *trans);
 extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr);
 extern void serverDisconnect(ne_session *sess, sqlite3 *ptr);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);
-extern void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr);
 extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
+extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);
 
 #endif	/*	neon_H	*/

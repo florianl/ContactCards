@@ -157,36 +157,6 @@ static int vDataFetch(void *trans, const char *block, size_t len){
 	return len;
 }
 
-void requestPropfind(int serverID, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
-
-	ContactCards_stack_t		*stack;
-	int							resSel = 0;
-
-	stack = serverRequest(DAV_REQ_PROP_1, serverID, 0, sess, ptr);
-	responseHandle(stack, sess, ptr);
-
-	switch(stack->statuscode){
-		case 200 ... 299:
-			break;
-		default:
-			return;
-	}
-
-	resSel = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", serverID, "", "");
-
-	if(resSel){
-		/*	get all address books	*/
-		stack = serverRequest(DAV_REQ_PROP_3, serverID, 0, sess, ptr);
-	} else {
-		/* get only the address books of the user	*/
-		stack = serverRequest(DAV_REQ_PROP_2, serverID, 0, sess, ptr);
-	}
-	responseHandle(stack, sess, ptr);
-
-	checkAddressbooks(ptr, serverID, 10, sess);
-}
-
 const char *cookieSet(const char *srvTx){
 	printfunc(__func__);
 
@@ -329,20 +299,9 @@ sendAgain:
 	ne_buffer_clear(req_buffer);
 	switch(method){
 		/*
-		 * PROPFIND-Request to find the baselocation of the dav-collection
+		 * Initial requests
 		 */
-		case DAV_REQ_PROP_1:
-			req = ne_request_create(sess, "PROPFIND", davPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START_EMPTY, DAV_PROP_STD, DAV_PROPFIND_END, NULL);
-			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
-			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
-			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
-			break;
-
-		/*
-		 * PROPFIND-Request to find the addressbook of the current user
-		 */
-		case DAV_REQ_PROP_2:
+		case DAV_REQ_EMPTY:
 			req = ne_request_create(sess, "PROPFIND", davPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROPFIND_END, NULL);
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
@@ -350,60 +309,50 @@ sendAgain:
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 			break;
 
-		/*
-		 * PROPFIND-Request to find the Addressbook in all the dav-collections
-		 */
-		case DAV_REQ_PROP_3:
+		case DAV_REQ_CUR_PRINCIPAL:
 			req = ne_request_create(sess, "PROPFIND", davPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_FIND_ADDRESSBOOK, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_INFINITE);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_CUR_PRINCIPAL, DAV_PROP_END, DAV_PROPFIND_END, NULL);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
 			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
 			break;
 
-		/*
-		 * PROPFIND-Request to get the sync-settings of the addressbook
-		 *
-		 *			This is a seperated request, due to the fact the addressbook had to exist in the database first
-		 *
-		 */
-		case DAV_REQ_PROP_4:
+		case DAV_REQ_ADDRBOOK_HOME:
+			req = ne_request_create(sess, "PROPFIND", davPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_ADDRBOOK_HOME, DAV_PROP_END, DAV_PROPFIND_END, NULL);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
+			break;
+
+		case DAV_REQ_ADDRBOOKS:
+			req = ne_request_create(sess, "PROPFIND", davPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_ADDRBOOKS, DAV_PROP_END, DAV_PROPFIND_END, NULL);
+			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
+			break;
+
+		case DAV_REQ_ADDRBOOK_SYNC:
 			addrbookPath = getSingleChar(ptr, "addressbooks", "path", 14, "cardServer", serverID, "", "", "", "", "addressbookID", itemID);
 			if(addrbookPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "PROPFIND", addrbookPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_SYNC_ADDRESSBOOK, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_ADDRBOOK_SYNC, DAV_PROP_END, DAV_PROPFIND_END, NULL);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
 			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
 			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
 			break;
 
-		/*
-		 * PROPFIND-Request to sync contacts from google
-		 */
-		case DAV_REQ_PROP_5:
-			davPath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", itemID, "", "", "", "", "", 0);
-			if(davPath== NULL) goto failedRequest;
-			req = ne_request_create(sess, "PROPFIND", davPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START_EMPTY, DAV_PROPFIND_SYNC_CONTACTS, DAV_PROPFIND_END, NULL);
-			ne_add_depth_header(req, NE_DEPTH_ONE);
-			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
-
-			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
-			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
-			break;
-
-		/*
-		 * REPORT
-		 */
 		case DAV_REQ_REP_1:
 			addrbookPath = getSingleChar(ptr, "addressbooks", "path", 14, "cardServer", serverID, "", "", "", "", "addressbookID", itemID);
 			if(addrbookPath== NULL) goto failedRequest;
 			req = ne_request_create(sess, "REPORT", addrbookPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_REP_SYNC_START, DAV_REP_SYNC_BASE, DAV_REP_SYNC_END, NULL);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_REP_SYNC_START, DAV_REP_SYNC_TOKEN, DAV_PROP_START, DAV_REP_ETAG, DAV_PROP_END, DAV_REP_SYNC_END, NULL);
 			ne_add_depth_header(req, NE_DEPTH_ONE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
@@ -412,12 +361,12 @@ sendAgain:
 			break;
 
 		case DAV_REQ_REP_2:
-			davPath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", itemID, "", "", "", "", "", 0);
-			if(davPath== NULL) goto failedRequest;
+			addrbookPath = getSingleChar(ptr, "addressbooks", "path", 14, "cardServer", serverID, "", "", "", "", "addressbookID", itemID);
+			if(addrbookPath== NULL) goto failedRequest;
 			davSyncToken = getSingleChar(ptr, "addressbooks", "syncToken", 1, "addressbookID", itemID, "", "", "", "", "", 0);
 			if(davSyncToken== NULL) goto failedRequest;
-			req = ne_request_create(sess, "REPORT", davPath);
-			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_SYNC_TOKEN_START, davSyncToken, DAV_SYNC_TOKEN_END, NULL);
+			req = ne_request_create(sess, "REPORT", addrbookPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_REP_SYNC_START, DAV_REP_SYNC_TOKEN_START, davSyncToken, DAV_REP_SYNC_TOKEN_END,DAV_PROP_START, DAV_REP_ETAG, DAV_PROP_END, DAV_REP_SYNC_END, NULL);
 			ne_add_depth_header(req, NE_DEPTH_ONE);
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 
@@ -425,6 +374,21 @@ sendAgain:
 			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
 			break;
 
+		case DAV_REQ_REP_3:
+			addrbookPath = getSingleChar(ptr, "addressbooks", "path", 14, "cardServer", serverID, "", "", "", "", "addressbookID", itemID);
+			if(addrbookPath== NULL) goto failedRequest;
+			req = ne_request_create(sess, "PROPFIND", addrbookPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START, DAV_PROP_START, DAV_REP_ETAG, DAV_PROP_END, DAV_PROPFIND_END, NULL);
+			ne_add_depth_header(req, NE_DEPTH_ONE);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
+			break;
+
+		/*
+		 * request to get the vCard
+		 */
 		case DAV_REQ_GET:
 			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(davPath == NULL) goto failedRequest;
@@ -473,6 +437,7 @@ sendAgain:
 			ne_add_request_header(req, "Content-Type", "application/x-www-form-urlencoded");
 			}
 			break;
+
 		default:
 			dbgCC("no request without method\n");
 			goto failedRequest;
@@ -665,4 +630,44 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 
 	ne_close_connection(sess);
 	ne_session_destroy(sess);
+}
+
+static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
+	printfunc(__func__);
+
+	ContactCards_stack_t		*stack;
+
+	stack = serverRequest(DAV_REQ_EMPTY, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
+
+	switch(stack->statuscode){
+		case 200 ... 299:
+			break;
+		default:
+			return;
+	}
+
+	stack = serverRequest(DAV_REQ_CUR_PRINCIPAL, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
+
+	stack = serverRequest(DAV_REQ_ADDRBOOK_HOME, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
+
+	stack = serverRequest(DAV_REQ_ADDRBOOKS, serverID, 0, sess, ptr);
+	responseHandle(stack, sess, ptr);
+
+	checkAddressbooks(ptr, serverID, 10, sess);
+}
+
+void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
+	printfunc(__func__);
+
+	if(countElements(ptr, "addressbooks", 1, "cardServer", serverID, "", "", "", "") == 0){
+		/*
+		 * 	Initial request to find the base stuff
+		 */
+		syncInitial(ptr, sess, serverID);
+	}
+
+	checkAddressbooks(ptr, serverID, 20, sess);
 }

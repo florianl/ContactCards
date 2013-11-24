@@ -300,8 +300,7 @@ static void *syncOneServer(void *trans){
 	}
 
 	sess = serverConnect(data);
-	requestPropfind(serverID, sess, ptr);
-	checkAddressbooks(ptr, serverID, 20, sess);
+	syncContacts(ptr, sess, serverID);
 	serverDisconnect(sess, ptr);
 
 	gtk_statusbar_pop(GTK_STATUSBAR(statusBar), ctxID);

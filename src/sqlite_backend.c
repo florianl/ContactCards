@@ -793,7 +793,6 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 		GSList				*next = retList->next;
 		int					addressbookID = GPOINTER_TO_INT(retList->data);
 		int					syncType;
-		int					isOAuth;
 		ContactCards_stack_t		*stack = NULL;
 
 		if(addressbookID == 0){
@@ -802,32 +801,33 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 		}
 		switch(type){
 			case 10:
-				stack = serverRequest(DAV_REQ_PROP_4, serverID, addressbookID, sess, ptr);
-				responseHandle(stack, sess, ptr);
+				/*
+				 * check how the address book will be synced
+				 */
+				stack = serverRequest(DAV_REQ_ADDRBOOK_SYNC, serverID, addressbookID, sess, ptr);
 				break;
 			case 20:
-				isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
-				if(isOAuth){
-					stack = serverRequest(DAV_REQ_PROP_5, serverID, addressbookID, sess, ptr);
-				} else {
-					syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
-					if(syncType == -1) return;
-					if(syncType & DAV_SYNC_COLLECTION){
-						if(!checkSyncToken(ptr, addressbookID)){
-							stack = serverRequest(DAV_REQ_REP_1, serverID, addressbookID, sess, ptr);
-						} else {
-							stack = serverRequest(DAV_REQ_REP_2, serverID, addressbookID, sess, ptr);
-						}
+				/*
+				 * get the latest content of each address book
+				 */
+				syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
+				if(syncType == -1) return;
+				if(syncType & DAV_SYNC_COLLECTION){
+					if(!checkSyncToken(ptr, addressbookID)){
+						stack = serverRequest(DAV_REQ_REP_1, serverID, addressbookID, sess, ptr);
 					} else {
-						stack = serverRequest(DAV_REQ_PROP_5, serverID, addressbookID, sess, ptr);
+						stack = serverRequest(DAV_REQ_REP_2, serverID, addressbookID, sess, ptr);
 					}
+				} else {
+					dbgCC("[%s] ELSE \n", __func__);
+					stack = serverRequest(DAV_REQ_REP_3, serverID, addressbookID, sess, ptr);
 				}
-				responseHandle(stack, sess, ptr);
 				break;
 			default:
 				dbgCC("[%s] can't handle this number: %d\n", __func__, type);
 				return;
 		}
+		responseHandle(stack, sess, ptr);
 		retList = next;
 	}
 

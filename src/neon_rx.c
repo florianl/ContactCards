@@ -6,21 +6,6 @@
 #include "ContactCards.h"
 #endif
 
-void treePrint(GNode *node, int depth){
-	printfunc(__func__);
-
-	int				i;
-
-	while(node){
-		GNode	*next = node->next;
-		for(i=0; i < depth; i++) printf("  ");
-		printf("%s\n", ((ContactCards_node_t *)node->data)->name);
-		if(node->children)
-			treePrint(node->children, depth++);
-		node = next;
-	}
-}
-
 void branchDestroy(GNode *node){
 	printfunc(__func__);
 
@@ -66,6 +51,12 @@ gboolean elementCheck(GNode *branch, int elementType){
 							}else {
 								break;
 							}
+					case DAV_ELE_ADDRBOOK_HOME:
+							if(!strncmp(((ContactCards_node_t *)branch->data)->name, "addressbook-home-set", 20)) {
+								return TRUE;
+							}else {
+								break;
+							}
 					case DAV_ELE_ADDRBOOK_MULTIGET:
 							if(!strncmp(((ContactCards_node_t *)branch->data)->name, "addressbook-multiget", 20)) {
 								return TRUE;
@@ -82,6 +73,14 @@ gboolean elementCheck(GNode *branch, int elementType){
 							if(!strncmp(((ContactCards_node_t *)branch->data)->name, "sync-collection", 15)) {
 								return TRUE;
 							}else {
+								break;
+							}
+					case DAV_ELE_PROXY:
+							if(!strncmp(((ContactCards_node_t *)branch->data)->name, "calendar-proxy-read", 19)) {
+								return TRUE;
+							} else if(!strncmp(((ContactCards_node_t *)branch->data)->name, "calendar-proxy-write", 20)) {
+								return TRUE;
+							} else {
 								break;
 							}
 					default:
@@ -137,7 +136,7 @@ char *elementGet(GNode *branch, int elementType){
 	return retElement;
 }
 
-void uriHandle(GNode *tree, int serverID, sqlite3 *ptr){
+void locateCurUserPrincipal(GNode *tree, int serverID, sqlite3 *ptr){
 	printfunc(__func__);
 
 	if(!strncmp(((ContactCards_node_t *)tree->data)->name, "href", 4)){
@@ -147,17 +146,73 @@ void uriHandle(GNode *tree, int serverID, sqlite3 *ptr){
 
 	while(tree){
 				if(tree->children) {
-					uriHandle(tree->children, serverID, ptr);
+					locateCurUserPrincipal(tree->children, serverID, ptr);
 				}
 				tree = tree->next;
 	}
 }
 
-void locateCurUserPrincipal(GNode *branch, int serverID, sqlite3 *ptr){
+char *getAddressbookHomeSet(GNode *branch){
+	printfunc(__func__);
+
+	char		*ret = NULL;
+
+	if(!strncmp(((ContactCards_node_t *)branch->data)->name, "addressbook-home-set", 20)){
+		ret = elementGet(branch, DAV_ELE_HREF);
+		return ret;
+	}
+
+	while(branch){
+				if(branch->children) {
+					ret = getAddressbookHomeSet(branch->children);
+				}
+				branch = branch->next;
+	}
+
+	return ret;
+}
+
+void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
+	printfunc(__func__);
+
+	char			*href;
+
+	if(elementCheck(branch, DAV_ELE_STATUS_200) != TRUE){
+		return;
+	}
+
+	if(elementCheck(branch, DAV_ELE_ADDRBOOK_HOME) != TRUE){
+		return;
+	}
+
+	if(elementCheck(branch, DAV_ELE_PROXY) == TRUE){
+		dbgCC("\tProxyelement found...\n");
+		return;
+	}
+
+	href = getAddressbookHomeSet(branch);
+
+	if(href == NULL){
+		return;
+	}
+
+	updateUri(ptr, serverID, href, TRUE);
+}
+
+void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod){
 	printfunc(__func__);
 
 	if(!strncmp(((ContactCards_node_t *)branch->data)->name, "propstat", 8)){
-		uriHandle(branch, serverID, ptr);
+		switch(reqMethod){
+			case DAV_ELE_CUR_PRINCIPAL:
+				locateCurUserPrincipal(branch, serverID, ptr);
+				break;
+			case DAV_ELE_ADDRBOOK_HOME:
+				locateAddressbookHomeSet(branch, serverID, ptr);
+				break;
+			default:
+				dbgCC("Can't handle %d\n", reqMethod);
+		}
 		return;
 	}
 
@@ -165,21 +220,21 @@ void locateCurUserPrincipal(GNode *branch, int serverID, sqlite3 *ptr){
 
 	while(branch){
 		if(branch->children) {
-				locateCurUserPrincipal(branch->children, serverID, ptr);
+				locatePropstatBase(branch->children, serverID, ptr, reqMethod);
 		}
 		branch = branch->prev;
 	}
+
 }
 
-void locateAddressbook(GNode *branch, int serverID, sqlite3 *ptr){
-	printfunc(__func__);
+void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
 
-	char			*href;
-	char			*displayname;
+	char		*href = NULL;
+	char		*displayname = NULL;
 
 	if(elementCheck(branch, DAV_ELE_STATUS_200) != TRUE){
 		return;
-	} 
+	}
 
 	if(elementCheck(branch, DAV_ELE_ADDRESSBOOK) != TRUE){
 		return;
@@ -255,19 +310,27 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 	branch->prev = NULL;
 
 	switch(reqMethod){
-			case DAV_REQ_PROP_1:
-				locateCurUserPrincipal(branch, serverID, ptr);
+			/*
+			 *	Initial requests
+			 */
+			case DAV_REQ_CUR_PRINCIPAL:
+				locatePropstatBase(branch, serverID, ptr, DAV_ELE_CUR_PRINCIPAL);
 				break;
-			case DAV_REQ_PROP_2:
-			case DAV_REQ_PROP_3:
-				locateAddressbook(branch, serverID, ptr);
+			case DAV_REQ_ADDRBOOK_HOME:
+				locatePropstatBase(branch, serverID, ptr, DAV_ELE_ADDRBOOK_HOME);
 				break;
-			case DAV_REQ_PROP_4:
+			case DAV_REQ_ADDRBOOKS:
+				locateAddressbooks(branch, serverID, ptr);
+				break;
+			case DAV_REQ_ADDRBOOK_SYNC:
 				setAddrbookSync(branch, addressbookID, ptr);
+				break;
+			case DAV_REQ_EMPTY:
+				return;
 				break;
 			case DAV_REQ_REP_1:
 			case DAV_REQ_REP_2:
-			case DAV_REQ_PROP_5:
+			case DAV_REQ_REP_3:
 				reportHandle(branch, addressbookID, serverID, sess, ptr);
 				break;
 			default:
