@@ -2,9 +2,7 @@
  * neon_rx.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 void branchDestroy(GNode *node){
 	printfunc(__func__);

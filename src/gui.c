@@ -2,9 +2,7 @@
  *	gui.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
@@ -83,7 +81,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	buffers = data->element2;
 
 	dbgCC("[%s] %d\n", __func__, buffers->srvID);
-	
+
 	dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(ptr, buffers->srvID, 0);
 	fillList(ptr, 3, 0, buffers->srvPrefList);
@@ -760,7 +758,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	/*		Connect Signales		*/
 	serverSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(serverPrefList));
-	gtk_tree_selection_set_mode (serverSel, GTK_SELECTION_SINGLE); 
+	gtk_tree_selection_set_mode (serverSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(serverSel, "changed", G_CALLBACK(prefServerSelect), data);
 	g_signal_connect(G_OBJECT(prefWindow), "destroy", G_CALLBACK(prefExit), buffers);
 
@@ -888,7 +886,7 @@ void guiInit(sqlite3 *ptr){
 	transBook->db = ptr;
 	cleanUpList = g_slist_append(cleanUpList, transBook);
 	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
-	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE); 
+	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selBook), transBook);
 
 	transContact = g_new(ContactCards_trans_t, 1);
@@ -896,7 +894,7 @@ void guiInit(sqlite3 *ptr){
 	transContact->element = contactView;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
-	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE); 
+	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
 
 	g_signal_connect(G_OBJECT(mainWindow), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);

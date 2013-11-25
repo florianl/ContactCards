@@ -2,9 +2,7 @@
  *	main.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 #ifdef ContactCards_DEBUG
 static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *message, gpointer user_data){

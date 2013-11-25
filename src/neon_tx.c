@@ -2,9 +2,7 @@
  * neon_tx.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 static int getUserAuth(void *trans, const char *realm, int attempts, char *username, char *password) {
 	printfunc(__func__);
