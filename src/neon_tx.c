@@ -7,10 +7,11 @@
 static int getUserAuth(void *trans, const char *realm, int attempts, char *username, char *password) {
 	printfunc(__func__);
 
-	credits_t			*key = NULL;
+	credits_t			key;
 	int					id;
-	sqlite3				*ptr;
 	ContactCards_trans_t		*data = trans;
+
+    memset(&key, 0, sizeof(key));
 
 	if (attempts > 4){
 		dbgCC("[%s] must EXIT now\n", __func__);
@@ -18,18 +19,13 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 	}
 
 	id = GPOINTER_TO_INT(data->element);
-	ptr = data->db;
 
-	key = (credits_t *)calloc(1, sizeof(credits_t));
+	readCardServerCredits(id, &key, data->db);
 
-	readCardServerCredits(id, key, ptr);
+	if(key.user == NULL) return 5;
 
-	if(key->user == NULL) return 5;
-
-	g_stpcpy(username, key->user);
-	g_stpcpy(password, key->passwd);
-
-	free(key);
+	g_stpcpy(username, key.user);
+	g_stpcpy(password, key.passwd);
 
 	return attempts;
 }
