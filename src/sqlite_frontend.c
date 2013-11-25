@@ -2,9 +2,7 @@
  * sqlite_frontend.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	printfunc(__func__);

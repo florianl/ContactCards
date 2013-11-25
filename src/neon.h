@@ -1,7 +1,7 @@
 /*
  * 	neon.h
  */
- 
+
 #ifndef	neon_H
 #define neon_H
 
@@ -58,7 +58,7 @@
 #define	OAUTH_EXPIRES_IN				204
 
 /*
- * general Stuff
+ * General stuff
  */
 #define	BUFFERSIZE						8192
 #define	DAV_XML_HEAD					"<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
@@ -119,7 +119,7 @@ typedef struct ContactCards_stack {
 	int				addressbookID;
 	int				statuscode;
 	int				reqMethod;
-}ContactCards_stack_t;
+} ContactCards_stack_t;
 
 typedef struct ContactCards_node {
 	char			*name;

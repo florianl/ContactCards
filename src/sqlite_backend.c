@@ -2,9 +2,7 @@
  * sqlite_backend.c
  */
 
-#ifndef ContactCards_H
 #include "ContactCards.h"
-#endif
 
 void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	printfunc(__func__);

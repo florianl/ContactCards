@@ -10,10 +10,7 @@
 #include <sqlite3.h>
 #endif	/*	SQLITE3_LIB_H	*/
 
-#ifndef neon_H
 #include "neon.h"
-#define neon_H
-#endif	/*	neon_H		*/
 
 /*		sqlite_backend.c		*/
 extern void showAddressbooks(sqlite3 *ptr);
