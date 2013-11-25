@@ -25,7 +25,7 @@
 
 #include "neon.h"
 
-/*	GLOBALES		*/
+/*	GLOBALS		*/
 GtkWidget				*addressbookList, *contactList;
 GtkListStore			*comboList;
 GMutex 					mutex;
@@ -45,7 +45,7 @@ int						selectedSrv;
 #define dbgCC(...)	g_log(NULL, G_LOG_PROTO, __VA_ARGS__)
 #else
 #define dbgCC(...)	do { } while (0)
-#endif
+#endif  /* ContactCards_DEBUG */
 
 #define VERSION			"0.04"
 #define DATABASE		"ContactCards.sql"

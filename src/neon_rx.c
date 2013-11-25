@@ -351,8 +351,8 @@ void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr)
 	child = stack->tree->children;
 
 	/*
-	 * split the whole response in its response-elements
-	 * each response-elements will be handled in its own branchHandle()
+	 * split up the whole response into response-elements
+	 * each response-element will be handled in an own branchHandle()
 	 */
 	while(child){
 		GNode	*next = child->next;
