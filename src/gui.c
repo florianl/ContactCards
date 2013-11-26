@@ -126,6 +126,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
 		frameTitle = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
+		if (frameTitle == NULL) return;
 		gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), frameTitle, -1);
 
