@@ -817,7 +817,6 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 						stack = serverRequest(DAV_REQ_REP_2, serverID, addressbookID, sess, ptr);
 					}
 				} else {
-					dbgCC("[%s] ELSE \n", __func__);
 					stack = serverRequest(DAV_REQ_REP_3, serverID, addressbookID, sess, ptr);
 				}
 				break;
@@ -850,17 +849,12 @@ void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char 
 	g_strstrip(cert);
 	g_strstrip(digest);
 
-	switch(counter){
-		case 0:
-			sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, cert) VALUES ('%d','%d','%q','%q');", serverID, trustFlag, digest, cert);
-			break;
-		case 1:
-			sql_query = sqlite3_mprintf("UPDATE certs SET digest = '%q' AND cert = '%q' AND trustFlag = '%d'  WHERE serverID = '%d';", digest, cert, trustFlag, serverID);
-			break;
-		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, counter);
-			return;
+	if(counter != 0){
+		sql_query = sqlite3_mprintf("DELETE FROM certs WHERE serverID = '%d';", serverID);
+		doSimpleRequest(ptr, sql_query, __func__);
 	}
+
+	sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, cert) VALUES ('%d','%d','%q','%q');", serverID, trustFlag, digest, cert);
 
 	doSimpleRequest(ptr, sql_query, __func__);
 }
