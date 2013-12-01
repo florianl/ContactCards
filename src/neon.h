@@ -41,8 +41,6 @@
 #define	DAV_REQ_REP_2					132
 #define	DAV_REQ_REP_3					133
 
-#define	DAV_REQ_LOCK					141
-#define	DAV_REQ_UNLOCK					151
 #define	DAV_REQ_GET						161
 #define	DAV_REQ_GET_GRANT				171
 #define	DAV_REQ_GET_TOKEN				172
