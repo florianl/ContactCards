@@ -80,6 +80,28 @@ void printGError(GError *error){
 	}
 }
 
+void exportCert(sqlite3 *ptr, char *base, int serverID){
+	printfunc(__func__);
+
+	char				*fileName = NULL;
+	char				*serverDesc = NULL;
+	char				*cert = NULL;
+	char				*path = NULL;
+	GError				*error = NULL;
+
+	serverDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+	fileName = g_strconcat(serverDesc, ".crt", NULL);
+	cert = getSingleChar(ptr, "certs", "cert", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(!serverDesc || !cert || !fileName) return;
+
+	path = g_strconcat(base, NULL);
+	if(g_chdir(path)) return;
+
+	g_build_filename(fileName, NULL);
+	g_file_set_contents(fileName, cert, strlen(cert), &error);
+	printGError(error);
+}
+
 void exportContacts(sqlite3 *ptr, char *base){
 	printfunc(__func__);
 

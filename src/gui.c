@@ -104,6 +104,38 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
 }
 
+void prefExportCert(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	sqlite3					*ptr;
+	ContactCards_trans_t	*data = trans;
+	ContactCards_pref_t		*buffers;
+	GtkWidget					*dirChooser;
+	int							result;
+	char						*path = NULL;
+
+	ptr = data->db;
+	buffers = data->element2;
+
+
+	dirChooser = gtk_file_chooser_dialog_new(_("Export Certificate"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Export"), GTK_RESPONSE_ACCEPT, NULL);
+
+	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
+	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
+
+	switch(result){
+		case GTK_RESPONSE_ACCEPT:
+			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
+			exportCert(ptr, path, buffers->srvID);
+			g_free(path);
+			break;
+		default:
+			break;
+	}
+	gtk_widget_destroy(dirChooser);
+}
+
 void prefServerSelect(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -637,7 +669,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*serverPrefList;
 	GtkWidget			*vbox, *hbox;
 	GtkWidget			*label, *input;
-	GtkWidget			*saveBtn, *deleteBtn;
+	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn;
 	GtkWidget			*resSwitch, *digSwitch;
 	GtkWidget			*sep, *scroll;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
@@ -723,6 +755,11 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
+	gtk_box_pack_start(GTK_BOX(hbox), exportCertBtn, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	input = gtk_text_view_new_with_buffer(cert);
@@ -752,6 +789,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->certBuf = cert;
 	buffers->btnDel = deleteBtn;
 	buffers->btnSave = saveBtn;
+	buffers->btnExportCert = exportCertBtn;
 	buffers->srvPrefList = serverPrefList;
 	buffers->resSel = resSwitch;
 	buffers->certSel = digSwitch;
@@ -765,6 +803,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	g_signal_connect(buffers->btnDel, "clicked", G_CALLBACK(prefServerDelete), data);
 	g_signal_connect(buffers->btnSave, "clicked", G_CALLBACK(prefServerSave), data);
+	g_signal_connect(buffers->btnExportCert, "clicked", G_CALLBACK(prefExportCert), data);
 
 	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), buffers);
 

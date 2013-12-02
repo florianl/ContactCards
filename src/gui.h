@@ -49,6 +49,7 @@ typedef struct ContactCards_pref {
 	GtkTextBuffer		*certBuf;
 	GtkWidget			*btnDel;
 	GtkWidget			*btnSave;
+	GtkWidget			*btnExportCert;
 	GtkWidget			*srvPrefList;
 	GtkWidget			*resSel;
 	GtkWidget			*certSel;
