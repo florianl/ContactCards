@@ -87,13 +87,15 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 	char				*serverDesc = NULL;
 	char				*cert = NULL;
 	char				*path = NULL;
+	char				*certdata = NULL;
 	GError				*error = NULL;
 
 	serverDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
 	fileName = g_strconcat(serverDesc, ".crt", NULL);
-	cert = getSingleChar(ptr, "certs", "cert", 1, "serverID", serverID, "", "", "", "", "", 0);
-	if(!serverDesc || !cert || !fileName) return;
+	certdata = getSingleChar(ptr, "certs", "cert", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(!serverDesc || !certdata || !fileName) return;
 
+	cert = g_strconcat("-----BEGIN CERTIFICATE-----\n", certdata, "\n-----END CERTIFICATE-----\n", NULL);
 	path = g_strconcat(base, NULL);
 	if(g_chdir(path)) return;
 
