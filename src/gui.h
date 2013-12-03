@@ -46,7 +46,8 @@ typedef struct ContactCards_pref {
 	GtkEntryBuffer		*urlBuf;
 	GtkEntryBuffer		*userBuf;
 	GtkEntryBuffer		*passwdBuf;
-	GtkTextBuffer		*certBuf;
+	GtkEntryBuffer		*issuedBuf;
+	GtkEntryBuffer		*issuerBuf;
 	GtkWidget			*btnDel;
 	GtkWidget			*btnSave;
 	GtkWidget			*btnExportCert;

@@ -41,6 +41,8 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	sqlite3						*ptr;
 	char						*newCer = NULL;
 	char						*dbDigest = NULL;
+	char						*issued = NULL;
+	char						*issuer = NULL;
 
 	ptr = data->db;
 	serverID = GPOINTER_TO_INT(data->element);
@@ -79,7 +81,9 @@ newCert:
 	newCer = ne_ssl_cert_export(cert);
 	ne_ssl_cert_digest(cert, digest);
 	trust = ContactCards_DIGEST_NEW;
-	setServerCert(ptr, serverID, exists, trust, newCer, digest);
+	issued = (char *) ne_ssl_cert_identity(cert);
+	issuer = ne_ssl_readable_dname(ne_ssl_cert_issuer(cert));
+	setServerCert(ptr, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
 	free(digest);

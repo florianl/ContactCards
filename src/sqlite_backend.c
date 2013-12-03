@@ -97,6 +97,8 @@ void dbCreate(sqlite3 *ptr){
 	serverID INTEGER, \
 	trustFlag INTEGER default 2,\
 	digest TEXT, \
+	issued TEXT, \
+	issuer TEXT, \
 	cert TEXT);", NULL, NULL, errmsg);
 
 	if (ret != SQLITE_OK)	goto sqlError;
@@ -841,20 +843,22 @@ void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
-void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char *cert, char *digest){
+void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char *cert, char *digest, char *issued, char *issuer){
 	printfunc(__func__);
 
 	char 				*sql_query;
 
 	g_strstrip(cert);
 	g_strstrip(digest);
+	g_strstrip(issued);
+	g_strstrip(issuer);
 
 	if(counter != 0){
 		sql_query = sqlite3_mprintf("DELETE FROM certs WHERE serverID = '%d';", serverID);
 		doSimpleRequest(ptr, sql_query, __func__);
 	}
 
-	sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, cert) VALUES ('%d','%d','%q','%q');", serverID, trustFlag, digest, cert);
+	sql_query = sqlite3_mprintf("INSERT INTO certs (serverID, trustFlag, digest, issued, issuer, cert) VALUES ('%d','%d','%q','%q','%q','%q');", serverID, trustFlag, digest, issued, issuer, cert);
 
 	doSimpleRequest(ptr, sql_query, __func__);
 }

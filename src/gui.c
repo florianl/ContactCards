@@ -146,7 +146,8 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	sqlite3				*ptr;
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
-	char				*frameTitle = NULL, *user = NULL, *passwd = NULL, *url = NULL, *cert = NULL;
+	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
+	char				*issued, *issuer, *url = NULL;
 	int					isOAuth;
 	gboolean			res = 0;
 
@@ -181,10 +182,13 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		res = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", selID, "", "");
 		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
 
-		cert = getSingleChar(ptr, "certs", "cert", 1, "serverID", selID, "", "", "", "", "", 0);
-		if(cert == NULL) cert = "";
-		gtk_text_buffer_set_text(buffers->certBuf, cert, -1);
+		issued = getSingleChar(ptr, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(issued == NULL) issued = "";
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
 
+		issuer = getSingleChar(ptr, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(issuer == NULL) issuer = "";
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
 
 		res = getSingleInt(ptr, "certs", "trustFlag", 1, "serverID", selID, "", "");
 		if(res == ContactCards_DIGEST_TRUSTED){
@@ -671,9 +675,9 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn;
 	GtkWidget			*resSwitch, *digSwitch;
-	GtkWidget			*sep, *scroll;
+	GtkWidget			*sep;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
-	GtkTextBuffer		*cert;
+	GtkEntryBuffer		*issued, *issuer;
 	GtkTreeSelection	*serverSel;
 	sqlite3				*ptr;
 	ContactCards_trans_t		*data = trans;
@@ -683,7 +687,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	url = gtk_entry_buffer_new(NULL, -1);
 	user = gtk_entry_buffer_new(NULL, -1);
 	passwd = gtk_entry_buffer_new(NULL, -1);
-	cert = gtk_text_buffer_new(NULL);
+	issued = gtk_entry_buffer_new(NULL, -1);
+	issuer = gtk_entry_buffer_new(NULL, -1);
 
 	buffers = g_new(ContactCards_pref_t, 1);
 
@@ -748,28 +753,35 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
+	gtk_box_pack_start(GTK_BOX(hbox), exportCertBtn, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Certificate is issued for "));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	input = gtk_entry_new_with_buffer(issued);
+	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
+	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Certificate issued by "));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	input = gtk_entry_new_with_buffer(issuer);
+	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
+	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Trust Certificate?"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	digSwitch = gtk_switch_new();
 	gtk_box_pack_start(GTK_BOX(hbox), digSwitch, FALSE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
-	gtk_box_pack_start(GTK_BOX(hbox), exportCertBtn, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-	input = gtk_text_view_new_with_buffer(cert);
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(input), FALSE);
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(input), GTK_WRAP_CHAR);
-	gtk_widget_set_size_request(scroll, 128, 256);
-	gtk_container_add(GTK_CONTAINER(scroll), input);
-	gtk_container_set_border_width(GTK_CONTAINER(scroll), 10);
-	gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 2);
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	deleteBtn = gtk_button_new_with_label(_("Delete Server"));
@@ -786,7 +798,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->urlBuf = url;
 	buffers->userBuf = user;
 	buffers->passwdBuf = passwd;
-	buffers->certBuf = cert;
+	buffers->issuedBuf = issued;
+	buffers->issuerBuf = issuer;
 	buffers->btnDel = deleteBtn;
 	buffers->btnSave = saveBtn;
 	buffers->btnExportCert = exportCertBtn;
