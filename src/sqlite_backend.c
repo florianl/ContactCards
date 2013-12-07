@@ -396,7 +396,7 @@ void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
-void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, int oAuthEntity){
+void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int oAuthEntity){
 	printfunc(__func__);
 
 	char		 		*sql_query = NULL;
@@ -406,6 +406,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, int oAuthEntity){
 
 	g_strstrip(desc);
 	g_strstrip(newuser);
+	g_strstrip(newGrant);
 
 	davBase = getSingleChar(ptr, "oAuthServer", "davURI", 1, "oAuthID", oAuthEntity, "", "", "", "", "", 0);
 
@@ -423,8 +424,9 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, int oAuthEntity){
 	doSimpleRequest(ptr, sql_query, __func__);
 
 	serverID = getSingleInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser);
+	setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
 
-	dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
+	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 
 	return;
 }

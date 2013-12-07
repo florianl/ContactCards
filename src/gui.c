@@ -555,103 +555,6 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 
 }
 
-void dialogNewServer(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*dialog, *notebook, *box, *box2;
-	GtkWidget			*area, *label, *input;
-	GtkWidget			*regFrame, *oAuthFrame;
-	GtkEntryBuffer		*desc, *url, *user, *passwd;
-	GtkEntryBuffer		*desc2, *user2;
-	int					result;
-	int					regNote, oAuthNote;
-	sqlite3				*ptr;
-	ContactCards_trans_t		*data = trans;
-
-	ptr = data->db;
-
-	desc = gtk_entry_buffer_new(NULL, -1);
-	url = gtk_entry_buffer_new(NULL, -1);
-	user = gtk_entry_buffer_new(NULL, -1);
-	passwd = gtk_entry_buffer_new(NULL, -1);
-	desc2 = gtk_entry_buffer_new(NULL, -1);
-	user2 = gtk_entry_buffer_new(NULL, -1);
-
-	dialog = gtk_dialog_new_with_buttons(_("New Server"), GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
-	notebook = gtk_notebook_new();
-
-	area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-	gtk_box_pack_start(GTK_BOX(area), notebook, FALSE, FALSE, 2);
-
-	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	regFrame = gtk_frame_new("");
-	label = gtk_label_new(_("Description"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(desc);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, FALSE, 2);
-
-	label = gtk_label_new(_("URL"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(url);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, FALSE, 2);
-
-	label = gtk_label_new(_("User"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(user);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, FALSE, 2);
-
-	label = gtk_label_new(_("Password"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(passwd);
-	gtk_entry_set_visibility(GTK_ENTRY(input), FALSE);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, FALSE, 2);
-
-	gtk_container_add(GTK_CONTAINER(regFrame), box);
-	label = gtk_label_new(_("Regular"));
-	regNote = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), regFrame, label);
-
-	box2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	oAuthFrame = gtk_frame_new("");
-	label = gtk_label_new(_("Description"));
-	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(desc2);
-	gtk_box_pack_start(GTK_BOX(box2), input, FALSE, FALSE, 2);
-
-	label = gtk_label_new(_("User"));
-	gtk_box_pack_start(GTK_BOX(box2), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(user2);
-	gtk_box_pack_start(GTK_BOX(box2), input, FALSE, FALSE, 2);
-
-	gtk_container_add(GTK_CONTAINER(oAuthFrame), box2);
-	label = gtk_label_new(_("oAuth2"));
-	oAuthNote = gtk_notebook_append_page(GTK_NOTEBOOK(notebook), oAuthFrame, label);
-
-	g_signal_connect(G_OBJECT(dialog), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
-
-	gtk_widget_show_all(dialog);
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch(result){
-		case GTK_RESPONSE_ACCEPT:
-			if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) == regNote){
-				if(gtk_entry_buffer_get_length(desc)== 0) break;
-				if(gtk_entry_buffer_get_length(url)== 0) break;
-				if(gtk_entry_buffer_get_length(user)== 0) break;
-				if(gtk_entry_buffer_get_length(passwd)== 0) break;
-				newServer(ptr, (char *) gtk_entry_buffer_get_text(desc), (char *) gtk_entry_buffer_get_text(user), (char *) gtk_entry_buffer_get_text(passwd), (char *) gtk_entry_buffer_get_text(url));
-			} else if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) == oAuthNote) {
-				if(gtk_entry_buffer_get_length(desc2)== 0) break;
-				if(gtk_entry_buffer_get_length(user2)== 0) break;
-				newServerOAuth(ptr, g_strdup(gtk_entry_buffer_get_text(desc2)), g_strdup(gtk_entry_buffer_get_text(user2)), 1);
-			}
-			fillCombo(ptr, comboList);
-			break;
-		default:
-			break;
-	}
-	gtk_widget_destroy(dialog);
-}
-
 void prefExit(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -826,6 +729,316 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_widget_show_all(prefWindow);
 }
 
+static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkAssistant			*assistant = GTK_ASSISTANT (data);
+	GtkWidget				*box;
+	int						curPage;
+	GtkEntryBuffer			*buf1, *buf2;
+	int						buf1l, buf2l;
+
+	buf1 = buf2 = NULL;
+	buf1l = buf2l = 0;
+	curPage = gtk_assistant_get_current_page(assistant);
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant),curPage);
+
+	switch(curPage){
+		case 1:
+			buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "descEntry");
+			buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
+			break;
+		case 2:
+			buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
+			buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
+			break;
+		case 3:
+			buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "oAuthEntry");
+			buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "grantEntry");
+			break;
+		default:
+			break;
+	}
+
+	buf1l = gtk_entry_buffer_get_length(buf1);
+	buf2l = gtk_entry_buffer_get_length(buf2);
+	if(buf1l !=0 && buf2l !=0)
+				gtk_assistant_set_page_complete(GTK_ASSISTANT(assistant), box, TRUE);
+}
+
+static void newDialogClose(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	gtk_widget_destroy(widget);
+}
+
+static void newDialogApply(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget					*assistant, *box;
+	GtkWidget					*controller;
+	GtkEntryBuffer				*buf1, *buf2, *buf3, *buf4;
+	sqlite3						*ptr;
+	ContactCards_trans_t		*data = trans;
+
+	ptr = data->db;
+	assistant = (GtkWidget*)widget;
+
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 0);
+	controller = (GtkWidget*)g_object_get_data(G_OBJECT(box),"google");
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controller))){
+		buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "oAuthEntry");
+		goto google;
+	}
+
+	controller = (GtkWidget*)g_object_get_data(G_OBJECT(box),"fruux");
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controller))){
+		goto fruux;
+	}
+
+	/*	others		*/
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 2);
+	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
+	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 1);
+	buf3 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "descEntry");
+	buf4 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
+	newServer(ptr, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
+	return;
+
+fruux:
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 2);
+	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
+	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
+	newServer(ptr, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
+	return;
+
+google:
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 3);
+	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "oAuthEntry");
+	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "grantEntry");
+	newServerOAuth(ptr, "google", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), 1);
+	return;
+}
+
+static void newDialogConfirm(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget				*box, *hbox;
+	GtkWidget				*label;
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Confirm"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+	gtk_widget_show_all(box);
+	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
+	gtk_assistant_set_page_type(GTK_ASSISTANT(widget), box, GTK_ASSISTANT_PAGE_CONFIRM);
+	gtk_assistant_set_page_title(GTK_ASSISTANT(widget), box, _("Confirm"));
+	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, TRUE);
+}
+
+static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget				*box, *hbox;
+	GtkWidget				*label, *inputoAuth, *inputGrant, *button;
+	GtkEntryBuffer			*user, *grant;
+	char					*uri = NULL;
+
+	user = gtk_entry_buffer_new(NULL, -1);
+	grant = gtk_entry_buffer_new(NULL, -1);
+
+	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("User"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputoAuth = gtk_entry_new_with_buffer(user);
+	g_object_set_data(G_OBJECT(box),"oAuthEntry", user);
+	gtk_box_pack_start(GTK_BOX(hbox), inputoAuth, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+
+	button = gtk_link_button_new_with_label(uri, _("Request Grant"));
+	gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Grant"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputGrant = gtk_entry_new_with_buffer(grant);
+	g_object_set_data(G_OBJECT(box),"grantEntry", grant);
+	gtk_box_pack_start(GTK_BOX(hbox), inputGrant, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+	gtk_widget_show_all(box);
+	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
+	gtk_assistant_set_page_type(GTK_ASSISTANT(widget), box, GTK_ASSISTANT_PAGE_CONTENT);
+	gtk_assistant_set_page_title(GTK_ASSISTANT(widget), box, _("OAuth"));
+	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, FALSE);
+
+	g_signal_connect (G_OBJECT(inputoAuth), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+	g_signal_connect (G_OBJECT(inputGrant), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+}
+
+static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget				*box, *hbox;
+	GtkWidget				*label, *inputUser, *inputPasswd;
+	GtkEntryBuffer			*user, *passwd;
+
+	user = gtk_entry_buffer_new(NULL, -1);
+	passwd = gtk_entry_buffer_new(NULL, -1);
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("User"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputUser = gtk_entry_new_with_buffer(user);
+	g_object_set_data(G_OBJECT(box),"userEntry", user);
+	gtk_box_pack_start(GTK_BOX(hbox), inputUser, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Password"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputPasswd = gtk_entry_new_with_buffer(passwd);
+	g_object_set_data(G_OBJECT(box),"passwdEntry", passwd);
+	gtk_box_pack_start(GTK_BOX(hbox), inputPasswd, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+	gtk_widget_show_all(box);
+	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
+	gtk_assistant_set_page_type(GTK_ASSISTANT(widget), box, GTK_ASSISTANT_PAGE_CONTENT);
+	gtk_assistant_set_page_title(GTK_ASSISTANT(widget), box, _("Credentials"));
+	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, FALSE);
+
+	g_signal_connect (G_OBJECT(inputUser), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+	g_signal_connect (G_OBJECT(inputPasswd), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+}
+
+static void newDialogServerSettings(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget				*box, *hbox;
+	GtkWidget				*label, *inputDesc, *inputUrl;
+	GtkEntryBuffer			*desc, *url;
+
+	desc = gtk_entry_buffer_new(NULL, -1);
+	url = gtk_entry_buffer_new(NULL, -1);
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Description"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputDesc = gtk_entry_new_with_buffer(desc);
+	g_object_set_data(G_OBJECT(box),"descEntry", desc);
+	gtk_box_pack_start(GTK_BOX(hbox), inputDesc, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("URL"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	inputUrl = gtk_entry_new_with_buffer(url);
+	g_object_set_data(G_OBJECT(box),"urlEntry", url);
+	gtk_box_pack_start(GTK_BOX(hbox), inputUrl, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+
+	gtk_widget_show_all(box);
+	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
+	gtk_assistant_set_page_type(GTK_ASSISTANT(widget), box, GTK_ASSISTANT_PAGE_CONTENT);
+	gtk_assistant_set_page_title(GTK_ASSISTANT(widget), box, _("Serversettings"));
+	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, FALSE);
+
+	g_signal_connect (G_OBJECT(inputDesc), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+	g_signal_connect (G_OBJECT(inputUrl), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+}
+
+gint newDialogSelectPage(gint curPage, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget			*widget;
+	GtkWidget			*box;
+	GtkWidget			*controller;
+
+	widget = (GtkWidget*)data;
+	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(widget),curPage);
+
+	if(curPage == 0){
+		controller = (GtkWidget*)g_object_get_data(G_OBJECT(box),"google");
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controller))){
+				return 3;
+		}
+		controller = (GtkWidget*)g_object_get_data(G_OBJECT(box),"fruux");
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controller))){
+				return 2;
+		}
+	}else if (curPage == 2){
+		return 4;
+	}
+	return curPage+1;
+}
+
+static void newDialogSelectType(GtkWidget *widget, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget				*box;
+	GtkWidget				*fruux, *google, *others;
+
+	fruux = gtk_radio_button_new_with_label(NULL, _("fruux"));
+	google = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(fruux), _("google"));
+	others = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(fruux), _("others"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(others), TRUE);
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	g_object_set_data(G_OBJECT(box),"google",google);
+	g_object_set_data(G_OBJECT(box),"fruux",fruux);
+	gtk_box_pack_start (GTK_BOX (box), fruux, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (box), google, TRUE, TRUE, 2);
+	gtk_box_pack_start (GTK_BOX (box), others, TRUE, TRUE, 2);
+
+	gtk_widget_show_all(box);
+
+	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
+	gtk_assistant_set_page_type(GTK_ASSISTANT(widget), box, GTK_ASSISTANT_PAGE_INTRO);
+	gtk_assistant_set_page_title(GTK_ASSISTANT(widget), box, _("Select Server"));
+	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, TRUE);
+}
+
+static void newDialog(GtkWidget *do_widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget 			*assistant = NULL;
+
+	assistant = gtk_assistant_new ();
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(assistant), TRUE);
+	gtk_window_set_default_size (GTK_WINDOW (assistant), -1, 300);
+
+	newDialogSelectType(assistant, trans);
+	newDialogServerSettings(assistant, trans);
+	newDialogUserCredentials(assistant, trans);
+	newDialogOAuthCredentials(assistant, trans);
+	newDialogConfirm(assistant, trans);
+
+	gtk_widget_show_all(assistant);
+	gtk_assistant_set_forward_page_func(GTK_ASSISTANT(assistant), newDialogSelectPage, assistant, NULL);
+
+	/*		Connect Signales		*/
+	g_signal_connect(G_OBJECT(assistant), "close", G_CALLBACK(newDialogClose), NULL);
+	g_signal_connect(G_OBJECT(assistant), "cancel", G_CALLBACK(newDialogClose), NULL);
+	g_signal_connect(G_OBJECT(assistant), "apply", G_CALLBACK(newDialogApply), trans);
+}
+
 void guiInit(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -954,7 +1167,7 @@ void guiInit(sqlite3 *ptr){
 	g_signal_connect(G_OBJECT(mainWindow), "destroy", G_CALLBACK(guiExit), cleanUpList);
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
-	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(dialogNewServer), transNew);
+	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), transNew);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), transSync);
 	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
 

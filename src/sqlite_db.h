@@ -26,7 +26,7 @@ extern int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRo
 extern GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2);
 extern void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path);
 extern void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url);
-extern void newServerOAuth(sqlite3 *ptr, char *desc, char *user, int oAuthType);
+extern void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int oAuthEntity);
 extern void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret, char *davURI, char *scope, char *grantURI, char *tokenURI, char *responseType, char *redirURI, char *grantType);
 extern void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addressbookID, ne_session *sess);
 extern void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr);
