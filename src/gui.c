@@ -911,6 +911,7 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 	label = gtk_label_new(_("Password"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	inputPasswd = gtk_entry_new_with_buffer(passwd);
+	gtk_entry_set_visibility(GTK_ENTRY(inputPasswd), FALSE);
 	g_object_set_data(G_OBJECT(box),"passwdEntry", passwd);
 	gtk_box_pack_start(GTK_BOX(hbox), inputPasswd, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
