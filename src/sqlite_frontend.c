@@ -85,23 +85,33 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 
 	char				*fileName = NULL;
 	char				*serverDesc = NULL;
-	char				*cert = NULL;
+	GString				*cert = NULL;
 	char				*path = NULL;
 	char				*certdata = NULL;
 	GError				*error = NULL;
+	int					i = 0;
 
 	serverDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
-	fileName = g_strconcat(serverDesc, ".crt", NULL);
+	fileName = g_strconcat(serverDesc, ".pem", NULL);
 	certdata = getSingleChar(ptr, "certs", "cert", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(!serverDesc || !certdata || !fileName) return;
 
-	cert = g_strconcat("-----BEGIN CERTIFICATE-----\n", certdata, "\n-----END CERTIFICATE-----\n", NULL);
+	cert = g_string_new("-----BEGIN CERTIFICATE-----\n");
+
+	g_string_append(cert, certdata);
+
+	for(i=0; (28+(1+i)*64+i) < cert->len; i++){
+		cert = g_string_insert(cert, 28+(1+i)*64+i, "\n");
+	}
+	g_string_append(cert, "\n-----END CERTIFICATE-----\n");
+
 	path = g_strconcat(base, NULL);
 	if(g_chdir(path)) return;
 
 	g_build_filename(fileName, NULL);
-	g_file_set_contents(fileName, cert, strlen(cert), &error);
+	g_file_set_contents(fileName, cert->str, cert->len, &error);
 	printGError(error);
+	g_string_free(cert, TRUE);
 }
 
 void exportContacts(sqlite3 *ptr, char *base){
