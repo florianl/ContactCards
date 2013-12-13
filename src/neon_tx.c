@@ -127,34 +127,6 @@ ne_session *serverConnect(void *trans){
 	return sess;
 }
 
-int vDataAccept(void *userdata, ne_request *req, const ne_status *st){
-	printfunc(__func__);
-
-	return (st->code == 200);
-}
-
-
-static int vDataFetch(void *trans, const char *block, size_t len){
-	printfunc(__func__);
-
-	int					contactID;
-	unsigned char		*tmp = NULL;
-	sqlite3				*ptr;
-	ContactCards_trans_t		*data = trans;
-
-	contactID = GPOINTER_TO_INT(data->element);
-	ptr = data->db;
-
-	tmp = g_memdup(g_strstrip((char *)block), len);
-
-	updateContact(ptr, contactID, tmp);
-
-	free(tmp);
-	g_free(trans);
-
-	return len;
-}
-
 const char *cookieSet(const char *srvTx){
 	printfunc(__func__);
 
@@ -266,7 +238,11 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	gchar				*ContactCardsIdent = NULL;
 	ne_uri				uri;
 	ContactCards_trans_t		*trans = NULL;
-	ContactCards_trans_t		*reqData = NULL;
+	int					ret = 0;
+	int 				count = 0;
+	char				buf[BUFFERSIZE];
+	gchar				*vCard = NULL;
+	gchar				*tmpCard = NULL;
 
 	switch(method){
 		case DAV_REQ_GET_GRANT:
@@ -391,10 +367,6 @@ sendAgain:
 			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(davPath == NULL) goto failedRequest;
 			req = ne_request_create(sess, "GET", davPath);
-			reqData = g_new(ContactCards_trans_t, 1);
-			reqData->db = ptr;
-			reqData->element = GINT_TO_POINTER(itemID);
-			ne_add_response_body_reader(req, vDataAccept, vDataFetch, reqData);
 			break;
 
 		/*
@@ -471,13 +443,36 @@ sendAgain:
 	((ContactCards_stack_t *)userdata)->serverID = serverID;
 	((ContactCards_stack_t *)userdata)->addressbookID = itemID;
 
-	switch(ne_request_dispatch(req)){
-		case NE_OK:
-			break;
-		default:
-			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
-			if(failed++ > 3) goto failedRequest;
-			goto sendAgain;
+	if(method == DAV_REQ_GET){
+		ret = ne_begin_request(req);
+		if(ret == NE_OK){
+			do{
+				memset(&buf, 0, BUFFERSIZE);
+				ret = ne_read_response_block(req, buf, sizeof(buf));
+				if(ret == 0) break;
+				count += ret;
+				if(vCard == NULL){
+					tmpCard = g_strndup(buf, strlen(buf));
+				} else {
+					tmpCard = g_strconcat(vCard, buf, NULL);
+				}
+				vCard = g_strndup(tmpCard, strlen(tmpCard));
+			} while(ret);
+		if (ret == NE_OK)
+			ret = ne_end_request(req);
+		}
+		updateContact(ptr, itemID, vCard);
+		g_free(tmpCard);
+		g_free(vCard);
+	} else {
+		switch(ne_request_dispatch(req)){
+			case NE_OK:
+				break;
+			default:
+				dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
+				if(failed++ > 3) goto failedRequest;
+				goto sendAgain;
+		}
 	}
 
 	statuscode = ne_get_status(req)->code;
