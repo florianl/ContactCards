@@ -370,6 +370,15 @@ sendAgain:
 			break;
 
 		/*
+		 * request to delete one contact
+		 */
+		case DAV_REQ_DEL_CONTACT:
+			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			req = ne_request_create(sess, "DELETE", davPath);
+			break;
+
+		/*
 		 * oAuth-Stuff
 		 */
 		case DAV_REQ_GET_TOKEN:
@@ -623,6 +632,24 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 
 	ne_close_connection(sess);
 	ne_session_destroy(sess);
+}
+
+int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
+	printfunc(__func__);
+
+	ContactCards_stack_t		*stack;
+
+	stack = serverRequest(DAV_REQ_DEL_CONTACT, serverID, selID, sess, ptr);
+
+	switch(stack->statuscode){
+		case 200 ... 299:
+			break;
+		default:
+			return stack->statuscode;
+	}
+
+	dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", selID);
+	return stack->statuscode;
 }
 
 static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){

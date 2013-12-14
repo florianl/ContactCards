@@ -199,6 +199,39 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	}
 }
 
+static void contactDel(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID, addrID, srvID;
+	sqlite3				*ptr;
+	ne_session 			*sess = NULL;
+	ContactCards_trans_t		*data = trans;
+	ContactCards_trans_t		*delData = NULL;
+
+	ptr = data->db;
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
+		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
+		dbgCC("[%s] %d\n",__func__, selID);
+
+		g_mutex_lock(&mutex);
+		addrID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", selID, "", "");
+		srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "");
+
+		delData = g_new(ContactCards_trans_t, 1);
+		delData->db = ptr;
+		delData->element = GINT_TO_POINTER(srvID);
+
+		sess = serverConnect(delData);
+		serverDelContact(ptr, sess, srvID, selID);
+		serverDisconnect(sess, ptr);
+		g_free(delData);
+		g_mutex_unlock(&mutex);
+	}
+}
+
 static void selContact(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1047,6 +1080,7 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*addressbookWindow;
 	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
 	GtkWidget			*serverCombo;
+	GtkWidget			*delContact, *contactButtons, *contactsEdit;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GtkTextBuffer		*dataBuffer;
@@ -1056,6 +1090,7 @@ void guiInit(sqlite3 *ptr){
 	ContactCards_trans_t		*transPref = NULL;
 	ContactCards_trans_t		*transNew = NULL;
 	ContactCards_trans_t		*transSync = NULL;
+	ContactCards_trans_t		*transDelContact = NULL;
 
 	gtk_init(NULL, NULL);
 
@@ -1131,6 +1166,14 @@ void guiInit(sqlite3 *ptr){
 	contactList = gtk_tree_view_new();
 	listInit(contactList);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
+	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	delContact = gtk_button_new_with_label("Del");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(delContact), _("Delete selected contact"));
+	gtk_container_add(GTK_CONTAINER(contactButtons), delContact);
+	gtk_widget_set_vexpand(GTK_WIDGET(contactList), TRUE);
+	gtk_container_add(GTK_CONTAINER(contactsEdit), contactWindow);
+	gtk_container_add(GTK_CONTAINER(contactsEdit), contactButtons);
 
 	/*		preference dialog		*/
 	transPref = g_new(ContactCards_trans_t, 1);
@@ -1164,6 +1207,12 @@ void guiInit(sqlite3 *ptr){
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
 
+	transDelContact = g_new(ContactCards_trans_t, 1);
+	cleanUpList = g_slist_append(cleanUpList, transDelContact);
+	transDelContact->db = ptr;
+	transDelContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
+	g_signal_connect(G_OBJECT(delContact), "clicked", G_CALLBACK(contactDel), transDelContact);
+
 	g_signal_connect(G_OBJECT(mainWindow), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
 	g_signal_connect(G_OBJECT(mainWindow), "destroy", G_CALLBACK(guiExit), cleanUpList);
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
@@ -1177,7 +1226,7 @@ void guiInit(sqlite3 *ptr){
 	gtk_container_add(GTK_CONTAINER(addressbookWindow), addressbookList);
 	gtk_container_add(GTK_CONTAINER(mainContent), addressbookWindow);
 	gtk_container_add(GTK_CONTAINER(contactWindow), contactList);
-	gtk_container_add(GTK_CONTAINER(contactBox), contactWindow);
+	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
 	gtk_container_add(GTK_CONTAINER(contactBox), scroll);
 	gtk_container_add(GTK_CONTAINER(mainContent), contactBox);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainContent, TRUE, TRUE, 0);

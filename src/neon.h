@@ -41,6 +41,8 @@
 #define	DAV_REQ_REP_2					132
 #define	DAV_REQ_REP_3					133
 
+#define DAV_REQ_DEL_CONTACT				141
+
 #define	DAV_REQ_GET						161
 #define	DAV_REQ_GET_GRANT				171
 #define	DAV_REQ_GET_TOKEN				172
@@ -143,6 +145,7 @@ extern void serverDisconnect(ne_session *sess, sqlite3 *ptr);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);
 extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
+extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);
 
 #endif	/*	neon_H	*/
