@@ -678,7 +678,11 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	}
 	g_strfreev(lines);
 
-	sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = %Q WHERE contactID = '%d';", displayName, contactID);
+	if(strlen(displayName) == 0){
+		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = '(no name)' WHERE contactID = '%d';", contactID);
+	} else {
+		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = %Q WHERE contactID = '%d';", displayName, contactID);
+	}
 	doSimpleRequest(ptr, sql_query, __func__);
 
 	g_free(displayName-=strlen("FN:"));
