@@ -662,30 +662,17 @@ void showContacts(sqlite3 *ptr){
 void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	printfunc(__func__);
 
-	char			**lines = g_strsplit(vData, "\n", 0);
-	char			**one = lines;
 	char			*displayName = NULL;
 	char	 		*sql_query = NULL;
 
-	while (*one != NULL) {
-		if(g_str_has_prefix(*one, "FN:")){
-			displayName = g_strdup(*one);
-			g_strstrip(displayName);
-			displayName+=strlen("FN:");
-			break;
-		}
-		++one;
-	}
-	g_strfreev(lines);
+	displayName = getSingleCardAttribut(CARDTYPE_FN, vData);
 
-	if(strlen(displayName) == 0){
+	if(strlen(g_strstrip(displayName)) == 0){
 		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = '(no name)' WHERE contactID = '%d';", contactID);
 	} else {
-		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = %Q WHERE contactID = '%d';", displayName, contactID);
+		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = %Q WHERE contactID = '%d';", g_strstrip(displayName), contactID);
 	}
 	doSimpleRequest(ptr, sql_query, __func__);
-
-	g_free(displayName-=strlen("FN:"));
 }
 
 void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean resSel, gboolean certSel){

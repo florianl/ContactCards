@@ -23,7 +23,13 @@
 #include "sqlite_db.h"
 #endif	/*	sqlite_H	*/
 
+#ifndef cards_H
+#include "cards.h"
+#endif	/*	cards_H		*/
+
+#ifndef neon_H
 #include "neon.h"
+#endif	/*	neon_H		*/
 
 /*	GLOBALS		*/
 GtkWidget				*addressbookList, *contactList;

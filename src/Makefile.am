@@ -2,6 +2,7 @@ AM_CFLAGS=-Wall -Wno-pointer-sign -std=c99 -ggdb -lpthread -O3
 
 bin_PROGRAMS = ContactCards
 ContactCards_SOURCES = 	ContactCards.c \
+						cards.c \
 						gui.c \
 						neon_rx.c \
 						neon_tx.c \
