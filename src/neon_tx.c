@@ -180,7 +180,7 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 	char				*existingCtx;
 	char				*concat;
 
-	if(len < 7)
+	if(len < 3)
 		return 0;
 
 	newCtx = g_strndup(cdata, len);

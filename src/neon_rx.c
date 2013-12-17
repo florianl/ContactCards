@@ -108,22 +108,22 @@ char *elementGet(GNode *branch, int elementType){
 					if(!strncmp(((ContactCards_node_t *)branch->data)->name, "href", 4)){
 						return ((ContactCards_node_t *)branch->data)->content;
 					}
+					break;
 				case DAV_ELE_ETAG:
 					if(!strncmp(((ContactCards_node_t *)branch->data)->name, "getetag", 7)){
 						return ((ContactCards_node_t *)branch->data)->content;
 					}
+					break;
 				case DAV_ELE_SYNCTOKEN:
 					if(!strncmp(((ContactCards_node_t *)branch->data)->name, "sync-token", 10)){
 						return ((ContactCards_node_t *)branch->data)->content;
 					}
+					break;
 				case DAV_ELE_DISPLAYNAME:
 					if (!strncmp(((ContactCards_node_t *)branch->data)->name, "displayname", 11)){
-						if(((ContactCards_node_t *)branch->data)->content == NULL){
-							return NULL;
-						} else {
-							return ((ContactCards_node_t *)branch->data)->content;
-						}
+						return ((ContactCards_node_t *)branch->data)->content;
 					}
+					break;
 				default:
 					dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 					break;
