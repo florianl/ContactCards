@@ -1180,13 +1180,13 @@ void guiInit(sqlite3 *ptr){
 	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	
-	ascContact = gtk_button_new_with_label("Asc");
+	ascContact = gtk_button_new_from_icon_name("view-sort-ascending", 2);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(ascContact), _("Sort contacts in ascending order"));
 	gtk_container_add(GTK_CONTAINER(contactButtons), ascContact);
-	descContact = gtk_button_new_with_label("Desc");
+	descContact = gtk_button_new_from_icon_name("view-sort-descending", 2);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(descContact), _("Sort contacts in descending order"));
 	gtk_container_add(GTK_CONTAINER(contactButtons), descContact);
-	delContact = gtk_button_new_with_label("Del");
+	delContact = gtk_button_new_from_icon_name("list-remove", 2);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(delContact), _("Delete selected contact"));
 	gtk_container_add(GTK_CONTAINER(contactButtons), delContact);
 	gtk_widget_set_vexpand(GTK_WIDGET(contactList), TRUE);
