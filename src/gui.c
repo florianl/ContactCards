@@ -100,7 +100,6 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 
 	updateServerDetails(ptr, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
-						gtk_switch_get_active(GTK_SWITCH(buffers->resSel)),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
 }
 
@@ -178,9 +177,6 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 
 		url = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
-
-		res = getSingleInt(ptr, "cardServer", "resources", 1, "serverID", selID, "", "");
-		gtk_switch_set_active(GTK_SWITCH(buffers->resSel), res);
 
 		issued = getSingleChar(ptr, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
 		if(issued == NULL) issued = "";
@@ -610,7 +606,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*vbox, *hbox;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn;
-	GtkWidget			*resSwitch, *digSwitch;
+	GtkWidget			*digSwitch;
 	GtkWidget			*sep;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkEntryBuffer		*issued, *issuer;
@@ -678,13 +674,6 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("AllAddressBooks"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	resSwitch = gtk_switch_new();
-	gtk_box_pack_start(GTK_BOX(hbox), resSwitch, FALSE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
-
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
@@ -740,7 +729,6 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->btnSave = saveBtn;
 	buffers->btnExportCert = exportCertBtn;
 	buffers->srvPrefList = serverPrefList;
-	buffers->resSel = resSwitch;
 	buffers->certSel = digSwitch;
 	data->element2 = buffers;
 

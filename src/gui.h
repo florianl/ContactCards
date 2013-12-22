@@ -52,7 +52,6 @@ typedef struct ContactCards_pref {
 	GtkWidget			*btnSave;
 	GtkWidget			*btnExportCert;
 	GtkWidget			*srvPrefList;
-	GtkWidget			*resSel;
 	GtkWidget			*certSel;
 	int					srvID;
 } ContactCards_pref_t;
