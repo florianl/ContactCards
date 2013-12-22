@@ -305,6 +305,28 @@ void listInit(GtkWidget *list){
 	g_object_unref(store);
 }
 
+static void listSortorderAsc(void){
+	printfunc(__func__);
+
+	GtkListStore		*store;
+
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_ASCENDING);
+
+}
+
+static void listSortorderDesc(void){
+	printfunc(__func__);
+
+	GtkListStore		*store;
+
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_DESCENDING);
+
+}
+
 static void *syncOneServer(void *trans){
 	printfunc(__func__);
 
@@ -1069,6 +1091,7 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
 	GtkWidget			*serverCombo;
 	GtkWidget			*delContact, *contactButtons, *contactsEdit;
+	GtkWidget			*ascContact, *descContact;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GtkTextBuffer		*dataBuffer;
@@ -1156,6 +1179,13 @@ void guiInit(sqlite3 *ptr){
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
 	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	
+	ascContact = gtk_button_new_with_label("Asc");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(ascContact), _("Sort contacts in ascending order"));
+	gtk_container_add(GTK_CONTAINER(contactButtons), ascContact);
+	descContact = gtk_button_new_with_label("Desc");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(descContact), _("Sort contacts in descending order"));
+	gtk_container_add(GTK_CONTAINER(contactButtons), descContact);
 	delContact = gtk_button_new_with_label("Del");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(delContact), _("Delete selected contact"));
 	gtk_container_add(GTK_CONTAINER(contactButtons), delContact);
@@ -1194,6 +1224,9 @@ void guiInit(sqlite3 *ptr){
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
+
+	g_signal_connect(G_OBJECT(ascContact), "clicked", G_CALLBACK(listSortorderAsc), NULL);
+	g_signal_connect(G_OBJECT(descContact), "clicked", G_CALLBACK(listSortorderDesc), NULL);
 
 	transDelContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transDelContact);
