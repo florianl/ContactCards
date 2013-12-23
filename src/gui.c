@@ -200,6 +200,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
+	GtkListStore		*store;
 	int					selID, addrID, srvID;
 	sqlite3				*ptr;
 	ne_session 			*sess = NULL;
@@ -223,6 +224,10 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		sess = serverConnect(delData);
 		serverDelContact(ptr, sess, srvID, selID);
 		serverDisconnect(sess, ptr);
+
+		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+		gtk_list_store_remove(store, &iter);
+
 		g_free(delData);
 		g_mutex_unlock(&mutex);
 	}
