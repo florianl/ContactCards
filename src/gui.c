@@ -201,6 +201,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 	GtkListStore		*store;
+	GtkWidget                       *dialog;
 	int					selID, addrID, srvID;
 	sqlite3				*ptr;
 	ne_session 			*sess = NULL;
@@ -208,6 +209,18 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	ContactCards_trans_t		*delData = NULL;
 
 	ptr = data->db;
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
+
+	switch(gtk_dialog_run(GTK_DIALOG(dialog))){
+		case GTK_RESPONSE_YES:
+			gtk_widget_destroy(dialog);
+			break;
+		case GTK_RESPONSE_NO:
+		default:
+			gtk_widget_destroy(dialog);
+			return;
+	}
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
