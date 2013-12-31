@@ -57,6 +57,10 @@
 #define	OAUTH_TOKEN_TYPE				203
 #define	OAUTH_EXPIRES_IN				204
 
+#define	OAUTH_GRANT_FAILURE				210
+#define	OAUTH_ACCESSTOKEN_FAILURE		211
+#define	OAUTH_REFRESHTOKEN_FAILURE		212
+#define	OAUTH_UP2DATE					213
 /*
  * General stuff
  */
@@ -144,6 +148,7 @@ extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID,
 extern void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);
 extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type);
+extern int oAuthUpdate(sqlite3 *ptr, int serverID);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
 extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);

@@ -223,6 +223,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	}
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
+		int				isOAuth = 0;
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
 
@@ -234,6 +235,15 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		delData->db = ptr;
 		delData->element = GINT_TO_POINTER(srvID);
 
+		isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+
+		if(isOAuth){
+			int 		ret = 0;
+			ret = oAuthUpdate(ptr, srvID);
+			if(ret != OAUTH_UP2DATE)
+				goto failure;
+		}
+
 		sess = serverConnect(delData);
 		serverDelContact(ptr, sess, srvID, selID);
 		serverDisconnect(sess, ptr, srvID);
@@ -241,6 +251,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
 		gtk_list_store_remove(store, &iter);
 
+failure:
 		g_free(delData);
 		g_mutex_unlock(&mutex);
 	}
@@ -371,36 +382,10 @@ static void *syncOneServer(void *trans){
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
 	if(isOAuth){
-		char				*oAuthGrant = NULL;
-		char				*oAuthToken = NULL;
-		char				*oAuthRefresh = NULL;
-		int					oAuthEntity = 0;
-
-		oAuthGrant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
-		oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
-		dbgCC("[%s] connecting to a oAuth-Server\n", __func__);
-		if(strlen(oAuthGrant) == 1){
-			char		*newuser = NULL;
-			newuser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
-			dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
-		} else {
-			dbgCC("[%s] there is already a grant\n", __func__);
-		}
-		oAuthRefresh = getSingleChar(ptr, "cardServer", "oAuthRefreshToken", 1, "serverID", serverID, "", "", "", "", "", 0);
-		if(strlen(oAuthRefresh) == 1){
-			dbgCC("[%s] there is no refresh_token\n", __func__);
-			oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
-		} else {
-			dbgCC("[%s] there is already a refresh_token\n", __func__);
-			oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_REFRESH);
-		}
-		oAuthToken = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
-		if(strlen(oAuthToken) == 1){
-			dbgCC("[%s] there is no oAuthToken\n", __func__);
-			g_free(data);
-			g_mutex_unlock(&mutex);
+		int 		ret = 0;
+		ret = oAuthUpdate(ptr, serverID);
+		if(ret != OAUTH_UP2DATE)
 			return NULL;
-		}
 	}
 
 	sess = serverConnect(data);

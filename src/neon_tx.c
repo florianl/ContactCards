@@ -581,6 +581,46 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	ne_session_destroy(sess);
 }
 
+int oAuthUpdate(sqlite3 *ptr, int serverID){
+	printfunc(__func__);
+
+	char				*oAuthGrant = NULL;
+	char				*oAuthToken = NULL;
+	char				*oAuthRefresh = NULL;
+	int					oAuthEntity = 0;
+	int					ret = 0;
+
+	oAuthGrant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
+	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
+	dbgCC("[%s] connecting to a oAuth-Server\n", __func__);
+	if(strlen(oAuthGrant) == 1){
+		char		*newuser = NULL;
+		newuser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
+		ret = OAUTH_GRANT_FAILURE;
+		dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
+	} else {
+		dbgCC("[%s] there is already a grant\n", __func__);
+	}
+	oAuthRefresh = getSingleChar(ptr, "cardServer", "oAuthRefreshToken", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(strlen(oAuthRefresh) == 1){
+		dbgCC("[%s] there is no refresh_token\n", __func__);
+		ret = OAUTH_REFRESHTOKEN_FAILURE;
+		oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
+	} else {
+		dbgCC("[%s] there is already a refresh_token\n", __func__);
+		oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_REFRESH);
+	}
+	oAuthToken = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
+	if(strlen(oAuthToken) == 1){
+		dbgCC("[%s] there is no oAuthToken\n", __func__);
+		ret = OAUTH_ACCESSTOKEN_FAILURE;
+	} else {
+		ret = OAUTH_UP2DATE;
+	}
+
+	return ret;
+}
+
 void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	printfunc(__func__);
 
