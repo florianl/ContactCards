@@ -565,13 +565,15 @@ failedRequest:
 	return userdata;
 }
 
-void serverDisconnect(ne_session *sess, sqlite3 *ptr){
+void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	printfunc(__func__);
 
 	int			isOAuth = 0;
 
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
+
 	if(isOAuth){
-		setSingleChar(ptr, "cardServer", "oAuthAccessToken", NULL, "", 0);
+		setSingleChar(ptr, "cardServer", "oAuthAccessToken", NULL, "serverID", serverID);
 	}
 
 	ne_close_connection(sess);

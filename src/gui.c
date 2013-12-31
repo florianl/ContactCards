@@ -236,7 +236,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 		sess = serverConnect(delData);
 		serverDelContact(ptr, sess, srvID, selID);
-		serverDisconnect(sess, ptr);
+		serverDisconnect(sess, ptr, srvID);
 
 		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
 		gtk_list_store_remove(store, &iter);
@@ -405,7 +405,7 @@ static void *syncOneServer(void *trans){
 
 	sess = serverConnect(data);
 	syncContacts(ptr, sess, serverID);
-	serverDisconnect(sess, ptr);
+	serverDisconnect(sess, ptr, serverID);
 
 	gtk_statusbar_pop(GTK_STATUSBAR(statusBar), ctxID);
 
