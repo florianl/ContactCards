@@ -1175,7 +1175,7 @@ void guiInit(sqlite3 *ptr){
 
 	/*		Addressbookstuff		*/
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 128, -1);
 	addressbookList = gtk_tree_view_new();
 	listInit(addressbookList);
@@ -1184,7 +1184,7 @@ void guiInit(sqlite3 *ptr){
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(contactWindow, 192, -1);
 	dataBuffer = gtk_text_buffer_new(NULL);
 	contactView = gtk_text_view_new_with_buffer(dataBuffer);
