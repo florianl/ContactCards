@@ -17,7 +17,7 @@ AC_CHECK_HEADERS([libintl.h locale.h stdlib.h string.h sqlite3.h])
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
-PKG_CHECK_MODULES(GTK3, gtk+-3.0, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
+PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.10, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
 AC_SUBST(GTK3_CFLAGS)
 AC_SUBST(GTK3_LIBS)
 
