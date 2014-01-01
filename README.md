@@ -1,24 +1,25 @@
-	ContactCards
-	
+ContactCards
+============
+
 ContactCards is a simple address book written in C.
 
 vCards are safed  in a local database and fetched from a remote server using the
 cardDav protocoll.
 
-## Requirements
+Requirements
+------------
 
 The following packages are required:
 - libgtk-3-dev
 - libsqlite3-dev
 - libneon27-dev
 
-## Build
+Build
+-----
 
-```
-$ ./autogen.sh
-$ ./configure
-$ make
-```
+	$ ./autogen.sh
+	$ ./configure
+	$ make
 
 License: GPLv2
 Contact: dev (AT) der-flo.net
