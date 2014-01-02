@@ -22,7 +22,11 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 			}
 			break;
 		case 2:		// contactlist
-			sql_query = sqlite3_mprintf("SELECT contactID, displayname FROM contacts WHERE addressbookID = '%d';", from);
+			if(from == 0){
+				sql_query = sqlite3_mprintf("SELECT contactID, displayname FROM contacts;");
+			} else {
+				sql_query = sqlite3_mprintf("SELECT contactID, displayname FROM contacts WHERE addressbookID = '%d';", from);
+			}
 			break;
 		case 3:		// serverlist
 			sql_query = sqlite3_mprintf("SELECT serverID, desc FROM cardServer;");

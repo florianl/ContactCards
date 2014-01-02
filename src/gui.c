@@ -8,6 +8,7 @@ void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
 	fillList(ptr, 1, 0, addressbookList);
+	fillList(ptr, 2, 0, contactList);
 	gtk_main();
 }
 
@@ -500,6 +501,7 @@ static void comboChanged(GtkComboBox *combo, gpointer trans){
 		selectedSrv = id;
 	} else {
 		fillList(ptr, 1, 0, addressbookList);
+		fillList(ptr, 2, 0, contactList);
 		selectedSrv = 0;
 	}
 }

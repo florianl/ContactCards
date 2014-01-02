@@ -474,6 +474,8 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", desc, user, passwd, url, uri.host);
 
 	doSimpleRequest(ptr, sql_query, __func__);
+
+	fillCombo(ptr, comboList);
 }
 
 
