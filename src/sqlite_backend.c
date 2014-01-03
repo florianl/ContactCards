@@ -706,6 +706,11 @@ void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	char	 			*sql_query = NULL;
 	char				*dbData = NULL;
 
+	if(!g_str_has_prefix(vData, "BEGIN:VCARD")){
+		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", contactID);
+		return;
+	}
+
 	sql_query = sqlite3_mprintf("UPDATE contacts SET vCard = %Q WHERE contactID = '%d';", vData, contactID);
 
 	doSimpleRequest(ptr, sql_query, __func__);
