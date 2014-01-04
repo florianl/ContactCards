@@ -402,6 +402,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		g_free(value);
 		i++;
 	}
+	g_strfreev(ptr);
 }
 
 int responseOAuthHandle(void *trans, const char *block, size_t len){
