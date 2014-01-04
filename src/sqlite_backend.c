@@ -597,6 +597,32 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	sqlite3_free(sql_query);
 }
 
+/*
+ * This is a simple try to fix the URI of a vCard
+ * It is expected that only the basepath is broken
+ */
+static char *fixURI(char *base,char *corrupted){
+	printfunc(__func__);
+
+	char			*new = NULL;
+	char			**elements = g_strsplit(corrupted, "/", 0);
+	char			*tmp;
+	int				i = 0;
+
+	do{
+		i++;
+	} while(elements[i] != NULL);
+
+	tmp = g_strdup(elements[i-1]);
+
+	new = g_strconcat(base, tmp, NULL);
+
+	g_free(tmp);
+	g_strfreev(elements);
+
+	return new;
+}
+
 void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addressbookID, ne_session *sess){
 	printfunc(__func__);
 
@@ -606,8 +632,14 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 	basePath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
 	if(strlen(basePath) == 1) return;
-	if(!strncmp(basePath, href, strlen(href))){
-		return;
+	if(strncmp(href, basePath, strlen(basePath))){
+		char				*tmp = NULL;
+		tmp = fixURI(basePath, href);
+		if(strncmp(tmp, basePath, strlen(basePath))){
+			return;
+		} else {
+			href = tmp;
+		}
 	}
 
 	if(countElements(ptr, "contacts", 123, "addressbookID", addressbookID, "etag", etag, "href", href) != 0){
