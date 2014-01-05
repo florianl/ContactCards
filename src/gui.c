@@ -84,6 +84,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	dbgCC("[%s] %d\n", __func__, buffers->srvID);
 
 	dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", buffers->srvID);
+	dbRemoveItem(ptr, "certs", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(ptr, buffers->srvID, 0);
 	fillList(ptr, 3, 0, buffers->srvPrefList);
 	fillList(ptr, 1, 0, addressbookList);
