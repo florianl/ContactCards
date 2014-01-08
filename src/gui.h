@@ -56,4 +56,9 @@ typedef struct ContactCards_pref {
 	int					srvID;
 } ContactCards_pref_t;
 
+typedef struct ContactCards_add {
+	GtkWidget			*grid;
+	GtkWidget			*sibling;
+} ContactCards_add_t;
+
 #endif	/*	gui_H	*/
