@@ -361,13 +361,16 @@ stepForward:
 static void contactAddSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	GSList					*list = trans;
+	ContactCards_add_t		*data = trans;
+	GSList					*list = data->list;
 	GSList					*next;
 	ContactCards_item_t		*item;
-	int				i = 0;
+	char					*card;
+
+	card = buildCard(list);
+	dbgCC(":%s\n", card);
 
 	while(list){
-		i++;
 		next = list->next;
 
 		if(!list->data)
@@ -537,7 +540,7 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(btnPostal), "clicked",  G_CALLBACK(contactAddPostal), transNew);
 	g_signal_connect(G_OBJECT(btnPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
-	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), items);
+	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactAddDiscard), items);
 
 	/*		Put it all together		*/

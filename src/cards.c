@@ -4,6 +4,69 @@
 
 #include "ContactCards.h"
 
+/*
+ * Based on the comment by Andrew Moore on
+ * http://www.php.net/manual/en/function.uniqid.php#94959
+ */
+
+static char *getUID(void){
+	printfunc(__func__);
+
+	char		*uid = NULL;
+	GRand		*rand = g_rand_new();
+
+	uid = g_strdup_printf("%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
+		g_rand_int_range(rand, 0, 0xffff),
+		g_rand_int_range(rand, 0, 0xffff),
+		g_rand_int_range(rand, 0, 0xffff),
+		g_rand_int_range(rand, 0, 0x0fff) | 0x4000,
+		g_rand_int_range(rand, 0, 0x3fff) | 0x8000,
+		g_rand_int_range(rand, 0, 0xffff),
+		g_rand_int_range(rand, 0, 0xffff),
+		g_rand_int_range(rand, 0, 0xffff));
+
+	return uid;
+}
+
+char *buildCard(GSList *list){
+	printfunc(__func__);
+
+	char				*card = NULL;
+	GSList				*next;
+	GString				*cardString;
+
+	cardString = g_string_new(NULL);
+
+	g_string_append(cardString, "BEGIN:VCARD\n");
+	g_string_append(cardString, "VERSION:3.0\n");
+
+	g_string_append(cardString, "PRODID:-//ContactCards//ContactCards");
+	g_string_append(cardString, VERSION);
+	g_string_append(cardString, "//EN\r\n");
+	g_string_append(cardString, "UID:");
+	g_string_append(cardString, getUID());
+	g_string_append(cardString, "\r\n");
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		dbgCC("> %d\n", item->itemID);
+stepForward:
+		list = next;
+	}
+
+	g_string_append(cardString, "END:VCARD\n");
+
+	card = g_strndup(cardString->str,  cardString->len);
+
+	return card;
+}
+
 static char *getAttributValue(char *line){
 	printfunc(__func__);
 

@@ -42,6 +42,7 @@
 #define	CARDTYPE_CLASS			71
 #define	CARDTYPE_KEY			72
 
+extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 
 #endif	/*	cards_H		*/
