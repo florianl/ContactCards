@@ -360,6 +360,27 @@ stepForward:
 
 static void contactAddSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
+
+	GSList					*list = trans;
+	GSList					*next;
+	ContactCards_item_t		*item;
+	int				i = 0;
+
+	while(list){
+		i++;
+		next = list->next;
+
+		if(!list->data)
+			goto stepForward;
+		item = (ContactCards_item_t *)list->data;
+		if(item->itemID == CONTACT_ADD_WINDOW){
+			gtk_widget_destroy(GTK_WIDGET(item->element));
+			break;
+		}
+stepForward:
+		list = next;
+	}
+	g_slist_free_full(list, g_free);
 }
 
 static void contactAdd(GtkWidget *widget, gpointer trans){
@@ -372,11 +393,15 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	GtkWidget			*discardBtn, *saveBtn;
 	GtkEntryBuffer		*fnBuff, *lnBuff;
 	int					rows = 0;
+	int					abID = 0;
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
 	ContactCards_add_t	*transNew = NULL;
 	ContactCards_item_t	*windowItem = NULL,
 						*bdItem = NULL,
 						*fnItem = NULL,
 						*lnItem = NULL;
+	ContactCards_trans_t		*data = trans;
 	GSList				*items;
 
 	fnBuff		= gtk_entry_buffer_new(NULL, -1);
@@ -387,6 +412,22 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	fnItem = g_new(ContactCards_item_t, 1);
 	lnItem = g_new(ContactCards_item_t, 1);
 	bdItem = g_new(ContactCards_item_t, 1);
+
+	transNew = g_new(ContactCards_add_t, 1);
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
+		gtk_tree_model_get(model, &iter, ID_COLUMN, &abID,  -1);
+	}
+	dbgCC("[%s] %d\n",__func__, abID);
+	if(abID == 0){
+		GtkWidget		*infoDia;
+		infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, _("There is no address book selected."));
+		gtk_dialog_run(GTK_DIALOG(infoDia));
+		gtk_widget_destroy(infoDia);
+		g_free(transNew);
+		g_slist_free_full(items, g_free);
+		return;
+	}
 
 	addWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(addWindow), _("Add new contact"));
@@ -488,10 +529,10 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
 	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
 	rows++;
-	transNew = g_new(ContactCards_add_t, 1);
+
 	transNew->grid = grid;
 	transNew->list = items;
-
+	transNew->addrBookID = abID;
 
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(btnPostal), "clicked",  G_CALLBACK(contactAddPostal), transNew);
