@@ -204,11 +204,16 @@ static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	GtkEntryBuffer		*numberBuff;
 	ContactCards_add_t	*data = trans;
 	ContactCards_item_t	*nrItem = NULL,
-						*optItem = NULL;
+						*optItem = NULL,
+						*eleList = NULL;
+	GSList				*elements;
 
 	numberBuff	= gtk_entry_buffer_new(NULL, -1);
 	nrItem = g_new(ContactCards_item_t, 1);
 	optItem = g_new(ContactCards_item_t, 1);
+	eleList	= g_new(ContactCards_item_t, 1);
+
+	elements = g_slist_alloc();
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Telephone number"));
@@ -223,7 +228,7 @@ static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
 	optItem->itemID = CARDTYPE_TEL_OPT;
 	optItem->element = opt;
-	data->list = g_slist_append(data->list, optItem);
+	elements = g_slist_append(elements, optItem);
 
 	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Number"));
@@ -234,13 +239,17 @@ static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
 	nrItem->itemID = CARDTYPE_TEL;
 	nrItem->element = numberBuff;
-	data->list = g_slist_append(data->list, nrItem);
+	elements = g_slist_append(elements, nrItem);
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
 	gtk_widget_show_all(row);
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
+
+	eleList->itemID = CARDTYPE_TEL;
+	eleList->element = elements;
+	data->list = g_slist_append(data->list, eleList);
 }
 
 static void contactAddPostal(GtkWidget *widget, gpointer trans){
@@ -253,7 +262,9 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 						*strItem = NULL,
 						*cityItem = NULL,
 						*stateItem = NULL,
-						*zipItem = NULL;
+						*zipItem = NULL,
+						*eleList = NULL;
+	GSList				*elements;
 
 	strBuff		= gtk_entry_buffer_new(NULL, -1);
 	cityBuff	= gtk_entry_buffer_new(NULL, -1);
@@ -265,6 +276,9 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	cityItem = g_new(ContactCards_item_t, 1);
 	stateItem = g_new(ContactCards_item_t, 1);
 	zipItem = g_new(ContactCards_item_t, 1);
+	eleList	= g_new(ContactCards_item_t, 1);
+
+	elements = g_slist_alloc();
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Postal address"));
@@ -279,7 +293,7 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
 	optItem->itemID = CARDTYPE_ADR_OPT;
 	optItem->element = opt;
-	data->list = g_slist_append(data->list, optItem);
+	elements = g_slist_append(elements, optItem);
 
 	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Street"));
@@ -290,7 +304,7 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
 	strItem->itemID = CARDTYPE_ADR_STREET;
 	strItem->element = strBuff;
-	data->list = g_slist_append(data->list, strItem);
+	elements = g_slist_append(elements, strItem);
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("City"));
@@ -301,7 +315,7 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
 	cityItem->itemID = CARDTYPE_ADR_CITY;
 	cityItem->element = cityBuff;
-	data->list = g_slist_append(data->list, cityItem);
+	elements = g_slist_append(elements, cityItem);
 
 	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("State"));
@@ -312,7 +326,7 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
 	stateItem->itemID = CARDTYPE_ADR_REGION;
 	stateItem->element = stateBuff;
-	data->list = g_slist_append(data->list, stateItem);
+	elements = g_slist_append(elements, stateItem);
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("ZIP code"));
@@ -323,7 +337,7 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
 	zipItem->itemID = CARDTYPE_ADR_ZIP;
 	zipItem->element = zipBuff;
-	data->list = g_slist_append(data->list, zipItem);
+	elements = g_slist_append(elements, zipItem);
 
 	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -331,6 +345,9 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	gtk_widget_show_all(row2);
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
 
+	eleList->itemID = CARDTYPE_ADR;
+	eleList->element = elements;
+	data->list = g_slist_append(data->list, eleList);
 }
 
 static void contactAddDiscard(GtkWidget *widget, gpointer trans){
