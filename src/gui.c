@@ -392,13 +392,13 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 		next = list->next;
 
 		if(!list->data)
-			goto stepForward;
+			goto firstForward;
 		item = (ContactCards_item_t *)list->data;
 		if(item->itemID == CONTACT_ADD_WINDOW){
 			gtk_widget_hide(GTK_WIDGET(item->element));
 			break;
 		}
-stepForward:
+firstForward:
 		list = next;
 	}
 
@@ -409,13 +409,13 @@ stepForward:
 		next = list->next;
 
 		if(!list->data)
-			goto stepForward;
+			goto secondForward;
 		item = (ContactCards_item_t *)list->data;
 		if(item->itemID == CONTACT_ADD_WINDOW){
 			gtk_widget_destroy(GTK_WIDGET(item->element));
 			break;
 		}
-stepForward:
+secondForward:
 		list = next;
 	}
 	g_slist_free_full(list, g_free);

@@ -193,6 +193,10 @@ char *buildCard(GSList *list){
 	printfunc(__func__);
 
 	char				*card = NULL;
+	char				*firstN = NULL;
+	char				*lastN = NULL;
+	int					bDay, bMonth, bYear;
+	char				*bDate;
 	GSList				*next;
 	GString				*cardString;
 
@@ -203,10 +207,10 @@ char *buildCard(GSList *list){
 
 	g_string_append(cardString, "PRODID:-//ContactCards//ContactCards");
 	g_string_append(cardString, VERSION);
-	g_string_append(cardString, "//EN\r\n");
+	g_string_append(cardString, "//EN\n");
 	g_string_append(cardString, "UID:");
 	g_string_append(cardString, getUID());
-	g_string_append(cardString, "\r\n");
+	g_string_append(cardString, "\n");
 
 	while(list){
 		ContactCards_item_t		*item;
@@ -223,6 +227,20 @@ char *buildCard(GSList *list){
 			case CARDTYPE_TEL:
 				g_string_append(cardString, buildTele(item->element));
 				break;
+			case CARDTYPE_FN_FIRST:
+				firstN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_LAST:
+				lastN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_BDAY:
+				gtk_calendar_get_date(GTK_CALENDAR(item->element), &bYear, &bMonth, &bDay);
+				bMonth++;
+				bDate = g_strdup_printf("%04d-%02d-%02d", bYear, bMonth, bDay);
+				g_string_append(cardString, "BDAY:");
+				g_string_append(cardString, bDate);
+				g_string_append(cardString, "\n");
+				break;
 			case CONTACT_ADD_WINDOW:
 			default:
 				break;
@@ -230,6 +248,28 @@ char *buildCard(GSList *list){
 stepForward:
 		list = next;
 	}
+
+/*
+ * RFC 2426 - 3.1.2 N Type Definition :
+ *
+ * The structured type value corresponds, in sequence, to
+ * the Family Name,
+ * Given Name,
+ * Additional Names,
+ * Honorific Prefixes, and
+ * Honorific Suffixes
+ */
+	g_string_append(cardString, "N:");
+	g_string_append(cardString, lastN);
+	g_string_append(cardString, ";");
+	g_string_append(cardString, firstN);
+	g_string_append(cardString, ";;;");
+	g_string_append(cardString, "\n");
+
+	g_string_append(cardString, "FN:");
+	g_string_append(cardString, firstN);
+	g_string_append(cardString, lastN);
+	g_string_append(cardString, "\n");
 
 	g_string_append(cardString, "END:VCARD\n");
 
