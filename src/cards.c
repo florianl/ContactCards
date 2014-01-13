@@ -28,6 +28,124 @@ static char *getUID(void){
 	return uid;
 }
 
+/*
+ * RFC 2426 - 3.2.1 ADR Type Definition:
+ *
+ * The structured type value corresponds, in sequence, to
+ * the post office box;
+ * the extended address;
+ * the street address;
+ * the locality (e.g., city);
+ * the region (e.g., state or province);
+ * the postal code;
+ * the country name.
+ */
+
+static char *buildAdr(GSList *list){
+	printfunc(__func__);
+
+	char				*adr = "";
+	char				*poBox = NULL;
+	char				*extAdr = NULL;
+	char				*str = NULL;
+	char				*loc = NULL;
+	char				*reg = NULL;
+	char				*zip = NULL;
+	char				*country = NULL;
+	GSList				*next;
+	GString				*tmp;
+
+	tmp = g_string_new(NULL);
+
+	g_string_append(tmp, "ADR");
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_ADR_OPT:
+				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
+					break;
+				g_string_append(tmp,";TYPE=");
+				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
+				break;
+			case CARDTYPE_ADR_OFFICE_BOX:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				poBox = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_EXT_ADDR:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				extAdr = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_STREET:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				str = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_CITY:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				loc = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_REGION:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				reg = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_ZIP:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				zip = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+			case CARDTYPE_ADR_COUNTRY:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					break;
+				country = (char *) gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element));
+				break;
+		}
+stepForward:
+		list = next;
+	}
+
+	if(!poBox && !extAdr && !str && !loc && !reg && !zip && !country)
+		goto stepEmpty;
+
+	g_string_append(tmp, ":");
+	if(poBox)
+		g_string_append(tmp, poBox);
+	g_string_append(tmp, ";");
+	if(extAdr)
+		g_string_append(tmp, extAdr);
+	g_string_append(tmp, ";");
+	if(str)
+		g_string_append(tmp, str);
+	g_string_append(tmp, ";");
+	if(loc)
+		g_string_append(tmp, loc);
+	g_string_append(tmp, ";");
+	if(reg)
+		g_string_append(tmp, reg);
+	g_string_append(tmp, ";");
+	if(zip)
+		g_string_append(tmp, zip);
+	g_string_append(tmp, ";");
+	if(country)
+		g_string_append(tmp, country);
+	g_string_append(tmp, ";");
+	g_string_append(tmp, "\n");
+	adr = g_strndup(tmp->str, tmp->len);
+
+stepEmpty:
+	return adr;
+}
+
 static char *buildTele(GSList *list){
 	printfunc(__func__);
 
@@ -100,6 +218,7 @@ char *buildCard(GSList *list){
 		item = (ContactCards_item_t *)list->data;
 		switch(item->itemID){
 			case CARDTYPE_ADR:
+				g_string_append(cardString, buildAdr(item->element));
 				break;
 			case CARDTYPE_TEL:
 				g_string_append(cardString, buildTele(item->element));

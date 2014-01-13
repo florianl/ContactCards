@@ -375,6 +375,10 @@ stepForward:
 	g_slist_free_full(list, g_free);
 }
 
+/*
+ * At first hide the widget. Then get and use the data.
+ * Finally destroy the widget.
+ */
 static void contactAddSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -383,6 +387,20 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 	GSList					*next;
 	ContactCards_item_t		*item;
 	char					*card;
+
+	while(list){
+		next = list->next;
+
+		if(!list->data)
+			goto stepForward;
+		item = (ContactCards_item_t *)list->data;
+		if(item->itemID == CONTACT_ADD_WINDOW){
+			gtk_widget_hide(GTK_WIDGET(item->element));
+			break;
+		}
+stepForward:
+		list = next;
+	}
 
 	card = buildCard(list);
 	dbgCC(":%s\n", card);
