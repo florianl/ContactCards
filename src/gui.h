@@ -60,6 +60,8 @@ typedef struct ContactCards_add {
 	GtkWidget			*grid;
 	GSList				*list;
 	int					addrBookID;
+	GtkEntryBuffer		*fnBuff;
+	GtkEntryBuffer		*lnBuff;
 } ContactCards_add_t;
 
 #define	CONTACT_ADD_WINDOW		1

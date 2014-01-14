@@ -473,6 +473,29 @@ stepForward:
 	g_slist_free_full(list, g_free);
 }
 
+static void contactStuffMissing(int stuff){
+	printfunc(__func__);
+
+	GtkWidget		*infoDia;
+	char			*missingInformation = NULL;
+
+	switch(stuff){
+		case 3:
+			missingInformation = _("First and last name are missing");
+			break;
+		case 2:
+			missingInformation = _("First name is missing");
+			break;
+		case 1:
+			missingInformation = _("Last name is missing");
+			break;
+	}
+
+	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, missingInformation);
+	gtk_dialog_run(GTK_DIALOG(infoDia));
+	gtk_widget_destroy(infoDia);
+}
+
 /*
  * At first hide the widget. Then get and use the data.
  * Finally destroy the widget.
@@ -485,6 +508,27 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 	GSList					*next;
 	ContactCards_item_t		*item;
 	char					*card;
+	GtkEntryBuffer			*fNBuff, *lNBuff;
+	int						fnL = 0,
+							lnL = 0;
+
+	fNBuff = (GtkEntryBuffer*) data->fnBuff;
+	lNBuff = (GtkEntryBuffer*) data->lnBuff;
+
+	fnL = gtk_entry_buffer_get_length(fNBuff);
+	lnL = gtk_entry_buffer_get_length(lNBuff);
+
+	if(fnL == 0 && lnL == 0){
+		contactStuffMissing(3);
+		return;
+	} else if (fnL == 0) {
+		contactStuffMissing(2);
+		return;
+	} else if (lnL == 0) {
+		contactStuffMissing(1);
+		return;
+	}
+
 
 	while(list){
 		next = list->next;
@@ -667,6 +711,8 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	transNew->grid = grid;
 	transNew->list = items;
 	transNew->addrBookID = abID;
+	transNew->fnBuff = fnBuff;
+	transNew->lnBuff = lnBuff;
 
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(btnPostal), "clicked",  G_CALLBACK(contactAddPostal), transNew);
