@@ -197,6 +197,106 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	}
 }
 
+static void contactAddMail(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget			*label, *row, *row2, *input, *opt, *sep;
+	GtkEntryBuffer		*mailBuff;
+	ContactCards_add_t	*data = trans;
+	ContactCards_item_t	*mailItem = NULL,
+						*optItem = NULL,
+						*eleList = NULL;
+	GSList				*elements;
+
+	mailBuff	= gtk_entry_buffer_new(NULL, -1);
+	mailItem = g_new(ContactCards_item_t, 1);
+	optItem = g_new(ContactCards_item_t, 1);
+	eleList	= g_new(ContactCards_item_t, 1);
+
+	elements = g_slist_alloc();
+
+	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("E-mail"));
+	opt = gtk_combo_box_text_new();
+	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Home"));
+	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Work"));
+	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Other"));
+	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Custom"));
+	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(row), opt, FALSE, FALSE, 3);
+	gtk_widget_show_all(row);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
+	optItem->itemID = CARDTYPE_EMAIL_OPT;
+	optItem->element = opt;
+	elements = g_slist_append(elements, optItem);
+
+	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("E-mail address"));
+	input = gtk_entry_new_with_buffer(mailBuff);
+	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
+	gtk_widget_show_all(row2);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
+	mailItem->itemID = CARDTYPE_EMAIL;
+	mailItem->element = mailBuff;
+	elements = g_slist_append(elements, mailItem);
+
+	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
+	gtk_widget_show_all(row);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
+
+	eleList->itemID = CARDTYPE_EMAIL;
+	eleList->element = elements;
+	data->list = g_slist_append(data->list, eleList);
+}
+
+static void contactAddBDay(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget				*label, *row, *row2, *bdCal, *sep;
+	ContactCards_add_t		*data = trans;
+	GSList					*list = data->list;
+	GSList					*next;
+	ContactCards_item_t		*bdItem = NULL;
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data)
+			goto stepForward;
+		item = (ContactCards_item_t *)list->data;
+		if(item->itemID == CARDTYPE_BDAY){
+			dbgCC("[%s] You can have birthday only once\n", __func__);
+			return;
+		}
+stepForward:
+		list = next;
+	}
+
+	bdItem = g_new(ContactCards_item_t, 1);
+
+	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Birthday"));
+	bdCal = gtk_calendar_new();
+	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(row), bdCal, FALSE, FALSE, 3);
+	gtk_widget_show_all(row);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
+	bdItem->itemID = CARDTYPE_BDAY;
+	bdItem->element = bdCal;
+	data->list = g_slist_append(data->list, bdItem);
+
+	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(row2), sep, TRUE, TRUE, 3);
+	gtk_widget_show_all(row2);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
+
+}
+
 static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -356,10 +456,8 @@ static void contactAddDiscard(GtkWidget *widget, gpointer trans){
 	GSList					*list = trans;
 	GSList					*next;
 	ContactCards_item_t		*item;
-	int				i = 0;
 
 	while(list){
-		i++;
 		next = list->next;
 
 		if(!list->data)
@@ -426,8 +524,7 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 
 	GtkWidget			*addWindow, *scrollView, *grid;
 	GtkWidget			*label, *row, *input, *sep;
-	GtkWidget			*bdCal;
-	GtkWidget			*btnPostal, *btnPhone;
+	GtkWidget			*btnPostal, *btnPhone, *btnBDay, *btnEMail;
 	GtkWidget			*discardBtn, *saveBtn;
 	GtkEntryBuffer		*fnBuff, *lnBuff;
 	int					rows = 0;
@@ -436,7 +533,6 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	GtkTreeModel		*model;
 	ContactCards_add_t	*transNew = NULL;
 	ContactCards_item_t	*windowItem = NULL,
-						*bdItem = NULL,
 						*fnItem = NULL,
 						*lnItem = NULL;
 	ContactCards_trans_t		*data = trans;
@@ -449,7 +545,6 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	windowItem = g_new(ContactCards_item_t, 1);
 	fnItem = g_new(ContactCards_item_t, 1);
 	lnItem = g_new(ContactCards_item_t, 1);
-	bdItem = g_new(ContactCards_item_t, 1);
 
 	transNew = g_new(ContactCards_add_t, 1);
 
@@ -546,21 +641,22 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	rows++;
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
+	label = gtk_label_new(_("E-mail address"));
+	btnEMail = gtk_button_new_from_icon_name("list-add", 2);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(btnEMail), _("Add e-mail address"));
+	gtk_box_pack_start(GTK_BOX(row), btnEMail, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
 	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
 	rows++;
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Birthday"));
-	bdCal = gtk_calendar_new();
+	btnBDay = gtk_button_new_from_icon_name("list-add", 2);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(btnPostal), _("Add birthday"));
+	gtk_box_pack_start(GTK_BOX(row), btnBDay, FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), bdCal, FALSE, FALSE, 3);
 	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
 	rows++;
-	bdItem->itemID = CARDTYPE_BDAY;
-	bdItem->element = bdCal;
-	items = g_slist_append(items, bdItem);
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -575,6 +671,8 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(btnPostal), "clicked",  G_CALLBACK(contactAddPostal), transNew);
 	g_signal_connect(G_OBJECT(btnPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
+	g_signal_connect(G_OBJECT(btnBDay), "clicked", G_CALLBACK(contactAddBDay), transNew);
+	g_signal_connect(G_OBJECT(btnEMail), "clicked", G_CALLBACK(contactAddMail), transNew);
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactAddDiscard), items);
 

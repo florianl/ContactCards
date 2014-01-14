@@ -146,6 +146,49 @@ stepEmpty:
 	return adr;
 }
 
+static char *buildEMail(GSList *list){
+	printfunc(__func__);
+
+	char				*mail = "";
+	GSList				*next;
+	GString				*tmp;
+
+	tmp = g_string_new(NULL);
+
+	g_string_append(tmp, "EMAIL");
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_EMAIL_OPT:
+				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
+					break;
+				g_string_append(tmp,";TYPE=");
+				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
+				break;
+			default:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					goto stepEmpty;
+				g_string_append(tmp,":");
+				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
+		}
+stepForward:
+		list = next;
+	}
+
+	g_string_append(tmp, "\n");
+	mail = g_strndup(tmp->str, tmp->len);
+
+stepEmpty:
+	return mail;
+}
+
 static char *buildTele(GSList *list){
 	printfunc(__func__);
 
@@ -240,6 +283,9 @@ char *buildCard(GSList *list){
 				g_string_append(cardString, "BDAY:");
 				g_string_append(cardString, bDate);
 				g_string_append(cardString, "\n");
+				break;
+			case CARDTYPE_EMAIL:
+				g_string_append(cardString, buildEMail(item->element));
 				break;
 			case CONTACT_ADD_WINDOW:
 			default:
