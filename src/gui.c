@@ -231,7 +231,7 @@ static void contactAddMail(GtkWidget *widget, gpointer trans){
 	elements = g_slist_append(elements, optItem);
 
 	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("E-mail address"));
+	label = gtk_label_new(_("Address"));
 	input = gtk_entry_new_with_buffer(mailBuff);
 	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
@@ -280,20 +280,24 @@ stepForward:
 
 	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Birthday"));
-	bdCal = gtk_calendar_new();
 	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), bdCal, FALSE, FALSE, 3);
 	gtk_widget_show_all(row);
 	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
+
+	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	bdCal = gtk_calendar_new();
+	gtk_box_pack_start(GTK_BOX(row2), bdCal, FALSE, FALSE, 3);
+	gtk_widget_show_all(row2);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
 	bdItem->itemID = CARDTYPE_BDAY;
 	bdItem->element = bdCal;
 	data->list = g_slist_append(data->list, bdItem);
 
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row2), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
+	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
+	gtk_widget_show_all(row);
+	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
 
 }
 
@@ -608,14 +612,14 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 
 	addWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(addWindow), _("Add new contact"));
-	gtk_window_resize(GTK_WINDOW(addWindow), 312, 408);
+	gtk_window_resize(GTK_WINDOW(addWindow), 264, 408);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(addWindow), TRUE);
 	windowItem->itemID = CONTACT_ADD_WINDOW;
 	windowItem->element = addWindow;
 	items = g_slist_append(items, windowItem);
 
 	scrollView = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollView),GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollView),GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
 	grid = gtk_grid_new();
 	gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
