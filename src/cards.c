@@ -314,6 +314,7 @@ stepForward:
 
 	g_string_append(cardString, "FN:");
 	g_string_append(cardString, firstN);
+	g_string_append(cardString, " ");
 	g_string_append(cardString, lastN);
 	g_string_append(cardString, "\n");
 
