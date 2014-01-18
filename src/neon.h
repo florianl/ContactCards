@@ -149,6 +149,7 @@ extern void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID);
 extern void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr);
 extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type);
 extern int oAuthUpdate(sqlite3 *ptr, int serverID);
+extern void pushCard(sqlite3 *ptr, char *card, int addrBookID);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
 extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);

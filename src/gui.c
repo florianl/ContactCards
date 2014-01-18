@@ -549,7 +549,8 @@ firstForward:
 	}
 
 	card = buildCard(list);
-	dbgCC(":%s\n", card);
+
+	pushCard(data->db, card, data->addrBookID);
 
 	while(list){
 		next = list->next;
@@ -585,6 +586,9 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 						*lnItem = NULL;
 	ContactCards_trans_t		*data = trans;
 	GSList				*items;
+	sqlite3				*ptr;
+
+	ptr = data->db;
 
 	fnBuff		= gtk_entry_buffer_new(NULL, -1);
 	lnBuff		= gtk_entry_buffer_new(NULL, -1);
@@ -712,6 +716,7 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
 	rows++;
 
+	transNew->db = ptr;
 	transNew->grid = grid;
 	transNew->list = items;
 	transNew->addrBookID = abID;

@@ -57,6 +57,7 @@ typedef struct ContactCards_pref {
 } ContactCards_pref_t;
 
 typedef struct ContactCards_add {
+	sqlite3				*db;
 	GtkWidget			*grid;
 	GSList				*list;
 	int					addrBookID;

@@ -694,6 +694,40 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	return stack->statuscode;
 }
 
+void pushCard(sqlite3 *ptr, char *card, int addrBookID){
+	printfunc(__func__);
+
+	ne_session	 			*sess = NULL;
+	int						srvID;
+	int						isOAuth = 0;
+	ContactCards_trans_t	*trans = NULL;
+
+	dbgCC("[%d]\n%s\n", addrBookID, card);
+
+	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+	if(isOAuth){
+		int 		ret = 0;
+		ret = oAuthUpdate(ptr, srvID);
+		if(ret != OAUTH_UP2DATE){
+			g_mutex_unlock(&mutex);
+			return;
+		}
+	}
+
+	g_mutex_lock(&mutex);
+
+	trans = g_new(ContactCards_trans_t, 1);
+	trans->db = ptr;
+	trans->element = GINT_TO_POINTER(srvID);
+
+	sess = serverConnect(trans);
+
+	serverDisconnect(sess, ptr, srvID);
+
+	g_mutex_unlock(&mutex);
+}
+
 static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	printfunc(__func__);
 
