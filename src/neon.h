@@ -43,6 +43,8 @@
 
 #define DAV_REQ_DEL_CONTACT				141
 
+#define	DAV_REQ_PUT_CONTACT				151
+
 #define	DAV_REQ_GET						161
 #define	DAV_REQ_GET_GRANT				171
 #define	DAV_REQ_GET_TOKEN				172

@@ -379,6 +379,22 @@ sendAgain:
 			break;
 
 		/*
+		 * request to push a new contact to the server
+		 */
+		case DAV_REQ_PUT_CONTACT:
+			{
+			char			*vCard = NULL;
+			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(vCard == NULL) goto failedRequest;
+			req = ne_request_create(sess, "PUT", davPath);
+			ne_add_request_header(req, "If-None-Match", "*");
+			ne_buffer_concat(req_buffer, vCard, NULL);
+			}
+			break;
+
+		/*
 		 * oAuth-Stuff
 		 */
 		case DAV_REQ_GET_TOKEN:
@@ -700,7 +716,9 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	ne_session	 			*sess = NULL;
 	int						srvID;
 	int						isOAuth = 0;
+	int						newID = 0;
 	ContactCards_trans_t	*trans = NULL;
+	ContactCards_stack_t	*stack;
 
 	dbgCC("[%d]\n%s\n", addrBookID, card);
 
@@ -710,7 +728,6 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 		int 		ret = 0;
 		ret = oAuthUpdate(ptr, srvID);
 		if(ret != OAUTH_UP2DATE){
-			g_mutex_unlock(&mutex);
 			return;
 		}
 	}
@@ -721,7 +738,18 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	trans->db = ptr;
 	trans->element = GINT_TO_POINTER(srvID);
 
+	newID = newContact(ptr, addrBookID, card);
+
 	sess = serverConnect(trans);
+
+	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	switch(stack->statuscode){
+		case 201:
+			break;
+		default:
+			/* server didn't accept the new contact	*/
+			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+	}
 
 	serverDisconnect(sess, ptr, srvID);
 

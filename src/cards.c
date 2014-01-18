@@ -390,6 +390,11 @@ char *getSingleCardAttribut(int type, char *card){
 					goto getValue;
 				else 
 					goto next;
+			case CARDTYPE_UID:
+				if(g_str_has_prefix(*line, "UID"))
+					goto getValue;
+				else
+					goto next;
 			default:
 				goto next;
 		}

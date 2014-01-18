@@ -662,6 +662,31 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 }
 
+int newContact(sqlite3 *ptr, int addressbookID, char *card){
+	printfunc(__func__);
+
+	char		 		*sql_query;
+	char				*basePath;
+	char				*cardPath;
+	char				*path;
+	int					newID;
+
+	basePath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
+	cardPath = getSingleCardAttribut(CARDTYPE_UID, card);
+
+	path = g_strconcat(basePath, cardPath, ".vcf", NULL);
+
+	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href) VALUES ('%d','%q', '%q');", addressbookID, card, path);
+
+	doSimpleRequest(ptr, sql_query, __func__);
+
+	newID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", path);
+
+	setDisplayname(ptr, newID, card);
+
+	return newID;
+}
+
 void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path){
 	printfunc(__func__);
 

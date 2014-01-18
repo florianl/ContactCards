@@ -38,6 +38,11 @@
 #define	CARDTYPE_EMAIL_OPT		321
 
 /*
+ *	EXPLANATORY TYPES
+ */
+#define	CARDTYPE_UID			67
+
+/*
  *	SECURITY TYPES
  */
 #define	CARDTYPE_CLASS			71
