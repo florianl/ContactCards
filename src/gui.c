@@ -386,8 +386,10 @@ static void *syncOneServer(void *trans){
 	if(isOAuth){
 		int 		ret = 0;
 		ret = oAuthUpdate(ptr, serverID);
-		if(ret != OAUTH_UP2DATE)
+		if(ret != OAUTH_UP2DATE){
+			g_mutex_unlock(&mutex);
 			return NULL;
+		}
 	}
 
 	sess = serverConnect(data);
