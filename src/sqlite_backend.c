@@ -4,6 +4,15 @@
 
 #include "ContactCards.h"
 
+/*
+ * doSimpleRequest()
+ *	@ptr			pointer to the database
+ *	@sql_query		query to send to the database
+ *	@func			functionname which the request come from
+ *
+ *	This function sends a request to the database and handles possible
+ *	errors
+ */
 void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	printfunc(__func__);
 
@@ -110,6 +119,21 @@ sqlError:
 	return;
 }
 
+/*
+ * multiCheck()
+ *	@ptr			pointer to the database
+ *	@tableName		name of the table in the database
+ *	@rows			combination of rowX and/or rowY
+ *	@row1			row 1 to select
+ *	@value1			value for row 1
+ *	@row2			row 2 to select
+ *	@value2			value for row 2
+ *	@row3			row 3 to select
+ *	@value4			value for row 3
+ *
+ *	This functions returns a list as the result to the request
+ *	to the database
+ */
 GSList *multiCheck(sqlite3 *ptr, char *tableName, int rows, char *sel, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
 	printfunc(__func__);
 
@@ -276,6 +300,20 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 
 }
 
+/*
+ * getSingleInt()
+ *	@ptr			pointer to the database
+ *	@tableName		name of the table in the database
+ *	@selValue		name of the column which will be selected
+ *	@selRow			selected combination of rowX and/or rowY
+ *	@row1			row 1 to select
+ *	@value1			value for row 1
+ *	@row2			row 2 to select
+ *	@value2			value for row 2
+ *
+ *	This functions returns a single int if there is no error on the
+ *	request to the database
+ */
 int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2){
 	printfunc(__func__);
 
@@ -326,6 +364,24 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	return retValue;
 }
 
+/*
+ * getSingleChar()
+ *	@ptr			pointer to the database
+ *	@tableName		name of the table in the database
+ *	@selValue		name of the column which will be selected
+ *	@selRow			selected combination of rowX and/or rowY
+ *	@row1			row 1 to select
+ *	@value1			value for row 1
+ *	@row2			row 2 to select
+ *	@value2			value for row 2
+ *	@row3			row 3 to select
+ *	@value3			value for row 3
+ *	@row4			row 4 to select
+ *	@value4			value for row 4
+ *
+ *	This functions returns a single char if there is no error on the
+ *	request to the database
+ */
 char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3, char *row4, int value4){
 	printfunc(__func__);
 

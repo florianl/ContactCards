@@ -219,6 +219,16 @@ int cbReader(void *userdata, const char *buf, size_t len){
 	return 0;
 }
 
+/*
+ * serverRequest()
+ *	@method			method on how to request the server
+ *	@serverID		ID for the server
+ *	@itemID			ID for items. For example addressbookID or contactID
+ *	@sess			session to the server you are connected to
+ *	@ptr			pointer to the database
+ *
+ *	This function forms and sends the requests to the server
+ */
 ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
