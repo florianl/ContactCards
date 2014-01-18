@@ -56,4 +56,20 @@ typedef struct ContactCards_pref {
 	int					srvID;
 } ContactCards_pref_t;
 
+typedef struct ContactCards_add {
+	sqlite3				*db;
+	GtkWidget			*grid;
+	GSList				*list;
+	int					addrBookID;
+	GtkEntryBuffer		*fnBuff;
+	GtkEntryBuffer		*lnBuff;
+} ContactCards_add_t;
+
+#define	CONTACT_ADD_WINDOW		1
+
+typedef struct ContactCards_item {
+	int			itemID;
+	void		*element;
+} ContactCards_item_t;
+
 #endif	/*	gui_H	*/

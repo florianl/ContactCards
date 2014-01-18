@@ -379,6 +379,22 @@ sendAgain:
 			break;
 
 		/*
+		 * request to push a new contact to the server
+		 */
+		case DAV_REQ_PUT_CONTACT:
+			{
+			char			*vCard = NULL;
+			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(vCard == NULL) goto failedRequest;
+			req = ne_request_create(sess, "PUT", davPath);
+			ne_add_request_header(req, "If-None-Match", "*");
+			ne_buffer_concat(req_buffer, vCard, NULL);
+			}
+			break;
+
+		/*
 		 * oAuth-Stuff
 		 */
 		case DAV_REQ_GET_TOKEN:
@@ -692,6 +708,52 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 
 	dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", selID);
 	return stack->statuscode;
+}
+
+void pushCard(sqlite3 *ptr, char *card, int addrBookID){
+	printfunc(__func__);
+
+	ne_session	 			*sess = NULL;
+	int						srvID;
+	int						isOAuth = 0;
+	int						newID = 0;
+	ContactCards_trans_t	*trans = NULL;
+	ContactCards_stack_t	*stack;
+
+	dbgCC("[%d]\n%s\n", addrBookID, card);
+
+	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+	if(isOAuth){
+		int 		ret = 0;
+		ret = oAuthUpdate(ptr, srvID);
+		if(ret != OAUTH_UP2DATE){
+			return;
+		}
+	}
+
+	g_mutex_lock(&mutex);
+
+	trans = g_new(ContactCards_trans_t, 1);
+	trans->db = ptr;
+	trans->element = GINT_TO_POINTER(srvID);
+
+	newID = newContact(ptr, addrBookID, card);
+
+	sess = serverConnect(trans);
+
+	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	switch(stack->statuscode){
+		case 201:
+			break;
+		default:
+			/* server didn't accept the new contact	*/
+			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+	}
+
+	serverDisconnect(sess, ptr, srvID);
+
+	g_mutex_unlock(&mutex);
 }
 
 static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
