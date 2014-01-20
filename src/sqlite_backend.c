@@ -96,6 +96,7 @@ void dbCreate(sqlite3 *ptr){
 	cardServer INTEGER, \
 	displayname TEXT, \
 	path TEXT, \
+	postURI TEXT, \
 	syncToken TEXT, \
 	syncMethod INTEGER);", NULL, NULL, errmsg);
 
@@ -811,6 +812,16 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
 	if(certSel == FALSE)
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
+}
+
+void updatePostURI(sqlite3 *ptr, int addressbookID, char *href){
+	printfunc(__func__);
+
+	char	 			*sql_query = NULL;
+
+	sql_query = sqlite3_mprintf("UPDATE addressbooks SET postURI = %Q WHERE addressbookID = '%d';", href, addressbookID);
+
+	doSimpleRequest(ptr, sql_query, __func__);
 }
 
 void updateContact(sqlite3 *ptr, int contactID, char *vData){

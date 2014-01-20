@@ -404,6 +404,30 @@ sendAgain:
 			}
 			break;
 
+		case DAV_REQ_POST_URI:
+			addrbookPath = getSingleChar(ptr, "addressbooks", "path", 14, "cardServer", serverID, "", "", "", "", "addressbookID", itemID);
+			if(addrbookPath== NULL) goto failedRequest;
+			req = ne_request_create(sess, "PROPFIND", addrbookPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_POST_URI, DAV_PROP_END, DAV_PROPFIND_END, NULL);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_207, cbReader, pXML);
+			break;
+
+		case DAV_REQ_POST_CONTACT:
+			{
+			char			*vCard = NULL;
+			int				abID = 0;
+			abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", itemID, "", "");
+			if(abID == 0) goto failedRequest;
+			davPath = getSingleChar(ptr, "addressbooks", "postURI", 1, "addressbookID", abID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(vCard == NULL) goto failedRequest;
+			req = ne_request_create(sess, "POST", davPath);
+			ne_buffer_concat(req_buffer, vCard, NULL);
+			}
+			break;
 		/*
 		 * oAuth-Stuff
 		 */
@@ -445,6 +469,7 @@ sendAgain:
 
 		default:
 			dbgCC("no request without method\n");
+			dbgCC("method: %d\n", method);
 			goto failedRequest;
 	}
 
@@ -720,6 +745,36 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	return stack->statuscode;
 }
 
+int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID){
+	printfunc(__func__);
+
+	char					*postURI = NULL;
+	ContactCards_stack_t	*stack;
+
+	postURI = getSingleChar(ptr, "addressbooks", "postURI", 14, "cardServer", srvID, "", "", "", "", "addressbookID", addrBookID);
+	if(strlen(postURI) <= 1){
+		stack = serverRequest(DAV_REQ_POST_URI, srvID, addrBookID, sess, ptr);
+		responseHandle(stack, sess, ptr);
+		postURI = getSingleChar(ptr, "addressbooks", "postURI", 14, "cardServer", srvID, "", "", "", "", "addressbookID", addrBookID);
+		if(strlen(postURI) <= 1){
+			/* Without a URI, we can post to, we can't do anything so far	*/
+			return -1;
+		}
+	}
+
+	stack = serverRequest(DAV_REQ_POST_CONTACT, srvID, newID, sess, ptr);
+
+	switch(stack->statuscode){
+		case 201:
+			return 1;
+			break;
+		default:
+			return -1;
+			break;
+	}
+	return -1;
+}
+
 void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	printfunc(__func__);
 
@@ -756,7 +811,13 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	switch(stack->statuscode){
 		case 201:
 			break;
+		case 400:
+			/* Try the way RFC 5995 describes	*/
+			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1)
+				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+			break;
 		default:
+			dbgCC("[%s] %d\n", __func__ , stack->statuscode);
 			/* server didn't accept the new contact	*/
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 	}

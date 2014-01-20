@@ -44,6 +44,8 @@
 #define DAV_REQ_DEL_CONTACT				141
 
 #define	DAV_REQ_PUT_CONTACT				151
+#define	DAV_REQ_POST_CONTACT			152
+#define	DAV_REQ_POST_URI				153
 
 #define	DAV_REQ_GET						161
 #define	DAV_REQ_GET_GRANT				171
@@ -85,6 +87,8 @@
 #define	DAV_PRINCIPAL_SEARCH_START		"<d:principal-property-search xmlns:d=\"DAV:\">"
 #define	DAV_PRINCIPAL_SEARCH_END		"</d:principal-property-search>"
 
+#define	DAV_POST_URI					"<d:add-member/>"
+
 #define	DAV_REP_SYNC_START				"<d:sync-collection xmlns:d=\"DAV:\">"
 #define	DAV_REP_SYNC_TOKEN				"<d:sync-token />"
 #define	DAV_REP_SYNC_TOKEN_START		"<d:sync-token>"
@@ -110,6 +114,7 @@
 #define	DAV_ELE_ADDRBOOK_HOME			810
 #define	DAV_ELE_CUR_PRINCIPAL			811
 #define	DAV_ELE_PROXY					812
+#define	DAV_ELE_ADD_MEMBER				813
 
 /*
  * Certificate stuff

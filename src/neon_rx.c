@@ -81,6 +81,12 @@ gboolean elementCheck(GNode *branch, int elementType){
 							} else {
 								break;
 							}
+					case DAV_ELE_ADD_MEMBER:
+							if(!strncmp(((ContactCards_node_t *)branch->data)->name, "add-member", 10)) {
+								return TRUE;
+							}else {
+								break;
+							}
 					default:
 							dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 							break;
@@ -225,7 +231,28 @@ void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod
 
 }
 
+void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
+	printfunc(__func__);
+
+	char		*href = NULL;
+
+	if(elementCheck(branch, DAV_ELE_STATUS_200) != TRUE){
+		return;
+	}
+
+	if(elementCheck(branch, DAV_ELE_ADD_MEMBER) != TRUE){
+		return;
+	}
+
+	href = elementGet(branch, DAV_ELE_HREF);
+
+	dbgCC("[%s] %s\n", __func__, href);
+
+	updatePostURI(ptr, addressbookID, href);
+}
+
 void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
+	printfunc(__func__);
 
 	char		*href = NULL;
 	char		*displayname = NULL;
@@ -330,6 +357,9 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 			case DAV_REQ_REP_2:
 			case DAV_REQ_REP_3:
 				reportHandle(branch, addressbookID, serverID, sess, ptr);
+				break;
+			case DAV_REQ_POST_URI:
+				locateAddMember(branch, addressbookID, ptr);
 				break;
 			default:
 				dbgCC("Can't handle %d\n", reqMethod);
