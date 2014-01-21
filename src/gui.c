@@ -565,6 +565,7 @@ firstForward:
 secondForward:
 		list = next;
 	}
+	fillList(data->db, 2, data->addrBookID, contactList);
 	g_slist_free_full(list, g_free);
 }
 

@@ -39,6 +39,7 @@ extern void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *n
 extern void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, char *row1, int value1);
 extern void sync_addressbook(sqlite3 *ptr, int serverID);
 extern void updateContact(sqlite3 *ptr, int contactID, char *vData);
+extern void updateContactUri(sqlite3 *ptr, int contactID, char *uri);
 extern void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value);
 extern void updatePostURI(sqlite3 *ptr, int addressbookID, char *href);
 extern void updateUri(sqlite3 *ptr, int serverID, char *newPath, gboolean force);

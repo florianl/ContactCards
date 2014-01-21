@@ -425,6 +425,7 @@ sendAgain:
 			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(vCard == NULL) goto failedRequest;
 			req = ne_request_create(sess, "POST", davPath);
+			ne_add_request_header(req, "Content-Type", "text/plain");
 			ne_buffer_concat(req_buffer, vCard, NULL);
 			}
 			break;
@@ -545,7 +546,13 @@ sendAgain:
 		case 207:
 			dbgCC("==\t207\t==\n");
 			break;
-		case 200 ... 206:
+		case 201:
+			if(method == DAV_REQ_POST_CONTACT){
+				updateContactUri(ptr, itemID, (char *)ne_get_response_header(req, "Location"));
+			}
+			break;
+		case 200:
+		case 202 ... 206:
 		case 208 ... 299:
 			dbgCC("==\t2xx Success\t==\n");
 			break;
@@ -766,6 +773,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 
 	switch(stack->statuscode){
 		case 201:
+			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
 			break;
 		default:
@@ -784,8 +792,6 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	int						newID = 0;
 	ContactCards_trans_t	*trans = NULL;
 	ContactCards_stack_t	*stack;
-
-	dbgCC("[%d]\n%s\n", addrBookID, card);
 
 	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
@@ -810,6 +816,7 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
 	switch(stack->statuscode){
 		case 201:
+			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/

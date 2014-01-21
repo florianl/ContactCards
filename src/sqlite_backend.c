@@ -824,6 +824,16 @@ void updatePostURI(sqlite3 *ptr, int addressbookID, char *href){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+void updateContactUri(sqlite3 *ptr, int contactID, char *uri){
+	printfunc(__func__);
+
+	char	 			*sql_query = NULL;
+
+	sql_query = sqlite3_mprintf("UPDATE contacts SET href = %Q WHERE contactID = '%d';", uri, contactID);
+
+	doSimpleRequest(ptr, sql_query, __func__);
+}
+
 void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	printfunc(__func__);
 
