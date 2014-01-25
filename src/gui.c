@@ -477,25 +477,19 @@ stepForward:
 	g_slist_free_full(list, g_free);
 }
 
-static void contactStuffMissing(int stuff){
+/*
+ * feedbackDialog()
+ *	@type			type of the dialog
+ *	@msg			message which will be shown
+ *
+ *	This function gives the user a feedback via a dialog
+ */
+void feedbackDialog(int type, char *msg){
 	printfunc(__func__);
 
 	GtkWidget		*infoDia;
-	char			*missingInformation = NULL;
 
-	switch(stuff){
-		case 3:
-			missingInformation = _("First and last name are missing");
-			break;
-		case 2:
-			missingInformation = _("First name is missing");
-			break;
-		case 1:
-			missingInformation = _("Last name is missing");
-			break;
-	}
-
-	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, missingInformation);
+	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, type, GTK_BUTTONS_OK, msg);
 	gtk_dialog_run(GTK_DIALOG(infoDia));
 	gtk_widget_destroy(infoDia);
 }
@@ -523,13 +517,13 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 	lnL = gtk_entry_buffer_get_length(lNBuff);
 
 	if(fnL == 0 && lnL == 0){
-		contactStuffMissing(3);
+		feedbackDialog(GTK_MESSAGE_WARNING, _("First and last name is missing"));
 		return;
 	} else if (fnL == 0) {
-		contactStuffMissing(2);
+		feedbackDialog(GTK_MESSAGE_WARNING, _("First name is missing"));
 		return;
 	} else if (lnL == 0) {
-		contactStuffMissing(1);
+		feedbackDialog(GTK_MESSAGE_WARNING, _("Last name is missing"));
 		return;
 	}
 
@@ -606,10 +600,7 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	}
 	dbgCC("[%s] %d\n",__func__, abID);
 	if(abID == 0){
-		GtkWidget		*infoDia;
-		infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, _("There is no address book selected."));
-		gtk_dialog_run(GTK_DIALOG(infoDia));
-		gtk_widget_destroy(infoDia);
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
 		g_free(transNew);
 		g_slist_free_full(items, g_free);
 		return;
