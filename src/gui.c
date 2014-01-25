@@ -527,38 +527,24 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
-
-	while(list){
-		next = list->next;
-
-		if(!list->data)
-			goto firstForward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CONTACT_ADD_WINDOW){
-			gtk_widget_hide(GTK_WIDGET(item->element));
-			break;
-		}
-firstForward:
-		list = next;
-	}
-
 	card = buildCard(list);
 
-	pushCard(data->db, card, data->addrBookID);
-
 	while(list){
 		next = list->next;
 
 		if(!list->data)
-			goto secondForward;
+			goto Forward;
 		item = (ContactCards_item_t *)list->data;
 		if(item->itemID == CONTACT_ADD_WINDOW){
 			gtk_widget_destroy(GTK_WIDGET(item->element));
 			break;
 		}
-secondForward:
+Forward:
 		list = next;
 	}
+
+	pushCard(data->db, card, data->addrBookID);
+
 	fillList(data->db, 2, data->addrBookID, contactList);
 	g_slist_free_full(list, g_free);
 }
