@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <libintl.h>
-#include <locale.h>
 #define _(string)		gettext(string)
 #endif	/*	std_H		*/
 
