@@ -1,6 +1,7 @@
 AC_INIT([ContactCards], [0.06], [https://github.com/florianl/ContactCards/issues])
 AC_CONFIG_SRCDIR([src/ContactCards.c])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_SILENT_RULES([yes])
 AC_PROG_CC_C99
 
 # Checks for programs.
