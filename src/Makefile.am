@@ -1,4 +1,5 @@
-AM_CFLAGS=-Wall -Wno-pointer-sign -std=c99 -ggdb -lpthread -O3
+AM_CFLAGS = -Wall -Wno-pointer-sign -std=c99 -ggdb -lpthread -O3
+AM_CFLAGS += -DLOCALEDIR=\"$(localedir)\"
 
 bin_PROGRAMS = ContactCards
 ContactCards_SOURCES = 	ContactCards.c \

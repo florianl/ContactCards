@@ -8,7 +8,11 @@ AC_PROG_CC_C99
 AC_PROG_CC([gcc])
 AM_PROG_CC_C_O
 
-# Checks for libraries.
+IT_PROG_INTLTOOL([0.40])
+GETTEXT_PACKAGE=ContactCards
+AC_SUBST([GETTEXT_PACKAGE])
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION([0.18.1])
 
 # Checks for header files.
 AC_HEADER_DIRENT
@@ -30,5 +34,5 @@ PKG_CHECK_MODULES(SQLITE3, sqlite3, SQLITE3_SUFFIX=sqlite3, AC_MSG_ERROR([sqlite
 AC_SUBST(SQLITE3_CFLAGS)
 AC_SUBST(SQLITE3_LIBS)
 
-AC_CONFIG_FILES([Makefile src/Makefile man/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile man/Makefile po/Makefile.in])
 AC_OUTPUT

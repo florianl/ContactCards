@@ -1,0 +1,271 @@
+#: src/gui.c:45
+msgid "About ContactCards"
+msgstr ""
+
+#: src/gui.c:47
+msgid "Address book written in C using DAV"
+msgstr ""
+
+#: src/gui.c:122 src/gui.c:1231
+msgid "Export Certificate"
+msgstr ""
+
+#: src/gui.c:122 src/gui.c:938 src/gui.c:1095
+msgid "_Cancel"
+msgstr ""
+
+#: src/gui.c:122
+msgid "_Export"
+msgstr ""
+
+#: src/gui.c:219
+msgid "E-mail"
+msgstr ""
+
+#: src/gui.c:221 src/gui.c:325 src/gui.c:390
+msgid "Home"
+msgstr ""
+
+#: src/gui.c:222 src/gui.c:326 src/gui.c:391
+msgid "Work"
+msgstr ""
+
+#: src/gui.c:223 src/gui.c:327 src/gui.c:392
+msgid "Other"
+msgstr ""
+
+#: src/gui.c:224 src/gui.c:328 src/gui.c:393
+msgid "Custom"
+msgstr ""
+
+#: src/gui.c:234
+msgid "Address"
+msgstr ""
+
+#: src/gui.c:282 src/gui.c:683
+msgid "Birthday"
+msgstr ""
+
+#: src/gui.c:323 src/gui.c:665
+msgid "Telephone number"
+msgstr ""
+
+#: src/gui.c:338
+msgid "Number"
+msgstr ""
+
+#: src/gui.c:388 src/gui.c:656
+msgid "Postal address"
+msgstr ""
+
+#: src/gui.c:403
+msgid "Street"
+msgstr ""
+
+#: src/gui.c:414
+msgid "City"
+msgstr ""
+
+#: src/gui.c:425
+msgid "State"
+msgstr ""
+
+#: src/gui.c:436
+msgid "ZIP code"
+msgstr ""
+
+#: src/gui.c:520
+msgid "First and last name is missing"
+msgstr ""
+
+#: src/gui.c:523
+msgid "First name is missing"
+msgstr ""
+
+#: src/gui.c:526
+msgid "Last name is missing"
+msgstr ""
+
+#: src/gui.c:589
+msgid "There is no address book selected."
+msgstr ""
+
+#: src/gui.c:596 src/gui.c:1722
+msgid "Add new contact"
+msgstr ""
+
+#: src/gui.c:614
+msgid "First name"
+msgstr ""
+
+#: src/gui.c:625
+msgid "Last name"
+msgstr ""
+
+#: src/gui.c:642
+msgid "Discard"
+msgstr ""
+
+#: src/gui.c:644
+msgid "Save"
+msgstr ""
+
+#: src/gui.c:658
+msgid "Add postal address"
+msgstr ""
+
+#: src/gui.c:667
+msgid "Add telephone number"
+msgstr ""
+
+#: src/gui.c:674
+msgid "E-mail address"
+msgstr ""
+
+#: src/gui.c:676
+msgid "Add e-mail address"
+msgstr ""
+
+#: src/gui.c:685
+msgid "Add birthday"
+msgstr ""
+
+#: src/gui.c:738
+msgid "Do you really want to delete this contact?"
+msgstr ""
+
+#: src/gui.c:778
+msgid "There is no contact selected."
+msgstr ""
+
+#: src/gui.c:900
+msgid "syncing "
+msgstr ""
+
+#: src/gui.c:938
+msgid "Export Contacts"
+msgstr ""
+
+#: src/gui.c:938
+msgid "_Open"
+msgstr ""
+
+#: src/gui.c:1095
+msgid "_Save"
+msgstr ""
+
+#: src/gui.c:1101 src/gui.c:1439
+msgid "Request Grant"
+msgstr ""
+
+#: src/gui.c:1103
+msgid "Access Grant"
+msgstr ""
+
+#: src/gui.c:1184 src/gui.c:1652 src/gui.c:1653
+msgid "Preferences"
+msgstr ""
+
+#: src/gui.c:1194
+msgid "Settings"
+msgstr ""
+
+#: src/gui.c:1199 src/gui.c:1513
+msgid "Description"
+msgstr ""
+
+#: src/gui.c:1206 src/gui.c:1522
+msgid "URL"
+msgstr ""
+
+#: src/gui.c:1213 src/gui.c:1431 src/gui.c:1473
+msgid "User"
+msgstr ""
+
+#: src/gui.c:1220 src/gui.c:1482
+msgid "Password"
+msgstr ""
+
+#: src/gui.c:1236
+msgid "Certificate is issued for "
+msgstr ""
+
+#: src/gui.c:1244
+msgid "Certificate issued by "
+msgstr ""
+
+#: src/gui.c:1252
+msgid "Trust Certificate?"
+msgstr ""
+
+#: src/gui.c:1262
+msgid "Delete Server"
+msgstr ""
+
+#: src/gui.c:1264
+msgid "Save changes"
+msgstr ""
+
+#: src/gui.c:1404 src/gui.c:1411
+msgid "Confirm"
+msgstr ""
+
+#: src/gui.c:1443
+msgid "Grant"
+msgstr ""
+
+#: src/gui.c:1453
+msgid "OAuth"
+msgstr ""
+
+#: src/gui.c:1493
+msgid "Credentials"
+msgstr ""
+
+#: src/gui.c:1532
+msgid "Serversettings"
+msgstr ""
+
+#: src/gui.c:1570
+msgid "fruux"
+msgstr ""
+
+#: src/gui.c:1571
+msgid "google"
+msgstr ""
+
+#: src/gui.c:1572
+msgid "others"
+msgstr ""
+
+#: src/gui.c:1586
+msgid "Select Server"
+msgstr ""
+
+#: src/gui.c:1647 src/gui.c:1648
+msgid "New"
+msgstr ""
+
+#: src/gui.c:1657 src/gui.c:1658
+msgid "Export"
+msgstr ""
+
+#: src/gui.c:1662 src/gui.c:1663
+msgid "Refresh"
+msgstr ""
+
+#: src/gui.c:1676 src/gui.c:1677
+msgid "About"
+msgstr ""
+
+#: src/gui.c:1713
+msgid "Sort contacts in ascending order"
+msgstr ""
+
+#: src/gui.c:1716
+msgid "Sort contacts in descending order"
+msgstr ""
+
+#: src/gui.c:1719
+msgid "Delete selected contact"
+msgstr ""

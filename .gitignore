@@ -1,6 +1,24 @@
 src/*.o
 ContactCards.sql
 
+*~
+config.guess
+config.rpath
+config.sub
+po/*.gmo
+po/*.header
+po/*.mo
+po/*.sed
+po/*.sin
+po/POTFILES
+po/Makefile
+po/Makefile.in
+po/Makefile.in.in
+po/Makevars.template
+po/contactcards.pot
+po/Rules-quot
+po/stamp-it
+ABOUT-NLS
 aclocal.m4
 autom4te.cache
 compile

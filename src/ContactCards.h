@@ -10,8 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libintl.h>
-#define _(string)		gettext(string)
+#include <glib/gi18n.h>
 #endif	/*	std_H		*/
 
 #ifndef	gui_H

@@ -6,4 +6,5 @@ if test -z $AUTORECONF; then
     exit 1
 else
     autoreconf --force --install --verbose || exit $?
+    intltoolize --copy --force --automake || exit $?
 fi

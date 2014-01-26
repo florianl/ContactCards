@@ -16,6 +16,11 @@ int main(int argc, char **argv){
 	int					ret;
 	sqlite3				*db_handler;
 
+    /* Set up internationalization */
+    setlocale (LC_ALL, "");
+    bindtextdomain (PACKAGE, LOCALEDIR);
+    textdomain (PACKAGE);
+
 	ret = sqlite3_open_v2(DATABASE, &db_handler, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 	sqlite3_extended_result_codes(db_handler, TRUE);
 
