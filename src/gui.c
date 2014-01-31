@@ -779,6 +779,28 @@ failure:
 	}
 }
 
+static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, GtkTreeIter *iter, gpointer trans){
+	printfunc(__func__);
+
+	GtkTextBuffer				*dataBuffer;
+	int							selID;
+	char						*vData = NULL;
+	sqlite3						*ptr;
+	ContactCards_trans_t		*data = trans;
+
+	ptr = data->db;
+
+	gtk_tree_model_get(model, iter, ID_COLUMN, &selID,  -1);
+	dbgCC("[%s] %d\n",__func__, selID);
+	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
+	if(vData == NULL) vData = "";
+	dataBuffer = gtk_text_view_get_buffer(data->element);
+	gtk_text_view_set_editable(data->element, FALSE);
+	gtk_text_view_set_wrap_mode(data->element, GTK_WRAP_CHAR);
+	gtk_text_buffer_set_text(dataBuffer, vData, -1);
+
+}
+
 static void selContact(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1619,11 +1641,12 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
 	GtkWidget			*serverCombo;
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit;
-	GtkWidget			*ascContact, *descContact;
+	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GtkTextBuffer		*dataBuffer;
 	GSList 				*cleanUpList = g_slist_alloc();
+	GtkEntryCompletion	*completion;
 	ContactCards_trans_t		*transBook = NULL;
 	ContactCards_trans_t		*transContact = NULL;
 	ContactCards_trans_t		*transPref = NULL;
@@ -1631,6 +1654,7 @@ void guiInit(sqlite3 *ptr){
 	ContactCards_trans_t		*transSync = NULL;
 	ContactCards_trans_t		*transDelContact = NULL;
 	ContactCards_trans_t		*transAddContact = NULL;
+	ContactCards_trans_t		*transCompletion = NULL;
 
 	gtk_init(NULL, NULL);
 
@@ -1721,8 +1745,16 @@ void guiInit(sqlite3 *ptr){
 	addContact = gtk_button_new_from_icon_name("list-add", 2);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addContact), _("Add new contact"));
 	gtk_container_add(GTK_CONTAINER(contactButtons), addContact);
+	completion = gtk_entry_completion_new ();
+	gtk_entry_completion_set_popup_set_width(GTK_ENTRY_COMPLETION(completion), TRUE);
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(contactList))));
+	gtk_entry_completion_set_text_column(completion, 0);
+	searchbar = gtk_entry_new();
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");
+	gtk_entry_set_completion(GTK_ENTRY(searchbar), GTK_ENTRY_COMPLETION(completion));
 	gtk_widget_set_vexpand(GTK_WIDGET(contactList), TRUE);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactWindow);
+	gtk_container_add(GTK_CONTAINER(contactsEdit), searchbar);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactButtons);
 
 	/*		preference dialog		*/
@@ -1759,6 +1791,12 @@ void guiInit(sqlite3 *ptr){
 
 	g_signal_connect(G_OBJECT(ascContact), "clicked", G_CALLBACK(listSortorderAsc), NULL);
 	g_signal_connect(G_OBJECT(descContact), "clicked", G_CALLBACK(listSortorderDesc), NULL);
+
+	transCompletion = g_new(ContactCards_trans_t, 1);
+	transCompletion->db = ptr;
+	transCompletion->element = contactView;
+	cleanUpList = g_slist_append(cleanUpList, transCompletion);
+	g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(completionContact), transCompletion);
 
 	transDelContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transDelContact);
