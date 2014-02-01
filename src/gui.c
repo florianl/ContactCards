@@ -1787,7 +1787,6 @@ void guiInit(sqlite3 *ptr){
 
 	transContact = g_new(ContactCards_trans_t, 1);
 	transContact->db = ptr;
-//	transContact->element = contactView;
 	transContact->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
@@ -1799,7 +1798,6 @@ void guiInit(sqlite3 *ptr){
 
 	transCompletion = g_new(ContactCards_trans_t, 1);
 	transCompletion->db = ptr;
-//	transCompletion->element = contactView;
 	transCompletion->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transCompletion);
 	g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(completionContact), transCompletion);
