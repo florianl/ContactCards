@@ -1638,13 +1638,13 @@ void guiInit(sqlite3 *ptr){
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;
-	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
+	GtkWidget			*contactBox, *contactWindow, *scroll;
 	GtkWidget			*serverCombo;
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit;
 	GtkWidget			*ascContact, *descContact, *searchbar;
+	GtkWidget			*emptyCard, *noContact;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
-	GtkTextBuffer		*dataBuffer;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
 	ContactCards_trans_t		*transBook = NULL;
@@ -1721,12 +1721,16 @@ void guiInit(sqlite3 *ptr){
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(contactWindow, 192, -1);
-	dataBuffer = gtk_text_buffer_new(NULL);
-	contactView = gtk_text_view_new_with_buffer(dataBuffer);
-	gtk_container_set_border_width(GTK_CONTAINER(contactView), 10);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-	gtk_container_add(GTK_CONTAINER(scroll), contactView);
+	emptyCard = gtk_grid_new();
+	gtk_widget_set_hexpand(GTK_WIDGET(emptyCard), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(emptyCard), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
+	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
+	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
 	contactList = gtk_tree_view_new();
 	listInit(contactList);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
@@ -1783,7 +1787,8 @@ void guiInit(sqlite3 *ptr){
 
 	transContact = g_new(ContactCards_trans_t, 1);
 	transContact->db = ptr;
-	transContact->element = contactView;
+//	transContact->element = contactView;
+	transContact->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
@@ -1794,7 +1799,8 @@ void guiInit(sqlite3 *ptr){
 
 	transCompletion = g_new(ContactCards_trans_t, 1);
 	transCompletion->db = ptr;
-	transCompletion->element = contactView;
+//	transCompletion->element = contactView;
+	transCompletion->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transCompletion);
 	g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(completionContact), transCompletion);
 
