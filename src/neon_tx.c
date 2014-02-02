@@ -38,22 +38,20 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	int							trust = 0;
 	int							exists = 0;
 	int							serverID;
-	sqlite3						*ptr;
 	char						*newCer = NULL;
 	char						*dbDigest = NULL;
 	char						*issued = NULL;
 	char						*issuer = NULL;
 
-	ptr = data->db;
 	serverID = GPOINTER_TO_INT(data->element);
 
-	exists = countElements(ptr, "certs", 1, "serverID", serverID, "", "", "", "");
+	exists = countElements(data->db, "certs", 1, "serverID", serverID, "", "", "", "");
 
 	if(exists == 0){
 		goto newCert;
 	}
 
-	trust = getSingleInt(ptr, "certs", "trustFlag", 1, "serverID", serverID, "", "");
+	trust = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 
 	switch(trust){
 		case ContactCards_DIGEST_TRUSTED:
@@ -70,7 +68,7 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 simpleCheck:
 	ne_ssl_cert_digest(cert, digest);
-	dbDigest = getSingleChar(ptr, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	dbDigest = getSingleChar(data->db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(dbDigest == NULL)
 		goto newCert;
 	if(g_strcmp0(digest, dbDigest) == 0){
@@ -83,7 +81,7 @@ newCert:
 	trust = ContactCards_DIGEST_NEW;
 	issued = (char *) ne_ssl_cert_identity(cert);
 	issuer = ne_ssl_readable_dname(ne_ssl_cert_issuer(cert));
-	setServerCert(ptr, serverID, exists, trust, newCer, digest, issued, issuer);
+	setServerCert(data->db, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
 	free(digest);
@@ -100,12 +98,10 @@ ne_session *serverConnect(void *trans){
 	ne_session			*sess = NULL;
 	ContactCards_trans_t		*data = trans;
 	int							serverID;
-	sqlite3						*ptr;
 
-	ptr = data->db;
 	serverID = GPOINTER_TO_INT(data->element);
 
-	davServer = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
+	davServer = getSingleChar(data->db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
 	if(davServer== NULL) return NULL;
 
