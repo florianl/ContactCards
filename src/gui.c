@@ -239,23 +239,17 @@ static void contactAddBDay(GtkWidget *widget, gpointer trans){
 	GtkWidget				*label, *row, *row2, *bdCal, *sep;
 	ContactCards_add_t		*data = trans;
 	GSList					*list = data->list;
-	GSList					*next;
 	ContactCards_item_t		*bdItem = NULL;
 
-	while(list){
-		ContactCards_item_t		*item;
-		next = list->next;
+	if (!list) /* avoid segfault pitfall in do/while */
+		return;
 
-		if(!list->data)
-			goto stepForward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CARDTYPE_BDAY){
+	do {
+		if(((ContactCards_item_t *) list->data)->itemID == CARDTYPE_BDAY){
 			dbgCC("[%s] You can have birthday only once\n", __func__);
 			return;
 		}
-stepForward:
-		list = next;
-	}
+	} while ((list = list->next) && list->data);
 
 	bdItem = g_new(ContactCards_item_t, 1);
 
@@ -510,7 +504,7 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 
 	card = buildCard(list);
 
-	while(list){
+	while(list){ /* changes from commit 2ade5ae might come in handy here, too */
 		next = list->next;
 
 		if(!list->data)
@@ -923,7 +917,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 
 	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
 
-	switch(result){
+	switch(result){ /* again, this could *currently* be more elegantly achived by using if(...) */
 		case GTK_RESPONSE_ACCEPT:
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
 			exportContacts(data->db, path);
@@ -959,22 +953,15 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 
 		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "");
 
-		while(retList){
-			GSList				*next = retList->next;
-			int					serverID = GPOINTER_TO_INT(retList->data);
-			if(serverID == 0){
-				retList = next;
-				continue;
-			}
+		for (; retList; retList = retList->next) {
+			if(!GPOINTER_TO_INT(retList->data)) continue;
 			buff = g_new(ContactCards_trans_t, 1);
 			buff->db = data->db;
-			buff->element = GINT_TO_POINTER(serverID);
+			buff->element = GINT_TO_POINTER(GPOINTER_TO_INT(retList->data)); /* buff->element = retList->data; Possible? */
 			buff->element2 = statusBar;
 			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
-			if(error){
-				dbgCC("[%s] something has gone wrong with threads\n", __func__);
-			}
-			retList = next;
+			if(error)
+				dbgCC("[%s] thread error: %s\n", __func__, error->message);
 		}
 		g_slist_free(retList);
 	}
