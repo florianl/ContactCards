@@ -112,14 +112,10 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 
 	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
 
-	switch(result){
-		case GTK_RESPONSE_ACCEPT:
+	if (result == GTK_RESPONSE_ACCEPT) {
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
 			exportCert(data->db, path, buffers->srvID);
 			g_free(path);
-			break;
-		default:
-			break;
 	}
 	gtk_widget_destroy(dirChooser);
 }
