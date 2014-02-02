@@ -918,7 +918,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 
 	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
 
-	switch(result){
+	switch(result){ /* again, this could *currently* be more elegantly achived by using if(...) */
 		case GTK_RESPONSE_ACCEPT:
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
 			exportContacts(data->db, path);
@@ -954,22 +954,15 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 
 		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "");
 
-		while(retList){
-			GSList				*next = retList->next;
-			int					serverID = GPOINTER_TO_INT(retList->data);
-			if(serverID == 0){
-				retList = next;
-				continue;
-			}
+		for (; retList; retList = retList->next) {
+			if(!GPOINTER_TO_INT(retList->data)) continue;
 			buff = g_new(ContactCards_trans_t, 1);
 			buff->db = data->db;
-			buff->element = GINT_TO_POINTER(serverID);
+			buff->element = GINT_TO_POINTER(GPOINTER_TO_INT(retList->data)); /* buff->element = retList->data; Possible? */
 			buff->element2 = statusBar;
 			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
-			if(error){
-				dbgCC("[%s] something has gone wrong with threads\n", __func__);
-			}
-			retList = next;
+			if(error)
+				dbgCC("[%s] thread error: %s\n", __func__, error->message);
 		}
 		g_slist_free(retList);
 	}
