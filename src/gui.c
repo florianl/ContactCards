@@ -56,12 +56,11 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	GtkTreeModel		*model;
 	char				*selText;
 	int					selID;
-	ContactCards_trans_t		*data = trans;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
-		fillList(data->db, 2, selID, contactList);
+		fillList(((ContactCards_trans_t *) trans)->db, 2, selID, contactList);
 		g_free(selText);
 	}
 }
