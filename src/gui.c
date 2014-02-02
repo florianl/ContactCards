@@ -15,10 +15,8 @@ void guiRun(sqlite3 *ptr){
 void guiExit(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
-	GSList			*cleanUpList = data;
-
 	gtk_main_quit();
-	g_slist_free_full(cleanUpList, g_free);
+	g_slist_free_full(data, g_free);
 }
 
 
