@@ -504,7 +504,7 @@ static void contactAddSave(GtkWidget *widget, gpointer trans){
 
 	card = buildCard(list);
 
-	while(list){
+	while(list){ /* changes from commit 2ade5ae might come in handy here, too */
 		next = list->next;
 
 		if(!list->data)
