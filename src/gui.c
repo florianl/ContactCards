@@ -239,23 +239,17 @@ static void contactAddBDay(GtkWidget *widget, gpointer trans){
 	GtkWidget				*label, *row, *row2, *bdCal, *sep;
 	ContactCards_add_t		*data = trans;
 	GSList					*list = data->list;
-	GSList					*next;
 	ContactCards_item_t		*bdItem = NULL;
 
-	while(list){
-		ContactCards_item_t		*item;
-		next = list->next;
+	if (!list) /* avoid segfault pitfall in do/while */
+		return;
 
-		if(!list->data)
-			goto stepForward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CARDTYPE_BDAY){
+	do {
+		if(((ContactCards_item_t *) list->data)->itemID == CARDTYPE_BDAY){
 			dbgCC("[%s] You can have birthday only once\n", __func__);
 			return;
 		}
-stepForward:
-		list = next;
-	}
+	} while ((list = list->next) && list->data);
 
 	bdItem = g_new(ContactCards_item_t, 1);
 
