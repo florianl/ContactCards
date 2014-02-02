@@ -709,8 +709,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 		resp = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
-		if (resp == GTK_RESPONSE_NO)
-			return;
+		if (resp != GTK_RESPONSE_YES) return;
 
 		g_mutex_lock(&mutex);
 		addrID = getSingleInt(data->db, "contacts", "addressbookID", 1, "contactID", selID, "", "");
