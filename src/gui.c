@@ -698,6 +698,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	ne_session 			*sess = NULL;
 	ContactCards_trans_t		*data = trans;
 	ContactCards_trans_t		*delData = NULL;
+	gint 				resp;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
 		int				isOAuth = 0;
@@ -706,15 +707,10 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
 
-		switch(gtk_dialog_run(GTK_DIALOG(dialog))){
-			case GTK_RESPONSE_YES:
-				gtk_widget_destroy(dialog);
-				break;
-			case GTK_RESPONSE_NO:
-			default:
-				gtk_widget_destroy(dialog);
-				return;
-		}
+		resp = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		if (resp == GTK_RESPONSE_NO)
+			return;
 
 		g_mutex_lock(&mutex);
 		addrID = getSingleInt(data->db, "contacts", "addressbookID", 1, "contactID", selID, "", "");
