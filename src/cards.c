@@ -337,6 +337,44 @@ static char *getAttributValue(char *line){
 	return value;
 }
 
+GSList *getMultipleCardAttribut(int type, char *card){
+	printfunc(__func__);
+
+	GSList				*list = g_slist_alloc();
+	char				**lines = g_strsplit(card, "\n", 0);
+	char				**line = lines;
+	char				*value = NULL;
+
+	while (*line != NULL) {
+		switch(type){
+			case CARDTYPE_ADR:
+				if(g_str_has_prefix(*line, "ADR"))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_TEL:
+				if(g_str_has_prefix(*line, "TEL"))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_EMAIL:
+				if(g_str_has_prefix(*line, "EMAIL"))
+					goto getValue;
+				else
+					goto next;
+			default:
+				goto next;
+		}
+		getValue:
+			value = getAttributValue(*line);
+			list = g_slist_append(list, value);
+		next:
+			line++;
+	}
+
+	return list;
+}
+
 char *getSingleCardAttribut(int type, char *card){
 	printfunc(__func__);
 
@@ -361,23 +399,8 @@ char *getSingleCardAttribut(int type, char *card){
 					goto getValue;
 				else 
 					goto next;
-			case CARDTYPE_ADR:
-				if(g_str_has_prefix(*line, "ADR"))
-					goto getValue;
-				else 
-					goto next;
 			case CARDTYPE_LABEL:
 				if(g_str_has_prefix(*line, "LABEL"))
-					goto getValue;
-				else 
-					goto next;
-			case CARDTYPE_TEL:
-				if(g_str_has_prefix(*line, "TEL"))
-					goto getValue;
-				else 
-					goto next;
-			case CARDTYPE_EMAIL:
-				if(g_str_has_prefix(*line, "EMAIL"))
 					goto getValue;
 				else 
 					goto next;
@@ -393,11 +416,6 @@ char *getSingleCardAttribut(int type, char *card){
 					goto next;
 			case CARDTYPE_UID:
 				if(g_str_has_prefix(*line, "UID"))
-					goto getValue;
-				else
-					goto next;
-			case CARDTYPE_PHOTO:
-				if(g_str_has_prefix(*line, "PHOTO"))
 					goto getValue;
 				else
 					goto next;
