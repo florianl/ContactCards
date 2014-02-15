@@ -419,6 +419,11 @@ char *getSingleCardAttribut(int type, char *card){
 					goto getValue;
 				else
 					goto next;
+			case CARDTYPE_BDAY:
+				if(g_str_has_prefix(*line, "BDAY"))
+					goto getValue;
+				else
+					goto next;
 			default:
 				goto next;
 		}

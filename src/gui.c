@@ -782,8 +782,10 @@ failure:
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	printfunc(__func__);
 
-	GtkWidget		*card;
-	GtkWidget		*photo, *fn;
+	GtkWidget		*card, *label;
+	GtkWidget		*photo, *fn, *bday;
+	GSList			*list;
+	int				line = 4;
 	char			*vData = NULL;
 	char			*markup;
 
@@ -794,18 +796,72 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
+	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
 	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
 
 	/*	PHOTO	*/
 	photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
-	gtk_container_add(GTK_CONTAINER(card), photo);
+	gtk_grid_attach(GTK_GRID(card), photo, 0, line++, 1, 2);
 
 	/*	FN	*/
 	fn = gtk_label_new(NULL);
 	markup = g_markup_printf_escaped ("<span size=\"18000\"><b>%s</b></span>", getSingleCardAttribut(CARDTYPE_FN, vData));
 	gtk_label_set_markup (GTK_LABEL(fn), markup);
-	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 1, 1);
+	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 2, 1);
+
+	/*	BDAY	*/
+	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
+	gtk_grid_attach_next_to(GTK_GRID(card), bday, fn, GTK_POS_BOTTOM, 1, 1);
+
+	/*	Adress	*/
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+	if (g_slist_length(list) > 1){
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
+					gtk_grid_attach(GTK_GRID(card), label, 1, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	Phone	*/
+	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+	if (g_slist_length(list) > 1){
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(value));
+					gtk_grid_attach(GTK_GRID(card), label, 1, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	EMAIL	*/
+	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+	if (g_slist_length(list) > 1){
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(value));
+					gtk_grid_attach(GTK_GRID(card), label, 1, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
 
 	return card;
 }
