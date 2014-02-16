@@ -52,5 +52,6 @@
 extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 extern GSList *getMultipleCardAttribut(int type, char *card);
+extern ContactCards_pix_t *getCardPhoto(char *card);
 
 #endif	/*	cards_H		*/

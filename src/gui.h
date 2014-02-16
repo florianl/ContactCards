@@ -56,6 +56,11 @@ typedef struct ContactCards_pref {
 	int					srvID;
 } ContactCards_pref_t;
 
+typedef struct ContactCards_pix {
+	guchar				*pixel;
+	int					size;
+} ContactCards_pix_t;
+
 typedef struct ContactCards_add {
 	sqlite3				*db;
 	GtkWidget			*grid;

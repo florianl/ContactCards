@@ -375,6 +375,72 @@ GSList *getMultipleCardAttribut(int type, char *card){
 	return list;
 }
 
+ContactCards_pix_t *getCardPhoto(char *card){
+	printfunc(__func__);
+
+	char				*start = g_strrstr(card, "PHOTO");
+	GString				*buf;
+	GString				*tmp;
+	guchar				*pix = NULL;
+	gsize				len;
+	int					i = 0;
+	int					j = 0;
+	ContactCards_pix_t	*pic;
+
+	pic = g_new(ContactCards_pix_t,1);
+
+	pic->pixel	= NULL;
+	pic->size	= 0;
+
+	if(start == NULL){
+		return pic;
+	}
+
+	while(start[i] != ':')
+		i++;
+	i++;	/* Set i to the point after the :	*/
+
+	buf = g_string_new(NULL);
+	tmp = g_string_new(NULL);
+
+	while(start[i+j] != ':')
+		g_string_append_unichar(buf, start[i+(j++)]);
+
+	/* Remove unnecessary stuff	*/
+	i = buf->len;
+
+	while(buf->str[i] != '\n')
+		i--;
+	g_string_truncate(buf, i);
+
+	i = 0;
+	j = 1;
+	while(buf->str[i])
+	{
+		switch(buf->str[i]){
+			case 43:			/*	+		*/
+			case 47:			/*	/		*/
+			case 48 ... 57:		/*	0-9		*/
+			case 61:			/*	=		*/
+			case 65 ... 90:		/*	A-Z		*/
+			case 97 ... 122:	/*	a-z		*/
+				g_string_append_unichar(tmp, buf->str[i]);
+				if(j%79 == 0 && j != 1)
+					g_string_append_unichar(tmp, '\n');
+				break;
+			default:
+				break;
+		}
+		i++;
+		j++;
+	}
+	pix = g_base64_decode(tmp->str, &len);
+	pic->pixel = pix;
+	pic->size = (int) len;
+
+	return pic;
+}
+
 char *getSingleCardAttribut(int type, char *card){
 	printfunc(__func__);
 
