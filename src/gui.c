@@ -752,13 +752,13 @@ failure:
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	printfunc(__func__);
 
-	GtkWidget		*card, *label, *sep;
-	GtkWidget		*photo, *fn, *bday;
-	GSList			*list;
-	int				line = 4;
-	char			*vData = NULL;
-	char			*markup;
-	GString			*tmp = NULL;
+	GtkWidget			*card, *label, *sep;
+	GtkWidget			*photo, *fn, *bday;
+	GSList				*list;
+	int					line = 4;
+	char				*vData = NULL;
+	char				*markup;
+	ContactCards_pix_t	*tmp = NULL;
 
 	card = gtk_grid_new();
 	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
@@ -772,25 +772,16 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 
 	/*	PHOTO	*/
 	tmp = getCardPhoto(vData);
-	if(tmp == NULL){
+	if(tmp->size == 0){
 		photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
 	} else {
-		GdkPixbuf			*pixbuf;
-		GdkPixbufLoader		*loader;
-		GError				*error = NULL;
-		/*
-		pixbuf = gdk_pixbuf_new_from_data((guchar *) tmp, GDK_COLORSPACE_RGB, FALSE, 8, 96,128, 3*96, (gpointer) g_free, NULL);
-		*/
-		loader = gdk_pixbuf_loader_new ();
-		gdk_pixbuf_loader_write (loader, tmp->str, tmp->len, &error);
-		if(error)
-			dbgCC("%s\n", error->message);
-		pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
-		dbgCC("[%s] %d\n%s\n", __func__, selID, tmp->str);
+		GdkPixbuf			*pixbuf = NULL;
+		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
+		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, NULL);
 		photo = gtk_image_new_from_pixbuf (pixbuf);
-		g_string_free(tmp,TRUE);
 	}
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
+	g_free(tmp);
 
 	/*	FN	*/
 	fn = gtk_label_new(NULL);
