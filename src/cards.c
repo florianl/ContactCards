@@ -375,6 +375,36 @@ GSList *getMultipleCardAttribut(int type, char *card){
 	return list;
 }
 
+GString *getCardPhoto(char *card){
+	printfunc(__func__);
+
+	char		*start = g_strrstr(card, "PHOTO");
+	GString		*buf;
+	int			i = 0;
+	int			j = 0;
+
+	if(start == NULL){
+		return NULL;
+	}
+
+	while(start[i] != ':')
+		i++;
+	i++;	/* Set i to the point after the :	*/
+
+	buf = g_string_new(NULL);
+	while(start[i+j] != ':')
+		g_string_append_unichar(buf, start[i+(j++)]);
+
+	/* Remove unnecessary stuff	*/
+	i = buf->len;
+
+	while(buf->str[i] != '\n')
+		i--;
+	g_string_truncate(buf, i);
+
+	return buf;
+}
+
 char *getSingleCardAttribut(int type, char *card){
 	printfunc(__func__);
 

@@ -758,6 +758,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	int				line = 4;
 	char			*vData = NULL;
 	char			*markup;
+	GString			*tmp = NULL;
 
 	card = gtk_grid_new();
 	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
@@ -770,7 +771,25 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
 
 	/*	PHOTO	*/
-	photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	tmp = getCardPhoto(vData);
+	if(tmp == NULL){
+		photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	} else {
+		GdkPixbuf			*pixbuf;
+		GdkPixbufLoader		*loader;
+		GError				*error = NULL;
+		/*
+		pixbuf = gdk_pixbuf_new_from_data((guchar *) tmp, GDK_COLORSPACE_RGB, FALSE, 8, 96,128, 3*96, (gpointer) g_free, NULL);
+		*/
+		loader = gdk_pixbuf_loader_new ();
+		gdk_pixbuf_loader_write (loader, tmp->str, tmp->len, &error);
+		if(error)
+			dbgCC("%s\n", error->message);
+		pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+		dbgCC("[%s] %d\n%s\n", __func__, selID, tmp->str);
+		photo = gtk_image_new_from_pixbuf (pixbuf);
+		g_string_free(tmp,TRUE);
+	}
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
 
 	/*	FN	*/
@@ -794,7 +813,6 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
 					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
@@ -815,7 +833,6 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
 					label = gtk_label_new(g_strstrip(value));
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
@@ -836,7 +853,6 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
 					label = gtk_label_new(g_strstrip(value));
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
