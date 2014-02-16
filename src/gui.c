@@ -1055,6 +1055,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 		g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
 			dbgCC("[%s] something has gone wrong with threads\n", __func__);
+			dbgCC("%s\n", error->message);
 		}
 	} else {
 
@@ -1074,6 +1075,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 			if(error){
 				dbgCC("[%s] something has gone wrong with threads\n", __func__);
+				dbgCC("%s\n", error->message);
 			}
 			retList = next;
 		}
