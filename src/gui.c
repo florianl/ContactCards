@@ -749,23 +749,128 @@ failure:
 	}
 }
 
+static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
+	printfunc(__func__);
+
+	GtkWidget		*card, *label, *sep;
+	GtkWidget		*photo, *fn, *bday;
+	GSList			*list;
+	int				line = 4;
+	char			*vData = NULL;
+	char			*markup;
+
+	card = gtk_grid_new();
+	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
+	if(vData == NULL)
+		return card;
+
+	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
+
+	/*	PHOTO	*/
+	photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
+
+	/*	FN	*/
+	fn = gtk_label_new(NULL);
+	markup = g_markup_printf_escaped ("<span size=\"18000\"><b>%s</b></span>", getSingleCardAttribut(CARDTYPE_FN, vData));
+	gtk_label_set_markup (GTK_LABEL(fn), markup);
+	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 1, 1);
+
+	/*	BDAY	*/
+	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
+	gtk_grid_attach_next_to(GTK_GRID(card), bday, fn, GTK_POS_BOTTOM, 1, 1);
+
+	/*	Adress	*/
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("Address"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	Phone	*/
+	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("Phone"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(value));
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	EMAIL	*/
+	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("EMail"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					dbgCC("[%s] %s\n", __func__, g_strstrip(value));
+					label = gtk_label_new(g_strstrip(value));
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+
+	return card;
+}
+
+static void cleanCard(GtkWidget *widget){
+	printfunc(__func__);
+
+	GList				*children, *child;
+
+	children = gtk_container_get_children(GTK_CONTAINER(widget));
+		for(child = children; child != NULL; child = g_list_next(child))
+			gtk_widget_destroy(GTK_WIDGET(child->data));
+		g_list_free(children);
+}
+
 static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, GtkTreeIter *iter, gpointer trans){
 	printfunc(__func__);
 
-	GtkTextBuffer				*dataBuffer;
+	GtkWidget					*card;
 	int							selID;
-	char						*vData = NULL;
-	ContactCards_trans_t		*data = trans;
 
 	gtk_tree_model_get(model, iter, ID_COLUMN, &selID,  -1);
 	dbgCC("[%s] %d\n",__func__, selID);
-	vData = getSingleChar(data->db, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-	if(vData == NULL) vData = "";
-	dataBuffer = gtk_text_view_get_buffer(data->element);
-	gtk_text_view_set_editable(data->element, FALSE);
-	gtk_text_view_set_wrap_mode(data->element, GTK_WRAP_CHAR);
-	gtk_text_buffer_set_text(dataBuffer, vData, -1);
-
+	card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
+	gtk_widget_show_all(card);
+	cleanCard(((ContactCards_trans_t *)trans)->element);
+	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element), card);
 }
 
 static void selContact(GtkWidget *widget, gpointer trans){
@@ -773,20 +878,16 @@ static void selContact(GtkWidget *widget, gpointer trans){
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
-	GtkTextBuffer		*dataBuffer;
+	GtkWidget			*card;
 	int					selID;
-	char				*vData = NULL;
-	ContactCards_trans_t		*data = trans;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
-		vData = getSingleChar(data->db, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-		if(vData == NULL) vData = "";
-		dataBuffer = gtk_text_view_get_buffer(data->element);
-		gtk_text_view_set_editable(data->element, FALSE);
-		gtk_text_view_set_wrap_mode(data->element, GTK_WRAP_CHAR);
-		gtk_text_buffer_set_text(dataBuffer, vData, -1);
+		card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
+		gtk_widget_show_all(card);
+		cleanCard(((ContactCards_trans_t *)trans)->element);
+		gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element), card);
 	}
 }
 
@@ -1588,13 +1689,13 @@ void guiInit(sqlite3 *ptr){
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;
-	GtkWidget			*contactBox, *contactWindow, *contactView, *scroll;
+	GtkWidget			*contactBox, *contactWindow, *scroll;
 	GtkWidget			*serverCombo;
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit;
 	GtkWidget			*ascContact, *descContact, *searchbar;
+	GtkWidget			*emptyCard, *noContact;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
-	GtkTextBuffer		*dataBuffer;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
 	ContactCards_trans_t		*transBook = NULL;
@@ -1671,12 +1772,16 @@ void guiInit(sqlite3 *ptr){
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(contactWindow, 192, -1);
-	dataBuffer = gtk_text_buffer_new(NULL);
-	contactView = gtk_text_view_new_with_buffer(dataBuffer);
-	gtk_container_set_border_width(GTK_CONTAINER(contactView), 10);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-	gtk_container_add(GTK_CONTAINER(scroll), contactView);
+	emptyCard = gtk_grid_new();
+	gtk_widget_set_hexpand(GTK_WIDGET(emptyCard), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(emptyCard), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
+	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
+	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
 	contactList = gtk_tree_view_new();
 	listInit(contactList);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
@@ -1733,7 +1838,7 @@ void guiInit(sqlite3 *ptr){
 
 	transContact = g_new(ContactCards_trans_t, 1);
 	transContact->db = ptr;
-	transContact->element = contactView;
+	transContact->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
@@ -1744,7 +1849,7 @@ void guiInit(sqlite3 *ptr){
 
 	transCompletion = g_new(ContactCards_trans_t, 1);
 	transCompletion->db = ptr;
-	transCompletion->element = contactView;
+	transCompletion->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transCompletion);
 	g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(completionContact), transCompletion);
 

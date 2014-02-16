@@ -13,6 +13,7 @@
 #define	CARDTYPE_FN_LAST		112
 #define	CARDTYPE_N				12
 #define	CARDTYPE_NICKNAME		13
+#define	CARDTYPE_PHOTO			14
 #define	CARDTYPE_BDAY			15
 
 /*
@@ -50,5 +51,6 @@
 
 extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
+extern GSList *getMultipleCardAttribut(int type, char *card);
 
 #endif	/*	cards_H		*/
