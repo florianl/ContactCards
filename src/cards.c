@@ -348,17 +348,22 @@ GSList *getMultipleCardAttribut(int type, char *card){
 	while (*line != NULL) {
 		switch(type){
 			case CARDTYPE_ADR:
-				if(g_str_has_prefix(*line, "ADR"))
+				if(g_regex_match_simple ("[^item]?ADR", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_TEL:
-				if(g_str_has_prefix(*line, "TEL"))
+				if(g_regex_match_simple ("[^item]?TEL", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_URL:
+				if(g_regex_match_simple ("[^item]?URL", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_EMAIL:
-				if(g_str_has_prefix(*line, "EMAIL"))
+				if(g_regex_match_simple ("[^item]?EMAIL", *line, 0,0))
 					goto getValue;
 				else
 					goto next;

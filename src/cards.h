@@ -42,6 +42,7 @@
  *	EXPLANATORY TYPES
  */
 #define	CARDTYPE_UID			67
+#define	CARDTYPE_URL			68
 
 /*
  *	SECURITY TYPES
