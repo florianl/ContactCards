@@ -805,6 +805,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				char				*value = list->data;
 				if(value != NULL){
 					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
 				list = next;
@@ -825,6 +826,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				char				*value = list->data;
 				if(value != NULL){
 					label = gtk_label_new(g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
 				list = next;
@@ -844,13 +846,35 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_label_new(g_strstrip(value));
+					label = gtk_link_button_new(g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
 				list = next;
 		}
 	}
 	g_slist_free(list);
+
+	/*	URL	*/
+	list = getMultipleCardAttribut(CARDTYPE_URL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("URL"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					label = gtk_link_button_new (g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
 
 	return card;
 }
