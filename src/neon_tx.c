@@ -4,6 +4,9 @@
 
 #include "ContactCards.h"
 
+/**
+ * getUserAuth - returns the user credentials for a server
+ */
 static int getUserAuth(void *trans, const char *realm, int attempts, char *username, char *password) {
 	printfunc(__func__);
 
@@ -30,6 +33,9 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 	return attempts;
 }
 
+/**
+ * verifyCert - verify a certificate of a server
+ */
 static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert){
 	printfunc(__func__);
 
@@ -90,6 +96,9 @@ fastExit:
 	return trust;
 }
 
+/**
+ * serverConnect - connect to a server
+ */
 ne_session *serverConnect(void *trans){
 	printfunc(__func__);
 
@@ -123,6 +132,9 @@ ne_session *serverConnect(void *trans){
 	return sess;
 }
 
+/**
+ * cookieSet - set a cookie to a session connected to a server
+ */
 const char *cookieSet(const char *srvTx){
 	printfunc(__func__);
 
@@ -136,6 +148,9 @@ const char *cookieSet(const char *srvTx){
 	return cookie;
 }
 
+/**
+ * elementStart - start of an response element
+ */
 static int elementStart(void *userdata, int parent, const char *nspace, const char *name, const char **atts){
 	printfunc(__func__);
 
@@ -169,6 +184,9 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 	return 1;
 }
 
+/**
+ * elementData - data of a reponse element
+ */
 static int elementData(void *userdata, int state, const char *cdata, size_t len){
 	printfunc(__func__);
 
@@ -194,6 +212,9 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 	return 0;
 }
 
+/**
+ * elementEnd - end of a response element
+ */
 static int elementEnd(void *userdata, int state, const char *nspace, const char *name){
 	printfunc(__func__);
 
@@ -206,6 +227,9 @@ static int elementEnd(void *userdata, int state, const char *nspace, const char 
 	return 0;
 }
 
+/**
+ * cbReader - callback function for the xml parser
+ */
 int cbReader(void *userdata, const char *buf, size_t len){
 	printfunc(__func__);
 
@@ -215,8 +239,9 @@ int cbReader(void *userdata, const char *buf, size_t len){
 	return 0;
 }
 
-/*
- * serverRequest()
+/**
+ * serverRequest - sends a request to a server
+ *
  *	@method			method on how to request the server
  *	@serverID		ID for the server
  *	@itemID			ID for items. For example addressbookID or contactID
@@ -619,6 +644,9 @@ failedRequest:
 	return userdata;
 }
 
+/**
+ * serverDisconnect - end a session to a server
+ */
 void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	printfunc(__func__);
 
@@ -635,6 +663,9 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	ne_session_destroy(sess);
 }
 
+/**
+ * oAuthUpdate - update the OAuth credentials of a server
+ */
 int oAuthUpdate(sqlite3 *ptr, int serverID){
 	printfunc(__func__);
 
@@ -675,6 +706,9 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 	return ret;
 }
 
+/**
+ * oAuthAccess - handle OAuth for a server
+ */
 void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	printfunc(__func__);
 
@@ -730,6 +764,9 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	ne_session_destroy(sess);
 }
 
+/**
+ * serverDelContact - delete a vCard from a server
+ */
 int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	printfunc(__func__);
 
@@ -748,6 +785,9 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	return stack->statuscode;
 }
 
+/**
+ * postPushCard - send a new vCard using RFC 5995
+ */
 int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID){
 	printfunc(__func__);
 
@@ -779,6 +819,9 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 	return -1;
 }
 
+/**
+ * postPushCard - send a new vCard to a server
+ */
 void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	printfunc(__func__);
 
@@ -831,6 +874,9 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	g_mutex_unlock(&mutex);
 }
 
+/**
+ * syncInitial - starts a initial synchronisation of a server
+ */
 static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	printfunc(__func__);
 
@@ -858,6 +904,9 @@ static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	checkAddressbooks(ptr, serverID, 10, sess);
 }
 
+/**
+ * syncContacts - get all contacts in all address books
+ */
 void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
 	printfunc(__func__);
 

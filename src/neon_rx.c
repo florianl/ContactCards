@@ -4,6 +4,9 @@
 
 #include "ContactCards.h"
 
+/**
+ * branchDestroy - delete a branch of a xml-response
+ */
 void branchDestroy(GNode *node){
 	printfunc(__func__);
 
@@ -20,6 +23,9 @@ void branchDestroy(GNode *node){
 	}
 }
 
+/**
+ * elementCheck - check if a branch contains a specific element
+ */
 gboolean elementCheck(GNode *branch, int elementType){
 	printfunc(__func__);
 
@@ -97,6 +103,9 @@ gboolean elementCheck(GNode *branch, int elementType){
 	return state;
 }
 
+/**
+ * elementGet - returns a specific element of a branch
+ */
 char *elementGet(GNode *branch, int elementType){
 	printfunc(__func__);
 
@@ -140,6 +149,9 @@ char *elementGet(GNode *branch, int elementType){
 	return retElement;
 }
 
+/**
+ * locateCurUserPrincipal - search for a current user principal in a xml-response
+ */
 void locateCurUserPrincipal(GNode *tree, int serverID, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -156,6 +168,9 @@ void locateCurUserPrincipal(GNode *tree, int serverID, sqlite3 *ptr){
 	}
 }
 
+/**
+ * getAddressbookHomeSet - returns the address book home set in a branch
+ */
 char *getAddressbookHomeSet(GNode *branch){
 	printfunc(__func__);
 
@@ -176,6 +191,9 @@ char *getAddressbookHomeSet(GNode *branch){
 	return ret;
 }
 
+/**
+ * locateAddressbookHomeSet - search for the address book home set in a branch
+ */
 void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -203,6 +221,9 @@ void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
 	updateUri(ptr, serverID, href, TRUE);
 }
 
+/**
+ * locatePropstatBase - search for the propstat base in a branch
+ */
 void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod){
 	printfunc(__func__);
 
@@ -231,6 +252,9 @@ void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod
 
 }
 
+/**
+ * locateAddMember - search for a new member element in a branch
+ */
 void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -251,6 +275,9 @@ void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
 	updatePostURI(ptr, addressbookID, href);
 }
 
+/**
+ * locateAddressbooks - search for address books in a branch
+ */
 void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -271,6 +298,9 @@ void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
 	newAddressbook(ptr, serverID, displayname, href);
 }
 
+/**
+ * setAddrbookSync - sets the type of syncing for a address book
+ */
 void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -299,6 +329,9 @@ void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
 	setSingleInt(ptr, "addressbooks", "syncMethod", synMethod, "addressbookID", addressbookID);
 }
 
+/**
+ * reportHandle - handle the response to a REPORT-request
+ */
 void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -327,6 +360,9 @@ void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *se
 
 }
 
+/**
+ * branchHandle - handle a branch by sended requests
+ */
 void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -368,6 +404,9 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 	branchDestroy(branch);
 }
 
+/**
+ * responseHandle - split a response into branches
+ */
 void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -395,6 +434,9 @@ void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr)
 	return;
 }
 
+/**
+ * responseElementOAuthHandle - handle a OAuth response element
+ */
 void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 	printfunc(__func__);
 
@@ -435,6 +477,9 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 	g_strfreev(ptr);
 }
 
+/**
+ * responseOAuthHandle - handle a OAuth response
+ */
 int responseOAuthHandle(void *trans, const char *block, size_t len){
 	printfunc(__func__);
 
