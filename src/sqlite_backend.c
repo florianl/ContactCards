@@ -4,8 +4,8 @@
 
 #include "ContactCards.h"
 
-/*
- * doSimpleRequest()
+/**
+ * doSimpleRequest - sends a simple request to the local database
  *	@ptr			pointer to the database
  *	@sql_query		query to send to the database
  *	@func			functionname which the request come from
@@ -38,12 +38,18 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 
 }
 
+/**
+ * dbClose - close the connection to the local database
+ */
 void dbClose(sqlite3 *ptr){
 	printfunc(__func__);
 
 	sqlite3_close(ptr);
 }
 
+/**
+ * dbCreate - create a new local database
+ */
 void dbCreate(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -120,8 +126,8 @@ sqlError:
 	return;
 }
 
-/*
- * multiCheck()
+/**
+ * multiCheck - check a table of the local database for some stuff
  *	@ptr			pointer to the database
  *	@tableName		name of the table in the database
  *	@rows			combination of rowX and/or rowY
@@ -189,7 +195,8 @@ GSList *multiCheck(sqlite3 *ptr, char *tableName, int rows, char *sel, char *row
 	return list;
 }
 
-/*
+/**
+ * countElements - returns quantity of a element in a table of the local database
  * returns 0 if it does not exist
  */
 
@@ -238,6 +245,9 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 	return count;
 }
 
+/**
+ * setSingleInt - sets an integer value to a row in a table
+ */
 void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, char *row1, int value1){
 	printfunc(__func__);
 
@@ -248,6 +258,9 @@ void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, c
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * setSingleChar - sets a char value to a row in a table
+ */
 void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue, char *row1, int value1){
 	printfunc(__func__);
 
@@ -258,6 +271,9 @@ void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * getListInt - returns a list of integers of a table of the local database
+ */
 GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2){
 	printfunc(__func__);
 
@@ -301,8 +317,8 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 
 }
 
-/*
- * getSingleInt()
+/**
+ * getSingleInt - returns a single integer value
  *	@ptr			pointer to the database
  *	@tableName		name of the table in the database
  *	@selValue		name of the column which will be selected
@@ -365,8 +381,8 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	return retValue;
 }
 
-/*
- * getSingleChar()
+/**
+ * getSingleChar - returns a single char value
  *	@ptr			pointer to the database
  *	@tableName		name of the table in the database
  *	@selValue		name of the column which will be selected
@@ -439,6 +455,9 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	return retValue;
 }
 
+/**
+ * newOAuthEntity - insert a new OAuth entity into the local database
+ */
 void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret, char *davURI, char *scope, char *grantURI, char *tokenURI, char *responseType, char *redirURI, char *grantType){
 	printfunc(__func__);
 
@@ -453,6 +472,9 @@ void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * newServerOAuth - creates a new server using OAuth
+ */
 void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int oAuthEntity){
 	printfunc(__func__);
 
@@ -488,6 +510,9 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	return;
 }
 
+/**
+ * newServer - create a new server
+ */
 void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	printfunc(__func__);
 
@@ -535,7 +560,11 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	fillCombo(ptr, comboList);
 }
 
-
+/**
+ * showServer - list all server of a local database 
+ * 
+ * this function is for debugging only, so far
+ */
 void showServer(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -549,6 +578,11 @@ void showServer(sqlite3 *ptr){
 	sqlite3_finalize(vm);
 }
 
+/**
+ * showAddressbooks - list all address books of a local database 
+ * 
+ * this function is for debugging only, so far
+ */
 void showAddressbooks(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -562,6 +596,9 @@ void showAddressbooks(sqlite3 *ptr){
 	sqlite3_finalize(vm);
 }
 
+/**
+ * cleanUpRequest - generic function to remove stuff from the local database
+ */
 void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	printfunc(__func__);
 
@@ -605,6 +642,9 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	sqlite3_free(sql_query);
 }
 
+/**
+ * dbRemoveItem - remove a single item from the local database
+ */
 void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *value1, char *row2, int value2){
 	printfunc(__func__);
 
@@ -628,7 +668,9 @@ void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *v
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
-
+/**
+ * readCardServerCredits - returns the credentials from a local database
+ */
 void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -654,7 +696,9 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	sqlite3_free(sql_query);
 }
 
-/*
+/**
+ * fixURI - fix a URI
+ *
  * This is a simple try to fix the URI of a vCard
  * It is expected that only the basepath is broken
  */
@@ -680,6 +724,9 @@ static char *fixURI(char *base,char *corrupted){
 	return new;
 }
 
+/**
+ * contactHandle - update a new vCard at the local database
+ */
 void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addressbookID, ne_session *sess){
 	printfunc(__func__);
 
@@ -719,6 +766,9 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 }
 
+/**
+ * newContact - create a new vCard at the local database
+ */
 int newContact(sqlite3 *ptr, int addressbookID, char *card){
 	printfunc(__func__);
 
@@ -744,6 +794,9 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 	return newID;
 }
 
+/**
+ * newAddressbook - create a new address book at the local database
+ */
 void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path){
 	printfunc(__func__);
 
@@ -759,7 +812,11 @@ void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path)
 
 }
 
-
+/**
+ * showContacts - list all vCards of a local database 
+ * 
+ * this function is for debugging only, so far
+ */
 void showContacts(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -775,6 +832,9 @@ void showContacts(sqlite3 *ptr){
 	sqlite3_finalize(vm);
 }
 
+/**
+ * setDisplayname - set the displaying name of a vCard
+ */
 void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	printfunc(__func__);
 
@@ -791,6 +851,9 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * updateServerDetails - update changes to the server settings
+ */
 void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel){
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
@@ -814,6 +877,9 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
 }
 
+/**
+ * updatePostURI - update the URI the new vCards are send to
+ */
 void updatePostURI(sqlite3 *ptr, int addressbookID, char *href){
 	printfunc(__func__);
 
@@ -824,6 +890,9 @@ void updatePostURI(sqlite3 *ptr, int addressbookID, char *href){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * updateContactUri - update the URI of a vCard
+ */
 void updateContactUri(sqlite3 *ptr, int contactID, char *uri){
 	printfunc(__func__);
 
@@ -834,6 +903,9 @@ void updateContactUri(sqlite3 *ptr, int contactID, char *uri){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * updateContact - insert a vCard into the local database
+ */
 void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	printfunc(__func__);
 
@@ -856,6 +928,9 @@ void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	setDisplayname(ptr, contactID, dbData);
 }
 
+/**
+ * updateUri - update the base URI of a server at the local database
+ */
 void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	printfunc(__func__);
 
@@ -896,6 +971,9 @@ void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * checkSyncToken - check how to sync the server
+ */
 gboolean checkSyncToken(sqlite3 *ptr, int addressbookID){
 	printfunc(__func__);
 
@@ -912,6 +990,9 @@ gboolean checkSyncToken(sqlite3 *ptr, int addressbookID){
 	return TRUE;
 }
 
+/**
+ * checkAddressbooks - check how to sync the address book
+ */
 void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 	printfunc(__func__);
 
@@ -963,6 +1044,9 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 	g_slist_free(retList);
 }
 
+/**
+ * updateSyncToken - update the syncing token of an address book
+ */
 void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken){
 	printfunc(__func__);
 
@@ -973,6 +1057,9 @@ void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken){
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * setServerCert - inserts a certificate to a server into the local database
+ */
 void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char *cert, char *digest, char *issued, char *issuer){
 	printfunc(__func__);
 
@@ -993,6 +1080,9 @@ void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag, char 
 	doSimpleRequest(ptr, sql_query, __func__);
 }
 
+/**
+ * updateOAuthCredentials - update the credentials for OAuth at the local database
+ */
 void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value){
 	printfunc(__func__);
 

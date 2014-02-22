@@ -4,6 +4,9 @@
 
 #include "ContactCards.h"
 
+/**
+ * fillList - fill a list
+ */
 void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	printfunc(__func__);
 
@@ -51,6 +54,9 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	sqlite3_free(sql_query);
 }
 
+/**
+ * fillCombo - fill a combo
+ */
 void fillCombo(sqlite3 *ptr, GtkListStore *store){
 	printfunc(__func__);
 
@@ -77,6 +83,9 @@ void fillCombo(sqlite3 *ptr, GtkListStore *store){
 	sqlite3_free(sql_query);
 }
 
+/**
+ * printGError - print a error
+ */
 void printGError(GError *error){
 	if (error != NULL) {
 		printf("[%s] %s \n", __func__, error->message);
@@ -84,6 +93,9 @@ void printGError(GError *error){
 	}
 }
 
+/**
+ * exportCert - export the certificate from a server
+ */
 void exportCert(sqlite3 *ptr, char *base, int serverID){
 	printfunc(__func__);
 
@@ -118,6 +130,9 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 	g_string_free(cert, TRUE);
 }
 
+/**
+ * exportContacts - exports all contacts of a server
+ */
 void exportContacts(sqlite3 *ptr, char *base){
 	printfunc(__func__);
 
