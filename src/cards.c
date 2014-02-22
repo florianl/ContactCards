@@ -4,11 +4,12 @@
 
 #include "ContactCards.h"
 
-/*
+/**
+ * getUID - create a UID for a new vCard
+ *
  * Based on the comment by Andrew Moore on
  * http://www.php.net/manual/en/function.uniqid.php#94959
  */
-
 static char *getUID(void){
 	printfunc(__func__);
 
@@ -28,7 +29,9 @@ static char *getUID(void){
 	return uid;
 }
 
-/*
+/**
+ * buildAdr - create the address field of a vCard
+ * 
  * RFC 2426 - 3.2.1 ADR Type Definition:
  *
  * The structured type value corresponds, in sequence, to
@@ -40,7 +43,6 @@ static char *getUID(void){
  * the postal code;
  * the country name.
  */
-
 static char *buildAdr(GSList *list){
 	printfunc(__func__);
 
@@ -146,6 +148,9 @@ stepEmpty:
 	return adr;
 }
 
+/**
+ * buildEMail - extract the EMail of the user input
+ */
 static char *buildEMail(GSList *list){
 	printfunc(__func__);
 
@@ -189,6 +194,9 @@ stepEmpty:
 	return mail;
 }
 
+/**
+ * buildTele - extract the  telephone number of the user input
+ */
 static char *buildTele(GSList *list){
 	printfunc(__func__);
 
@@ -232,6 +240,9 @@ stepEmpty:
 	return tel;
 }
 
+/**
+ * buildCard - create a RFC conform vCard from the user input
+ */
 char *buildCard(GSList *list){
 	printfunc(__func__);
 
@@ -287,7 +298,6 @@ char *buildCard(GSList *list){
 			case CARDTYPE_EMAIL:
 				g_string_append(cardString, buildEMail(item->element));
 				break;
-			case CONTACT_ADD_WINDOW:
 			default:
 				break;
 		}
@@ -325,6 +335,9 @@ stepForward:
 	return card;
 }
 
+/**
+ * getAttributValue - split the line of a vCard in its elements and return the value
+ */
 static char *getAttributValue(char *line){
 	printfunc(__func__);
 
@@ -337,6 +350,9 @@ static char *getAttributValue(char *line){
 	return value;
 }
 
+/**
+ * getMultipleCardAttribut - return a vCard element which can occur multiple times
+ */
 GSList *getMultipleCardAttribut(int type, char *card){
 	printfunc(__func__);
 
@@ -380,6 +396,9 @@ GSList *getMultipleCardAttribut(int type, char *card){
 	return list;
 }
 
+/**
+ * getCardPhoto - return the photo of a vCard
+ */
 ContactCards_pix_t *getCardPhoto(char *card){
 	printfunc(__func__);
 
@@ -446,6 +465,9 @@ ContactCards_pix_t *getCardPhoto(char *card){
 	return pic;
 }
 
+/**
+ * getSingleCardAttribut - return a vCard element which can occur only once
+ */
 char *getSingleCardAttribut(int type, char *card){
 	printfunc(__func__);
 
