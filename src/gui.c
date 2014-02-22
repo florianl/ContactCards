@@ -4,6 +4,9 @@
 
 #include "ContactCards.h"
 
+/**
+ * guiRun - run the basic GUI
+ */
 void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -12,6 +15,9 @@ void guiRun(sqlite3 *ptr){
 	gtk_main();
 }
 
+/**
+ * guiExit - exit the basic GUI and clean up
+ */
 void guiExit(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -19,7 +25,9 @@ void guiExit(GtkWidget *widget, gpointer data){
 	g_slist_free_full(data, g_free);
 }
 
-
+/**
+ * guiKeyHandler - control some kind of the basic GUI by keyboard
+ */
 void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
 	printfunc(__func__);
 
@@ -27,7 +35,9 @@ void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
 		guiExit(gui, data);
 	}
 }
-
+/**
+ * dialogKeyHandler - control some kind of a dialog by keyboard
+ */
 void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
 	printfunc(__func__);
 
@@ -36,6 +46,9 @@ void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
 	}
 }
 
+/**
+ * dialogAbout - display some basic stuff about this software
+ */
 static void dialogAbout(void){
 	printfunc(__func__);
 
@@ -49,6 +62,9 @@ static void dialogAbout(void){
 		NULL);
 }
 
+/**
+ * selBook - select a single address book
+ */
 static void selBook(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -65,6 +81,9 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	}
 }
 
+/**
+ * prefServerDelete - delete a server in the preferences dialog
+ */
 void prefServerDelete(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -82,6 +101,9 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	fillList(data->db, 1, 0, addressbookList);
 }
 
+/**
+ * prefServerSave - save changes to a server in the preferences dialog
+ */
 void prefServerSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -95,6 +117,9 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
 }
 
+/**
+ * prefExportCert - export the certificate of a server
+ */
 void prefExportCert(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -120,6 +145,9 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 	gtk_widget_destroy(dirChooser);
 }
 
+/**
+ * prefServerSelect - select a server in the preferences dialog
+ */
 void prefServerSelect(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -178,6 +206,9 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	}
 }
 
+/**
+ * contactAddMail - add a EMail to the new vCard dialog
+ */
 static void contactAddMail(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -233,6 +264,9 @@ static void contactAddMail(GtkWidget *widget, gpointer trans){
 	data->list = g_slist_append(data->list, eleList);
 }
 
+/**
+ * contactAddBDay - add a birthday to the new vCard dialog
+ */
 static void contactAddBDay(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -282,6 +316,9 @@ stepForward:
 
 }
 
+/**
+ * contactAddTelephone - add a telephone number to the new vCard dialog
+ */
 static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -337,6 +374,9 @@ static void contactAddTelephone(GtkWidget *widget, gpointer trans){
 	data->list = g_slist_append(data->list, eleList);
 }
 
+/**
+ * contactAddPostal - add a postal address to the new vCard dialog
+ */
 static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -435,6 +475,9 @@ static void contactAddPostal(GtkWidget *widget, gpointer trans){
 	data->list = g_slist_append(data->list, eleList);
 }
 
+/**
+ * contactAddDiscard - discard the new vCard dialog
+ */
 static void contactAddDiscard(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -458,8 +501,8 @@ stepForward:
 	g_slist_free_full(list, g_free);
 }
 
-/*
- * feedbackDialog()
+/**
+ * feedbackDialog
  *	@type			type of the dialog
  *	@msg			message which will be shown
  *
@@ -475,7 +518,9 @@ void feedbackDialog(int type, char *msg){
 	gtk_widget_destroy(infoDia);
 }
 
-/*
+/**
+ * contactAddSave - create a new vCard from the data of the new vCard GUI
+ * 
  * At first hide the widget. Then get and use the data.
  * Finally destroy the widget.
  */
@@ -530,6 +575,9 @@ Forward:
 	g_slist_free_full(list, g_free);
 }
 
+/**
+ * contactAdd - basic dialog to let the user create a new vCard
+ */
 static void contactAdd(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -693,6 +741,9 @@ static void contactAdd(GtkWidget *widget, gpointer trans){
 	gtk_widget_show_all(addWindow);
 }
 
+/**
+ * contactDel - delete a selected vCard
+ */
 static void contactDel(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -749,6 +800,9 @@ failure:
 	}
 }
 
+/**
+ * buildNewCard - display the data of a selected vCard
+ */
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	printfunc(__func__);
 
@@ -879,6 +933,9 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	return card;
 }
 
+/**
+ * cleanCard - clean up the area to display a new vCard
+ */
 static void cleanCard(GtkWidget *widget){
 	printfunc(__func__);
 
@@ -890,6 +947,9 @@ static void cleanCard(GtkWidget *widget){
 		g_list_free(children);
 }
 
+/**
+ * completionContact - select a vCard from the searchbar
+ */
 static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, GtkTreeIter *iter, gpointer trans){
 	printfunc(__func__);
 
@@ -904,6 +964,9 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element), card);
 }
 
+/**
+ * selContact - select a vCard from the list
+ */
 static void selContact(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -922,6 +985,9 @@ static void selContact(GtkWidget *widget, gpointer trans){
 	}
 }
 
+/**
+ * listFlush - remove all items from a list
+ */
 void listFlush(GtkWidget *list){
 	printfunc(__func__);
 
@@ -938,6 +1004,9 @@ void listFlush(GtkWidget *list){
 	gtk_list_store_clear(store);
 }
 
+/**
+ * listAppend - append a new item to a list
+ */
 void listAppend(GtkWidget *list, gchar *text, guint id) {
 	printfunc(__func__);
 
@@ -950,6 +1019,9 @@ void listAppend(GtkWidget *list, gchar *text, guint id) {
 	gtk_list_store_set(store, &iter, TEXT_COLUMN, text, ID_COLUMN, id, -1);
 }
 
+/**
+ * listInit - create a new list
+ */
 void listInit(GtkWidget *list){
 	printfunc(__func__);
 
@@ -974,6 +1046,9 @@ void listInit(GtkWidget *list){
 	g_object_unref(store);
 }
 
+/**
+ * listSortorderAsc - sort a list ascending
+ */
 static void listSortorderAsc(void){
 	printfunc(__func__);
 
@@ -985,6 +1060,9 @@ static void listSortorderAsc(void){
 
 }
 
+/**
+ * listSortorderDesc - sort a list descending
+ */
 static void listSortorderDesc(void){
 	printfunc(__func__);
 
@@ -996,6 +1074,9 @@ static void listSortorderDesc(void){
 
 }
 
+/**
+ * syncOneServer - check one single server for new data
+ */
 static void *syncOneServer(void *trans){
 	printfunc(__func__);
 
@@ -1041,6 +1122,9 @@ static void *syncOneServer(void *trans){
 	return NULL;
 }
 
+/**
+ * dialogExportContacts - dialog to export vCards
+ */
 static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1067,6 +1151,9 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	gtk_widget_destroy(dirChooser);
 }
 
+/**
+ * syncServer - check all available server for new data
+ */
 static void syncServer(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1114,6 +1201,9 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 	}
 }
 
+/**
+ * comboChanged - display the new stuff which is selected by the combo
+ */
 static void comboChanged(GtkComboBox *combo, gpointer trans){
 	printfunc(__func__);
 
@@ -1140,6 +1230,9 @@ static void comboChanged(GtkComboBox *combo, gpointer trans){
 	}
 }
 
+/**
+ * comboAppend - append a new item to a combo
+ */
 void comboAppend(GtkListStore *store, gchar *text, guint id) {
 	printfunc(__func__);
 
@@ -1149,6 +1242,9 @@ void comboAppend(GtkListStore *store, gchar *text, guint id) {
 	gtk_list_store_set(store, &iter, TEXT_COLUMN, text, ID_COLUMN, id, -1);
 }
 
+/**
+ * comboFlush - remove all items from a combo
+ */
 void comboFlush(GtkListStore *store){
 	printfunc(__func__);
 
@@ -1160,6 +1256,9 @@ void comboFlush(GtkListStore *store){
 
 }
 
+/**
+ * comboInit - create a new combo
+ */
 GtkWidget *comboInit(sqlite3 *ptr){
 	printfunc(__func__);
 
@@ -1191,6 +1290,11 @@ GtkWidget *comboInit(sqlite3 *ptr){
 	return combo;
 }
 
+/**
+ * dialogRequestGrant - ask the user for a grant in a dialog
+ * 
+ * This is required for OAuth
+ */
 void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 	printfunc(__func__);
 
@@ -1245,12 +1349,18 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 
 }
 
+/**
+ * prefExit - exit the preferences dialog
+ */
 void prefExit(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
 	g_free(data);
 }
 
+/**
+ * prefKeyHandler - control some kind of the preferences dialog by keyboard
+ */
 void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
 	printfunc(__func__);
 
@@ -1259,6 +1369,9 @@ void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
 	}
 }
 
+/**
+ * prefWindow - build the preferences dialog
+ */
 void prefWindow(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1408,6 +1521,9 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_widget_show_all(prefWindow);
 }
 
+/**
+ * newDialogEntryChanged - check for changes of a server in the preferences dialog
+ */
 static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1445,12 +1561,18 @@ static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
 				gtk_assistant_set_page_complete(GTK_ASSISTANT(assistant), box, TRUE);
 }
 
+/**
+ * newDialogClose - close the dialog for a new server
+ */
 static void newDialogClose(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
 	gtk_widget_destroy(widget);
 }
 
+/**
+ * newDialogApply - apply the user credentials to a new server
+ */
 static void newDialogApply(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1498,6 +1620,9 @@ google:
 	return;
 }
 
+/**
+ * newDialogConfirm - finally confirm to add a new server
+ */
 static void newDialogConfirm(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1518,6 +1643,9 @@ static void newDialogConfirm(GtkWidget *widget, gpointer data){
 	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, TRUE);
 }
 
+/**
+ * newDialogOAuthCredentials - credentials for OAuth
+ */
 static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1563,6 +1691,9 @@ static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 	g_signal_connect (G_OBJECT(inputGrant), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 }
 
+/**
+ * newDialogUserCredentials - basic credentials for a new server
+ */
 static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1603,6 +1734,9 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 	g_signal_connect (G_OBJECT(inputPasswd), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 }
 
+/**
+ * newDialogServerSettings - ask for basic informaion of the new server
+ */
 static void newDialogServerSettings(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1642,6 +1776,9 @@ static void newDialogServerSettings(GtkWidget *widget, gpointer data){
 	g_signal_connect (G_OBJECT(inputUrl), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 }
 
+/**
+ * newDialogSelectPage - guide the user through the new server dialog
+ */
 gint newDialogSelectPage(gint curPage, gpointer data){
 	printfunc(__func__);
 
@@ -1667,6 +1804,9 @@ gint newDialogSelectPage(gint curPage, gpointer data){
 	return curPage+1;
 }
 
+/**
+ * newDialogSelectType - select the type of the new server
+ */
 static void newDialogSelectType(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
@@ -1693,6 +1833,9 @@ static void newDialogSelectType(GtkWidget *widget, gpointer data){
 	gtk_assistant_set_page_complete(GTK_ASSISTANT(widget), box, TRUE);
 }
 
+/**
+ * newDialog - dialog to add a new server
+ */
 static void newDialog(GtkWidget *do_widget, gpointer trans){
 	printfunc(__func__);
 
@@ -1717,6 +1860,9 @@ static void newDialog(GtkWidget *do_widget, gpointer trans){
 	g_signal_connect(G_OBJECT(assistant), "apply", G_CALLBACK(newDialogApply), trans);
 }
 
+/**
+ * guiInit - build the basic GUI
+ */
 void guiInit(sqlite3 *ptr){
 	printfunc(__func__);
 
