@@ -10,6 +10,9 @@ static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *m
 }
 #endif  /* ContactCards_DEBUG */
 
+/**
+ * main - do I need to say more?
+ */
 int main(int argc, char **argv){
 	printfunc(__func__);
 
