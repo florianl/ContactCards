@@ -123,6 +123,9 @@
 #define	ContactCards_DIGEST_NEW			1
 #define	ContactCards_DIGEST_UNTRUSTED	2
 
+/**
+ * struct ContactCards_stack - contains the response to an request
+ */
 typedef struct ContactCards_stack {
 	GNode			*tree;
 	GNode			*lastBranch;
@@ -132,11 +135,17 @@ typedef struct ContactCards_stack {
 	int				reqMethod;
 } ContactCards_stack_t;
 
+/**
+ * struct ContactCards_stack - contains a subtree of the xml-response
+ */
 typedef struct ContactCards_node {
 	char			*name;
 	char			*content;
 } ContactCards_node_t;
 
+/**
+ * struct ContactCards_leaf -  contains the final data of the response
+ */
 typedef struct ContactCards_leaf {
 	char			*status;
 	char			*contentType;
@@ -144,11 +153,13 @@ typedef struct ContactCards_leaf {
 	char			*etag;
 } ContactCards_leaf_t;
 
+/**
+ * struct credits - contains the credentials of a user
+ */
 typedef struct credits{
 	char			*user;
 	char			*passwd;
 } credits_t;
-
 
 extern ne_session *serverConnect(void *trans);
 extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr);

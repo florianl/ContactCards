@@ -53,13 +53,4 @@ int						selectedSrv;
 
 #define DATABASE		"ContactCards.sql"
 
-#ifndef	CC_trans
-#define CC_trans
-typedef struct ContactCards_trans {
-	sqlite3				*db;
-	void				*element;
-	void				*element2;
-} ContactCards_trans_t;
-#endif	/*	CC_trans			*/
-
 #endif	/*	ContactCards_H		*/

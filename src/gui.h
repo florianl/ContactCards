@@ -17,14 +17,14 @@
 #include <sqlite3.h>
 #endif	/*	SQLITE3_LIB_H	*/
 
-#ifndef	CC_trans
-#define CC_trans
+/**
+ * struct ContactCards_trans -generic struct for all kind of data
+ */
 typedef struct ContactCards_trans {
 	sqlite3				*db;
 	void				*element;
 	void				*element2;
 } ContactCards_trans_t;
-#endif	/*	CC_trans			*/
 
 enum {
 	TEXT_COLUMN = 0,
@@ -41,6 +41,9 @@ extern void listFlush(GtkWidget *list);
 extern void comboFlush(GtkListStore *store);
 extern void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser);
 
+/**
+ * struct ContactCards_pref	- structure for handling the preference dialog
+ */
 typedef struct ContactCards_pref {
 	GtkEntryBuffer		*descBuf;
 	GtkEntryBuffer		*urlBuf;
@@ -56,11 +59,17 @@ typedef struct ContactCards_pref {
 	int					srvID;
 } ContactCards_pref_t;
 
+/**
+ * struct ContactCards_pix	- structure for handling a picture of a vCard
+ */
 typedef struct ContactCards_pix {
 	guchar				*pixel;
 	int					size;
 } ContactCards_pix_t;
 
+/**
+ * struct ContactCards_add	- structure for creating a new vCard
+ */
 typedef struct ContactCards_add {
 	sqlite3				*db;
 	GtkWidget			*grid;
@@ -72,6 +81,9 @@ typedef struct ContactCards_add {
 
 #define	CONTACT_ADD_WINDOW		1
 
+/**
+ * struct ContactCards_add	- helping structure for creating a new vCard
+ */
 typedef struct ContactCards_item {
 	int			itemID;
 	void		*element;
