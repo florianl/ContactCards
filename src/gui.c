@@ -807,7 +807,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	printfunc(__func__);
 
 	GtkWidget			*card, *label, *sep;
-	GtkWidget			*photo, *fn, *bday;
+	GtkWidget			*photo, *fn, *bday, *edit;
 	GSList				*list;
 	int					line = 4;
 	char				*vData = NULL;
@@ -822,7 +822,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
-	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
 
 	/*	PHOTO	*/
 	tmp = getCardPhoto(vData);
@@ -834,6 +834,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, NULL);
 		photo = gtk_image_new_from_pixbuf (pixbuf);
 	}
+	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
 	g_free(tmp);
 
@@ -846,14 +847,18 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	/*	BDAY	*/
 	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
 	gtk_grid_attach_next_to(GTK_GRID(card), bday, fn, GTK_POS_BOTTOM, 1, 1);
+	gtk_widget_set_halign(GTK_WIDGET(bday), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(bday), GTK_ALIGN_START);
 
 	/*	Adress	*/
 	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("Address"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		edit = gtk_image_new_from_icon_name("gtk-edit",   GTK_ICON_SIZE_SMALL_TOOLBAR);
 		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), edit, 3, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
 				char				*value = list->data;
@@ -873,8 +878,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("Phone"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		edit = gtk_image_new_from_icon_name("gtk-edit",   GTK_ICON_SIZE_SMALL_TOOLBAR);
 		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), edit, 3, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
 				char				*value = list->data;
@@ -894,8 +901,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("EMail"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		edit = gtk_image_new_from_icon_name("gtk-edit",   GTK_ICON_SIZE_SMALL_TOOLBAR);
 		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), edit, 3, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
 				char				*value = list->data;
@@ -914,8 +923,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("URL"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		edit = gtk_image_new_from_icon_name("gtk-edit",   GTK_ICON_SIZE_SMALL_TOOLBAR);
 		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), edit, 3, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
 				char				*value = list->data;
@@ -1958,7 +1969,7 @@ void guiInit(sqlite3 *ptr){
 	gtk_widget_set_vexpand(GTK_WIDGET(emptyCard), TRUE);
 	gtk_widget_set_halign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
-	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
 	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
 	contactList = gtk_tree_view_new();
