@@ -74,7 +74,7 @@ typedef struct ContactCards_add {
 	sqlite3				*db;
 	GtkWidget			*grid;
 	GSList				*list;
-	int					addrBookID;
+	int					editID;
 	GtkEntryBuffer		*fnBuff;
 	GtkEntryBuffer		*lnBuff;
 } ContactCards_add_t;
