@@ -77,8 +77,6 @@ typedef struct ContactCards_add {
 	int					editID;
 } ContactCards_add_t;
 
-#define	CONTACT_ADD_WINDOW		1
-
 /**
  * struct ContactCards_add	- helping structure for creating a new vCard
  */

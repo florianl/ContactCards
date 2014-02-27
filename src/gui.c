@@ -410,6 +410,170 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 }
 
 /**
+ * cleanCard - clean up the area to display a new vCard
+ */
+static void cleanCard(GtkWidget *widget){
+	printfunc(__func__);
+
+	GList				*children, *child;
+
+	children = gtk_container_get_children(GTK_CONTAINER(widget));
+		for(child = children; child != NULL; child = g_list_next(child))
+			gtk_widget_destroy(GTK_WIDGET(child->data));
+		g_list_free(children);
+}
+
+/**
+ * buildNewCard - display the data of a selected vCard
+ */
+static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
+	printfunc(__func__);
+
+	GtkWidget			*card, *label, *sep;
+	GtkWidget			*photo, *fn, *bday;
+	GSList				*list;
+	int					line = 4;
+	char				*vData = NULL;
+	char				*markup;
+	ContactCards_pix_t	*tmp = NULL;
+
+	card = gtk_grid_new();
+	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
+	if(vData == NULL)
+		return card;
+
+	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
+
+	/*	PHOTO	*/
+	tmp = getCardPhoto(vData);
+	if(tmp->size == 0){
+		photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+	} else {
+		GdkPixbuf			*pixbuf = NULL;
+		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
+		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, NULL);
+		photo = gtk_image_new_from_pixbuf (pixbuf);
+	}
+	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
+	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
+	g_free(tmp);
+
+	/*	FN	*/
+	fn = gtk_label_new(NULL);
+	markup = g_markup_printf_escaped ("<span size=\"18000\"><b>%s</b></span>", getSingleCardAttribut(CARDTYPE_FN, vData));
+	gtk_label_set_markup (GTK_LABEL(fn), markup);
+	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 1, 1);
+
+	/*	BDAY	*/
+	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
+	gtk_grid_attach_next_to(GTK_GRID(card), bday, fn, GTK_POS_BOTTOM, 1, 1);
+	gtk_widget_set_halign(GTK_WIDGET(bday), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(bday), GTK_ALIGN_START);
+
+	/*	Adress	*/
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("Address"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	Phone	*/
+	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("Phone"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					label = gtk_label_new(g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	/*	EMAIL	*/
+	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("EMail"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					label = gtk_link_button_new(g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+
+	/*	URL	*/
+	list = getMultipleCardAttribut(CARDTYPE_URL, vData);
+	if (g_slist_length(list) > 1){
+		label = gtk_label_new(_("URL"));
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					label = gtk_link_button_new (g_strstrip(value));
+					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
+	line++;
+
+	return card;
+}
+
+/**
+ * contactEditDiscard - discard the changes on a vCard
+ */
+static void contactEditDiscard(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget		*card;
+
+	card = buildNewCard(((ContactCards_add_t *)trans)->db, ((ContactCards_add_t *)trans)->editID);
+	gtk_widget_show_all(card);
+	cleanCard(((ContactCards_add_t *)trans)->grid);
+	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
+}
+
+/**
  * buildEditCard - display the data of a selected vCard for editing
  */
 static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
@@ -601,164 +765,14 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*		Connect Signales		*/
-	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
-	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactAddDiscard), items);
+//	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
+	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactEditDiscard), transNew);
 	/*
 	g_signal_connect(G_OBJECT(addPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
 	g_signal_connect(G_OBJECT(addMail), "clicked", G_CALLBACK(contactAddMail), transNew);
 	g_signal_connect(G_OBJECT(addUrl), "clicked", G_CALLBACK(contactAddUrl), transNew);
 	*/
 	return card;
-}
-
-/**
- * buildNewCard - display the data of a selected vCard
- */
-static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
-	printfunc(__func__);
-
-	GtkWidget			*card, *label, *sep;
-	GtkWidget			*photo, *fn, *bday;
-	GSList				*list;
-	int					line = 4;
-	char				*vData = NULL;
-	char				*markup;
-	ContactCards_pix_t	*tmp = NULL;
-
-	card = gtk_grid_new();
-	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-	if(vData == NULL)
-		return card;
-
-	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
-	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
-
-	/*	PHOTO	*/
-	tmp = getCardPhoto(vData);
-	if(tmp->size == 0){
-		photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
-	} else {
-		GdkPixbuf			*pixbuf = NULL;
-		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
-		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, NULL);
-		photo = gtk_image_new_from_pixbuf (pixbuf);
-	}
-	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
-	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
-	g_free(tmp);
-
-	/*	FN	*/
-	fn = gtk_label_new(NULL);
-	markup = g_markup_printf_escaped ("<span size=\"18000\"><b>%s</b></span>", getSingleCardAttribut(CARDTYPE_FN, vData));
-	gtk_label_set_markup (GTK_LABEL(fn), markup);
-	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 1, 1);
-
-	/*	BDAY	*/
-	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
-	gtk_grid_attach_next_to(GTK_GRID(card), bday, fn, GTK_POS_BOTTOM, 1, 1);
-	gtk_widget_set_halign(GTK_WIDGET(bday), GTK_ALIGN_START);
-	gtk_widget_set_valign(GTK_WIDGET(bday), GTK_ALIGN_START);
-
-	/*	Adress	*/
-	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
-	if (g_slist_length(list) > 1){
-		label = gtk_label_new(_("Address"));
-		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
-				}
-				list = next;
-		}
-	}
-	g_slist_free(list);
-	line++;
-
-	/*	Phone	*/
-	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
-	if (g_slist_length(list) > 1){
-		label = gtk_label_new(_("Phone"));
-		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					label = gtk_label_new(g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
-				}
-				list = next;
-		}
-	}
-	g_slist_free(list);
-	line++;
-
-	/*	EMAIL	*/
-	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
-	if (g_slist_length(list) > 1){
-		label = gtk_label_new(_("EMail"));
-		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					label = gtk_link_button_new(g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
-				}
-				list = next;
-		}
-	}
-	g_slist_free(list);
-
-	/*	URL	*/
-	list = getMultipleCardAttribut(CARDTYPE_URL, vData);
-	if (g_slist_length(list) > 1){
-		label = gtk_label_new(_("URL"));
-		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-		gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					label = gtk_link_button_new (g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
-				}
-				list = next;
-		}
-	}
-	g_slist_free(list);
-	line++;
-
-	return card;
-}
-
-/**
- * cleanCard - clean up the area to display a new vCard
- */
-static void cleanCard(GtkWidget *widget){
-	printfunc(__func__);
-
-	GList				*children, *child;
-
-	children = gtk_container_get_children(GTK_CONTAINER(widget));
-		for(child = children; child != NULL; child = g_list_next(child))
-			gtk_widget_destroy(GTK_WIDGET(child->data));
-		g_list_free(children);
 }
 
 /**
