@@ -571,6 +571,30 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 	gtk_widget_show_all(card);
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
+
+	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
+	g_free(trans);
+}
+
+/**
+ * contactEditSave - save the changes on a vCard
+ */
+static void contactEditSave(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	char		*vData;
+	GtkWidget		*card;
+	int			addrID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "addressbookID", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "");
+
+	vData = buildCard(((ContactCards_add_t *)trans)->list);
+	pushCard(((ContactCards_add_t *)trans)->db, vData, addrID);
+	cleanCard(((ContactCards_add_t *)trans)->grid);
+	card = buildNewCard(((ContactCards_add_t *)trans)->db, ((ContactCards_add_t *)trans)->editID);
+	gtk_widget_show_all(card);
+	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
+
+	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
+	g_free(trans);
 }
 
 /**
@@ -765,7 +789,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*		Connect Signales		*/
-//	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
+	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactEditSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactEditDiscard), transNew);
 	/*
 	g_signal_connect(G_OBJECT(addPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
