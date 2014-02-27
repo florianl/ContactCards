@@ -840,6 +840,125 @@ failure:
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no contact selected."));
 	}
 }
+/**
+ * contactEditPostalItem - Add a postal address to edit a vCard
+ */
+static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *value){
+	printfunc(__func__);
+
+	gchar				**postalPtr = NULL;
+	GtkWidget				*input, *label;
+	GtkEntryBuffer			*boxBuf, *extBuf, *streetBuf, *cityBuf, *regBuf, *zipBuf, *countryBuf;
+	ContactCards_item_t		*boxItem, *extItem, *streetItem, *cityItem, *regItem, *zipItem, *countryItem;
+
+	boxItem = g_new(ContactCards_item_t, 1);
+	extItem = g_new(ContactCards_item_t, 1);
+	streetItem = g_new(ContactCards_item_t, 1);
+	cityItem = g_new(ContactCards_item_t, 1);
+	regItem = g_new(ContactCards_item_t, 1);
+	zipItem = g_new(ContactCards_item_t, 1);
+	countryItem = g_new(ContactCards_item_t, 1);
+
+	boxBuf = gtk_entry_buffer_new(NULL, -1);
+	extBuf = gtk_entry_buffer_new(NULL, -1);
+	streetBuf = gtk_entry_buffer_new(NULL, -1);
+	cityBuf = gtk_entry_buffer_new(NULL, -1);
+	regBuf = gtk_entry_buffer_new(NULL, -1);
+	zipBuf = gtk_entry_buffer_new(NULL, -1);
+	countryBuf = gtk_entry_buffer_new(NULL, -1);
+
+	dbgCC("%s\n", value);
+	postalPtr = g_strsplit(value, ";", 8);
+	gtk_entry_buffer_set_text(boxBuf, g_strstrip(postalPtr[0]), -1);
+	gtk_entry_buffer_set_text(extBuf, g_strstrip(postalPtr[1]), -1);
+	gtk_entry_buffer_set_text(streetBuf, g_strstrip(postalPtr[2]), -1);
+	gtk_entry_buffer_set_text(cityBuf, g_strstrip(postalPtr[3]), -1);
+	gtk_entry_buffer_set_text(regBuf, g_strstrip(postalPtr[4]), -1);
+	gtk_entry_buffer_set_text(zipBuf, g_strstrip(postalPtr[5]), -1);
+	gtk_entry_buffer_set_text(countryBuf, g_strstrip(postalPtr[6]), -1);
+
+	label = gtk_label_new(_("post office box"));
+	input = gtk_entry_new_with_buffer(boxBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	boxItem->itemID = CARDTYPE_ADR_OFFICE_BOX;
+	boxItem->element = boxBuf;
+	list = g_slist_append(list, boxItem);
+
+	label = gtk_label_new(_("extended address"));
+	input = gtk_entry_new_with_buffer(extBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	extItem->itemID = CARDTYPE_ADR_EXT_ADDR;
+	extItem->element = extBuf;
+	list = g_slist_append(list, extItem);
+
+	label = gtk_label_new(_("street"));
+	input = gtk_entry_new_with_buffer(streetBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	streetItem->itemID = CARDTYPE_ADR_STREET;
+	streetItem->element = streetBuf;
+	list = g_slist_append(list, streetItem);
+
+	label = gtk_label_new(_("city"));
+	input = gtk_entry_new_with_buffer(cityBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	cityItem->itemID = CARDTYPE_ADR_CITY;
+	cityItem->element = cityBuf;
+	list = g_slist_append(list, cityItem);
+
+	label = gtk_label_new(_("region"));
+	input = gtk_entry_new_with_buffer(regBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	regItem->itemID = CARDTYPE_ADR_REGION;
+	regItem->element = regBuf;
+	list = g_slist_append(list, regItem);
+
+	label = gtk_label_new(_("zip"));
+	input = gtk_entry_new_with_buffer(zipBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	zipItem->itemID = CARDTYPE_ADR_ZIP;
+	zipItem->element = zipBuf;
+	list = g_slist_append(list, regItem);
+
+	label = gtk_label_new(_("country"));
+	input = gtk_entry_new_with_buffer(countryBuf);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	countryItem->itemID = CARDTYPE_ADR_COUNTRY;
+	countryItem->element = countryBuf;
+	list = g_slist_append(list, countryItem);
+
+	return line;
+}
+
+/**
+ * contactEditSingleItem - Add a single line value to edit a vCard
+ */
+static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int line, char *value){
+	printfunc(__func__);
+
+	GtkWidget				*input;
+	GtkEntryBuffer			*buf;
+	ContactCards_item_t		*item;
+
+	item = g_new(ContactCards_item_t, 1);
+	buf = gtk_entry_buffer_new(NULL, -1);
+
+	gtk_entry_buffer_set_text(buf, g_strstrip(value), -1);
+
+	input = gtk_entry_new_with_buffer(buf);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
+	item->itemID = type;
+	item->element = buf;
+	list = g_slist_append(list, item);
+
+	return line;
+}
 
 /**
  * buildEditCard - display the data of a selected vCard for editing
@@ -848,12 +967,14 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	printfunc(__func__);
 
 	GtkWidget			*card, *label, *sep, *input;
-	GtkWidget			*addPhone, *addMail, *addUrl;
+	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal;
 	GSList				*list, *items;
 	GtkWidget			*discardBtn, *saveBtn, *row;
 	GtkEntryBuffer		*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
 	int					line = 4;
 	char				*vData = NULL;
+	char				*naming = NULL;
+	gchar				**namingPtr = NULL;
 	ContactCards_add_t	*transNew = NULL;
 	ContactCards_item_t	*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
 
@@ -876,6 +997,14 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	middleNBuf = gtk_entry_buffer_new(NULL, -1);
 	lastNBuf = gtk_entry_buffer_new(NULL, -1);
 	suffixBuf = gtk_entry_buffer_new(NULL, -1);
+
+	naming = getSingleCardAttribut(CARDTYPE_N, vData);
+	namingPtr = g_strsplit(naming, ";", 5);
+	gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
+	gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
+	gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
+	gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
+	gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
 
 	transNew->db = ptr;
 	transNew->grid = card;
@@ -950,15 +1079,34 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_label_new(g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+					line = contactEditSingleItem(card, items, CARDTYPE_TEL, line, g_strstrip(value));
 				}
 				list = next;
 		}
 	}
 	g_slist_free(list);
 	line++;
+
+	/*	Address	*/
+	label = gtk_label_new(_("Address"));
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	addPostal = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addPostal), _("Add a postal address"));
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), addPostal, 3, line++, 1, 1);
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+	if (g_slist_length(list) > 1){
+		while(list){
+				GSList				*next = list->next;
+				char				*value = list->data;
+				if(value != NULL){
+					line = contactEditPostalItem(card, items, line, g_strstrip(value));
+				}
+				list = next;
+		}
+	}
+	g_slist_free(list);
 
 	/*	EMAIL	*/
 	label = gtk_label_new(_("EMail"));
@@ -974,9 +1122,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_link_button_new(g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+					line = contactEditSingleItem(card, items, CARDTYPE_EMAIL, line, g_strstrip(value));
 				}
 				list = next;
 		}
@@ -997,9 +1143,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_link_button_new (g_strstrip(value));
-					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
-					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
+					line = contactEditSingleItem(card, items, CARDTYPE_URL, line, g_strstrip(value));
 				}
 				list = next;
 		}
@@ -1010,10 +1154,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactAddDiscard), items);
+	/*
 	g_signal_connect(G_OBJECT(addPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
 	g_signal_connect(G_OBJECT(addMail), "clicked", G_CALLBACK(contactAddMail), transNew);
 	g_signal_connect(G_OBJECT(addUrl), "clicked", G_CALLBACK(contactAddUrl), transNew);
-
+	*/
 	return card;
 }
 
