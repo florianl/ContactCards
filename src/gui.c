@@ -207,342 +207,6 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 }
 
 /**
- * contactAddMail - add a EMail to the new vCard dialog
- */
-static void contactAddMail(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*label, *row, *row2, *input, *opt, *sep;
-	GtkEntryBuffer		*mailBuff;
-	ContactCards_add_t	*data = trans;
-	ContactCards_item_t	*mailItem = NULL,
-						*optItem = NULL,
-						*eleList = NULL;
-	GSList				*elements;
-
-	mailBuff	= gtk_entry_buffer_new(NULL, -1);
-	mailItem = g_new(ContactCards_item_t, 1);
-	optItem = g_new(ContactCards_item_t, 1);
-	eleList	= g_new(ContactCards_item_t, 1);
-
-	elements = g_slist_alloc();
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("E-mail"));
-	opt = gtk_combo_box_text_new();
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Home"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Work"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Other"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Custom"));
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), opt, FALSE, FALSE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
-	optItem->itemID = CARDTYPE_EMAIL_OPT;
-	optItem->element = opt;
-	elements = g_slist_append(elements, optItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Address"));
-	input = gtk_entry_new_with_buffer(mailBuff);
-	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-	mailItem->itemID = CARDTYPE_EMAIL;
-	mailItem->element = mailBuff;
-	elements = g_slist_append(elements, mailItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
-
-	eleList->itemID = CARDTYPE_EMAIL;
-	eleList->element = elements;
-	data->list = g_slist_append(data->list, eleList);
-}
-
-/**
- * contactAddBDay - add a birthday to the new vCard dialog
- */
-static void contactAddBDay(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget				*label, *row, *row2, *bdCal, *sep;
-	ContactCards_add_t		*data = trans;
-	GSList					*list = data->list;
-	GSList					*next;
-	ContactCards_item_t		*bdItem = NULL;
-
-	while(list){
-		ContactCards_item_t		*item;
-		next = list->next;
-
-		if(!list->data)
-			goto stepForward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CARDTYPE_BDAY){
-			dbgCC("[%s] You can have birthday only once\n", __func__);
-			return;
-		}
-stepForward:
-		list = next;
-	}
-
-	bdItem = g_new(ContactCards_item_t, 1);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Birthday"));
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	bdCal = gtk_calendar_new();
-	gtk_box_pack_start(GTK_BOX(row2), bdCal, FALSE, FALSE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-	bdItem->itemID = CARDTYPE_BDAY;
-	bdItem->element = bdCal;
-	data->list = g_slist_append(data->list, bdItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
-
-}
-
-/**
- * contactAddUrl - add a Url to the new vCard dialog
- */
-static void contactAddUrl(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*label, *row, *row2, *input, *sep;
-	GtkEntryBuffer		*urlBuff;
-	ContactCards_add_t	*data = trans;
-	ContactCards_item_t	*urlItem = NULL,
-						*eleList = NULL;
-	GSList				*elements;
-
-	urlBuff	= gtk_entry_buffer_new(NULL, -1);
-	urlItem = g_new(ContactCards_item_t, 1);
-	eleList	= g_new(ContactCards_item_t, 1);
-
-	elements = g_slist_alloc();
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Url"));
-	input = gtk_entry_new_with_buffer(urlBuff);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), input, FALSE, FALSE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
-	urlItem->itemID = CARDTYPE_URL;
-	urlItem->element = urlBuff;
-	elements = g_slist_append(elements, urlItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row2), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-
-	eleList->itemID = CARDTYPE_URL;
-	eleList->element = elements;
-	data->list = g_slist_append(data->list, eleList);
-}
-
-/**
- * contactAddTelephone - add a telephone number to the new vCard dialog
- */
-static void contactAddTelephone(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*label, *row, *row2, *input, *opt, *sep;
-	GtkEntryBuffer		*numberBuff;
-	ContactCards_add_t	*data = trans;
-	ContactCards_item_t	*nrItem = NULL,
-						*optItem = NULL,
-						*eleList = NULL;
-	GSList				*elements;
-
-	numberBuff	= gtk_entry_buffer_new(NULL, -1);
-	nrItem = g_new(ContactCards_item_t, 1);
-	optItem = g_new(ContactCards_item_t, 1);
-	eleList	= g_new(ContactCards_item_t, 1);
-
-	elements = g_slist_alloc();
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Telephone number"));
-	opt = gtk_combo_box_text_new();
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Home"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Work"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Other"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Custom"));
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), opt, FALSE, FALSE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
-	optItem->itemID = CARDTYPE_TEL_OPT;
-	optItem->element = opt;
-	elements = g_slist_append(elements, optItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Number"));
-	input = gtk_entry_new_with_buffer(numberBuff);
-	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-	nrItem->itemID = CARDTYPE_TEL;
-	nrItem->element = numberBuff;
-	elements = g_slist_append(elements, nrItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
-
-	eleList->itemID = CARDTYPE_TEL;
-	eleList->element = elements;
-	data->list = g_slist_append(data->list, eleList);
-}
-
-/**
- * contactAddPostal - add a postal address to the new vCard dialog
- */
-static void contactAddPostal(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*label, *row, *row2, *input, *opt, *sep;
-	GtkEntryBuffer		*strBuff, *cityBuff, *stateBuff, *zipBuff;
-	ContactCards_add_t	*data = trans;
-	ContactCards_item_t	*optItem = NULL,
-						*strItem = NULL,
-						*cityItem = NULL,
-						*stateItem = NULL,
-						*zipItem = NULL,
-						*eleList = NULL;
-	GSList				*elements;
-
-	strBuff		= gtk_entry_buffer_new(NULL, -1);
-	cityBuff	= gtk_entry_buffer_new(NULL, -1);
-	stateBuff	= gtk_entry_buffer_new(NULL, -1);
-	zipBuff		= gtk_entry_buffer_new(NULL, -1);
-
-	optItem = g_new(ContactCards_item_t, 1);
-	strItem = g_new(ContactCards_item_t, 1);
-	cityItem = g_new(ContactCards_item_t, 1);
-	stateItem = g_new(ContactCards_item_t, 1);
-	zipItem = g_new(ContactCards_item_t, 1);
-	eleList	= g_new(ContactCards_item_t, 1);
-
-	elements = g_slist_alloc();
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Postal address"));
-	opt = gtk_combo_box_text_new();
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Home"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Work"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Other"));
-	gtk_combo_box_text_prepend(GTK_COMBO_BOX_TEXT(opt), NULL, _("Custom"));
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), opt, FALSE, FALSE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, NULL, GTK_POS_BOTTOM, 4, 1);
-	optItem->itemID = CARDTYPE_ADR_OPT;
-	optItem->element = opt;
-	elements = g_slist_append(elements, optItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Street"));
-	input = gtk_entry_new_with_buffer(strBuff);
-	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-	strItem->itemID = CARDTYPE_ADR_STREET;
-	strItem->element = strBuff;
-	elements = g_slist_append(elements, strItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("City"));
-	input = gtk_entry_new_with_buffer(cityBuff);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
-	cityItem->itemID = CARDTYPE_ADR_CITY;
-	cityItem->element = cityBuff;
-	elements = g_slist_append(elements, cityItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("State"));
-	input = gtk_entry_new_with_buffer(stateBuff);
-	gtk_box_pack_start(GTK_BOX(row2), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row2), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-	stateItem->itemID = CARDTYPE_ADR_REGION;
-	stateItem->element = stateBuff;
-	elements = g_slist_append(elements, stateItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("ZIP code"));
-	input = gtk_entry_new_with_buffer(zipBuff);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), input, TRUE, TRUE, 3);
-	gtk_widget_show_all(row);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row, GTK_WIDGET(row2), GTK_POS_BOTTOM, 4, 1);
-	zipItem->itemID = CARDTYPE_ADR_ZIP;
-	zipItem->element = zipBuff;
-	elements = g_slist_append(elements, zipItem);
-
-	row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row2), sep, TRUE, TRUE, 3);
-	gtk_widget_show_all(row2);
-	gtk_grid_attach_next_to(GTK_GRID(data->grid), row2, GTK_WIDGET(row), GTK_POS_BOTTOM, 4, 1);
-
-	eleList->itemID = CARDTYPE_ADR;
-	eleList->element = elements;
-	data->list = g_slist_append(data->list, eleList);
-}
-
-/**
- * contactAddDiscard - discard the new vCard dialog
- */
-static void contactAddDiscard(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GSList					*list = trans;
-	GSList					*next;
-	ContactCards_item_t		*item;
-
-	while(list){
-		next = list->next;
-
-		if(!list->data)
-			goto stepForward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CONTACT_ADD_WINDOW){
-			gtk_widget_destroy(GTK_WIDGET(item->element));
-			break;
-		}
-stepForward:
-		list = next;
-	}
-	g_slist_free_full(list, g_free);
-}
-
-/**
  * feedbackDialog
  *	@type			type of the dialog
  *	@msg			message which will be shown
@@ -557,229 +221,6 @@ void feedbackDialog(int type, char *msg){
 	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, type, GTK_BUTTONS_OK, msg);
 	gtk_dialog_run(GTK_DIALOG(infoDia));
 	gtk_widget_destroy(infoDia);
-}
-
-/**
- * contactAddSave - create a new vCard from the data of the new vCard GUI
- * 
- * At first hide the widget. Then get and use the data.
- * Finally destroy the widget.
- */
-static void contactAddSave(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	ContactCards_add_t		*data = trans;
-	GSList					*list = data->list;
-	GSList					*next;
-	ContactCards_item_t		*item;
-	char					*card;
-	GtkEntryBuffer			*fNBuff, *lNBuff;
-	int						fnL = 0,
-							lnL = 0;
-
-	fNBuff = (GtkEntryBuffer*) data->fnBuff;
-	lNBuff = (GtkEntryBuffer*) data->lnBuff;
-
-	fnL = gtk_entry_buffer_get_length(fNBuff);
-	lnL = gtk_entry_buffer_get_length(lNBuff);
-
-	if(fnL == 0 && lnL == 0){
-		feedbackDialog(GTK_MESSAGE_WARNING, _("First and last name is missing"));
-		return;
-	} else if (fnL == 0) {
-		feedbackDialog(GTK_MESSAGE_WARNING, _("First name is missing"));
-		return;
-	} else if (lnL == 0) {
-		feedbackDialog(GTK_MESSAGE_WARNING, _("Last name is missing"));
-		return;
-	}
-
-	card = buildCard(list);
-
-	while(list){
-		next = list->next;
-
-		if(!list->data)
-			goto Forward;
-		item = (ContactCards_item_t *)list->data;
-		if(item->itemID == CONTACT_ADD_WINDOW){
-			gtk_widget_destroy(GTK_WIDGET(item->element));
-			break;
-		}
-Forward:
-		list = next;
-	}
-
-	pushCard(data->db, card, data->editID);
-
-	fillList(data->db, 2, data->editID, contactList);
-	g_slist_free_full(list, g_free);
-}
-
-/**
- * contactAdd - basic dialog to let the user create a new vCard
- */
-static void contactAdd(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
-
-	GtkWidget			*addWindow, *scrollView, *grid;
-	GtkWidget			*label, *row, *input, *sep;
-	GtkWidget			*btnPostal, *btnPhone, *btnBDay, *btnEMail;
-	GtkWidget			*discardBtn, *saveBtn;
-	GtkEntryBuffer		*fnBuff, *lnBuff;
-	int					rows = 0;
-	int					abID = 0;
-	GtkTreeIter			iter;
-	GtkTreeModel		*model;
-	ContactCards_add_t	*transNew = NULL;
-	ContactCards_item_t	*windowItem = NULL,
-						*fnItem = NULL,
-						*lnItem = NULL;
-	ContactCards_trans_t		*data = trans;
-	GSList				*items;
-
-	fnBuff		= gtk_entry_buffer_new(NULL, -1);
-	lnBuff		= gtk_entry_buffer_new(NULL, -1);
-
-	items = g_slist_alloc();
-	windowItem = g_new(ContactCards_item_t, 1);
-	fnItem = g_new(ContactCards_item_t, 1);
-	lnItem = g_new(ContactCards_item_t, 1);
-
-	transNew = g_new(ContactCards_add_t, 1);
-
-	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &abID,  -1);
-	}
-	dbgCC("[%s] %d\n",__func__, abID);
-	if(abID == 0){
-		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
-		g_free(transNew);
-		g_slist_free_full(items, g_free);
-		return;
-	}
-
-	addWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(addWindow), _("Add new contact"));
-	gtk_window_resize(GTK_WINDOW(addWindow), 264, 408);
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(addWindow), TRUE);
-	windowItem->itemID = CONTACT_ADD_WINDOW;
-	windowItem->element = addWindow;
-	items = g_slist_append(items, windowItem);
-
-	scrollView = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollView),GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-
-	grid = gtk_grid_new();
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("First name"));
-	input = gtk_entry_new_with_buffer(fnBuff);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), input, TRUE, TRUE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-	fnItem->itemID = CARDTYPE_FN_FIRST;
-	fnItem->element = fnBuff;
-	items = g_slist_append(items, fnItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Last name"));
-	input = gtk_entry_new_with_buffer(lnBuff);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), input, TRUE, TRUE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-	lnItem->itemID = CARDTYPE_FN_LAST;
-	lnItem->element = lnBuff;
-	items = g_slist_append(items, lnItem);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	discardBtn = gtk_button_new_with_label(_("Discard"));
-	gtk_box_pack_end(GTK_BOX(row), discardBtn, FALSE, FALSE, 2);
-	saveBtn = gtk_button_new_with_label(_("Save"));
-	gtk_box_pack_end(GTK_BOX(row), saveBtn, FALSE, FALSE, 2);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Postal address"));
-	btnPostal = gtk_button_new_from_icon_name("list-add", 2);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(btnPostal), _("Add postal address"));
-	gtk_box_pack_start(GTK_BOX(row), btnPostal, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Telephone number"));
-	btnPhone = gtk_button_new_from_icon_name("list-add", 2);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(btnPostal), _("Add telephone number"));
-	gtk_box_pack_start(GTK_BOX(row), btnPhone, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("E-mail address"));
-	btnEMail = gtk_button_new_from_icon_name("list-add", 2);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(btnEMail), _("Add e-mail address"));
-	gtk_box_pack_start(GTK_BOX(row), btnEMail, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Birthday"));
-	btnBDay = gtk_button_new_from_icon_name("list-add", 2);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(btnPostal), _("Add birthday"));
-	gtk_box_pack_start(GTK_BOX(row), btnBDay, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(row), label, FALSE, FALSE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(row), sep, TRUE, TRUE, 3);
-	gtk_grid_attach(GTK_GRID(grid), row, 0 , rows, 4, 1);
-	rows++;
-
-	transNew->db = data->db;
-	transNew->grid = grid;
-	transNew->list = items;
-	transNew->editID = abID;
-	transNew->fnBuff = fnBuff;
-	transNew->lnBuff = lnBuff;
-
-	/*		Connect Signales		*/
-	g_signal_connect(G_OBJECT(btnPostal), "clicked",  G_CALLBACK(contactAddPostal), transNew);
-	g_signal_connect(G_OBJECT(btnPhone), "clicked", G_CALLBACK(contactAddTelephone), transNew);
-	g_signal_connect(G_OBJECT(btnBDay), "clicked", G_CALLBACK(contactAddBDay), transNew);
-	g_signal_connect(G_OBJECT(btnEMail), "clicked", G_CALLBACK(contactAddMail), transNew);
-	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactAddSave), transNew);
-	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactAddDiscard), items);
-
-	/*		Put it all together		*/
-	gtk_container_add(GTK_CONTAINER(scrollView), grid);
-	gtk_container_add(GTK_CONTAINER(addWindow), scrollView);
-	gtk_widget_show_all(addWindow);
 }
 
 /**
@@ -849,7 +290,8 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gchar				**postalPtr = NULL;
 	GtkWidget				*input, *label;
 	GtkEntryBuffer			*boxBuf, *extBuf, *streetBuf, *cityBuf, *regBuf, *zipBuf, *countryBuf;
-	ContactCards_item_t		*boxItem, *extItem, *streetItem, *cityItem, *regItem, *zipItem, *countryItem;
+	GSList				*elements;
+	ContactCards_item_t		*boxItem, *extItem, *streetItem, *cityItem, *regItem, *zipItem, *countryItem, *eleList;
 
 	boxItem = g_new(ContactCards_item_t, 1);
 	extItem = g_new(ContactCards_item_t, 1);
@@ -858,6 +300,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	regItem = g_new(ContactCards_item_t, 1);
 	zipItem = g_new(ContactCards_item_t, 1);
 	countryItem = g_new(ContactCards_item_t, 1);
+	eleList = g_new(ContactCards_item_t, 1);
 
 	boxBuf = gtk_entry_buffer_new(NULL, -1);
 	extBuf = gtk_entry_buffer_new(NULL, -1);
@@ -866,6 +309,8 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	regBuf = gtk_entry_buffer_new(NULL, -1);
 	zipBuf = gtk_entry_buffer_new(NULL, -1);
 	countryBuf = gtk_entry_buffer_new(NULL, -1);
+
+	elements = g_slist_alloc();
 
 	dbgCC("%s\n", value);
 	postalPtr = g_strsplit(value, ";", 8);
@@ -883,7 +328,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	boxItem->itemID = CARDTYPE_ADR_OFFICE_BOX;
 	boxItem->element = boxBuf;
-	list = g_slist_append(list, boxItem);
+	elements = g_slist_append(elements, boxItem);
 
 	label = gtk_label_new(_("extended address"));
 	input = gtk_entry_new_with_buffer(extBuf);
@@ -891,7 +336,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	extItem->itemID = CARDTYPE_ADR_EXT_ADDR;
 	extItem->element = extBuf;
-	list = g_slist_append(list, extItem);
+	elements = g_slist_append(elements, extItem);
 
 	label = gtk_label_new(_("street"));
 	input = gtk_entry_new_with_buffer(streetBuf);
@@ -899,7 +344,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	streetItem->itemID = CARDTYPE_ADR_STREET;
 	streetItem->element = streetBuf;
-	list = g_slist_append(list, streetItem);
+	elements = g_slist_append(elements, streetItem);
 
 	label = gtk_label_new(_("city"));
 	input = gtk_entry_new_with_buffer(cityBuf);
@@ -907,7 +352,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	cityItem->itemID = CARDTYPE_ADR_CITY;
 	cityItem->element = cityBuf;
-	list = g_slist_append(list, cityItem);
+	elements = g_slist_append(elements, cityItem);
 
 	label = gtk_label_new(_("region"));
 	input = gtk_entry_new_with_buffer(regBuf);
@@ -915,7 +360,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	regItem->itemID = CARDTYPE_ADR_REGION;
 	regItem->element = regBuf;
-	list = g_slist_append(list, regItem);
+	elements = g_slist_append(elements, regItem);
 
 	label = gtk_label_new(_("zip"));
 	input = gtk_entry_new_with_buffer(zipBuf);
@@ -923,7 +368,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	zipItem->itemID = CARDTYPE_ADR_ZIP;
 	zipItem->element = zipBuf;
-	list = g_slist_append(list, regItem);
+	elements = g_slist_append(elements, regItem);
 
 	label = gtk_label_new(_("country"));
 	input = gtk_entry_new_with_buffer(countryBuf);
@@ -931,7 +376,11 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	countryItem->itemID = CARDTYPE_ADR_COUNTRY;
 	countryItem->element = countryBuf;
-	list = g_slist_append(list, countryItem);
+	elements = g_slist_append(elements, countryItem);
+
+	eleList->itemID = CARDTYPE_ADR;
+	eleList->element = elements;
+	list = g_slist_append(list, eleList);
 
 	return line;
 }
@@ -2436,7 +1885,7 @@ void guiInit(sqlite3 *ptr){
 	cleanUpList = g_slist_append(cleanUpList, transAddContact);
 	transAddContact->db = ptr;
 	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
-	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactAdd), transAddContact);
+//	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactAdd), transAddContact);
 
 	transEditContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transEditContact);
