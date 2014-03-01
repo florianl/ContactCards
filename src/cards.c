@@ -303,15 +303,15 @@ char *buildCard(GSList *list){
 
 	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
-	g_string_append(cardString, "BEGIN:VCARD\n");
-	g_string_append(cardString, "VERSION:3.0\n");
+	g_string_append(cardString, "BEGIN:VCARD\r\n");
+	g_string_append(cardString, "VERSION:3.0\r\n");
 
 	g_string_append(cardString, "PRODID:-//ContactCards//ContactCards");
 	g_string_append(cardString, VERSION);
-	g_string_append(cardString, "//EN\n");
+	g_string_append(cardString, "//EN\r\n");
 	g_string_append(cardString, "UID:");
 	g_string_append(cardString, getUID());
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, "\r\n");
 
 	while(list){
 		ContactCards_item_t		*item;
@@ -349,7 +349,7 @@ char *buildCard(GSList *list){
 				bDate = g_strdup_printf("%04d-%02d-%02d", bYear, bMonth, bDay);
 				g_string_append(cardString, "BDAY:");
 				g_string_append(cardString, bDate);
-				g_string_append(cardString, "\n");
+				g_string_append(cardString, "\r\n");
 				break;
 			case CARDTYPE_EMAIL:
 				g_string_append(cardString, buildEMail(item->element));
@@ -384,13 +384,13 @@ stepForward:
 	g_string_append(cardString, prefixN);
 	g_string_append(cardString, ";");
 	g_string_append(cardString, suffixN);
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "FN:");
 	g_string_append(cardString, firstN);
 	g_string_append(cardString, " ");
 	g_string_append(cardString, lastN);
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "END:VCARD\n");
 
@@ -594,77 +594,6 @@ char *getSingleCardAttribut(int type, char *card){
 	return value;
 }
 
-GString *salvagedItems(char *old){
-	printfunc(__func__);
-
-	GString		*salvaged;
-	int			i = 13;	/* to set i to the point after BEGIN:VCARD	*/
-	int			k;
-	int			whole = 0;
-
-	whole = strlen(old);
-	salvaged = g_string_new(NULL);
-
-	while(i < (whole - 11)){
-		if(g_regex_match_simple ("[^item]?TEL", &old[i], 0,0)){
-			dbgCC("\tTEL\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("^(VERSION|FN|N|REV|UID|PRODID):", &old[i], 0,0)){
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("^PHOTO", &old[i], 0,0)){
-			dbgCC("\tPhoto\n");
-			while(old[i++] != ':');
-			i++;
-			while(old[i++] != ':');
-			while(old[i--] != '\n');
-			i++;
-			continue;
-		}
-		if(g_regex_match_simple ("^BDAY:", &old[i], 0,0)){
-			dbgCC("\tBDAY\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("[^item]?ADR", &old[i], 0,0)){
-			dbgCC("\tADR\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("[^item]?URL", &old[i], 0,0)){
-			dbgCC("\tURL\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("[^item]?EMAIL", &old[i], 0,0)){
-			dbgCC("\tEMAIL\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		if(g_regex_match_simple ("^item", &old[i], 0,0)){
-			dbgCC("\titem\n");
-			while(old[i++] != '\n');
-			continue;
-		}
-		k = 0;
-		while(old[i+k] != ':')
-		g_string_append_unichar(salvaged, old[i+(k++)]);
-		k++;
-		while(old[i+k] != ':')
-		g_string_append_unichar(salvaged, old[i+(k++)]);
-		i+=k;
-		/* Remove unnecessary stuff	*/
-		k = salvaged->len;
-		while(salvaged->str[k--] != '\n');
-		g_string_truncate(salvaged, k);
-	}
-
-	return salvaged;
-}
-
 /**
  * mergeCards - merge the old vCard from the database with the new changes
  * This function is needed to keep the stuff alive which is not
@@ -673,16 +602,36 @@ GString *salvagedItems(char *old){
 char *mergeCards(GSList *new, char *old){
 	printfunc(__func__);
 
-	char		*vCard = NULL;
-	GString		*savaged = salvagedItems(old);
+	char			*vCard = NULL;
+	GSList			*next;
 
-	dbgCC("============================\n%s\n", old);
-	if(savaged->len < 1){
-		dbgCC("there is nothing left\n");
-	} else {
-		dbgCC("============================\n%s\n", savaged->str);
+	while(new){
+		ContactCards_item_t		*item;
+		next = new->next;
+
+		if(!new->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_FN:
+			case CARDTYPE_N:
+			case CARDTYPE_NICKNAME:
+			case CARDTYPE_PHOTO:
+			case CARDTYPE_BDAY:
+			case CARDTYPE_ADR:
+			case CARDTYPE_LABEL:
+			case CARDTYPE_TEL:
+			case CARDTYPE_EMAIL:
+			case CARDTYPE_URL:
+			case CARDTYPE_CLASS:
+			case CARDTYPE_KEY:
+			default:
+				break;
+		}
+stepForward:
+		new = next;
 	}
-	dbgCC("============================\n%s\n", buildCard(new));
 
 	return vCard;
 }
