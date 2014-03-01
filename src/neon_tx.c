@@ -822,13 +822,14 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 /**
  * postPushCard - send a new vCard to a server
  */
-void pushCard(sqlite3 *ptr, char *card, int addrBookID){
+int pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	printfunc(__func__);
 
 	ne_session	 			*sess = NULL;
 	int						srvID;
 	int						isOAuth = 0;
 	int						newID = 0;
+	int						ret = 0;
 	ContactCards_trans_t	*trans = NULL;
 	ContactCards_stack_t	*stack;
 
@@ -841,7 +842,7 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 		ret = oAuthUpdate(ptr, srvID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
-			return;
+			return -1;
 		}
 	}
 
@@ -857,21 +858,28 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	switch(stack->statuscode){
 		case 201:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
+			ret = 1;
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/
-			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1)
+			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1){
 				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+				ret = -1;
+			} else {
+				ret = 1;
+			}
 			break;
 		default:
 			dbgCC("[%s] %d\n", __func__ , stack->statuscode);
 			/* server didn't accept the new contact	*/
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+			ret = -1;
 	}
 
 	serverDisconnect(sess, ptr, srvID);
 
 	g_mutex_unlock(&mutex);
+	return ret;
 }
 
 /**

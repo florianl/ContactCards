@@ -149,6 +149,52 @@ stepEmpty:
 }
 
 /**
+ * buildUrl - extract the Url of the user input
+ */
+static char *buildUrl(GSList *list){
+	printfunc(__func__);
+
+	char				*url = "";
+	GSList				*next;
+	GString				*tmp;
+
+	tmp = g_string_new(NULL);
+
+	g_string_append(tmp, "URL");
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_EMAIL_OPT:
+				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
+					break;
+				g_string_append(tmp,";TYPE=");
+				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
+				break;
+			default:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					goto stepEmpty;
+				g_string_append(tmp,":");
+				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
+		}
+stepForward:
+		list = next;
+	}
+
+	g_string_append(tmp, "\n");
+	url = g_strndup(tmp->str, tmp->len);
+
+stepEmpty:
+	return url;
+}
+
+/**
  * buildEMail - extract the EMail of the user input
  */
 static char *buildEMail(GSList *list){
@@ -247,14 +293,15 @@ char *buildCard(GSList *list){
 	printfunc(__func__);
 
 	char				*card = NULL;
-	char				*firstN = NULL;
-	char				*lastN = NULL;
+	char				*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	int					bDay, bMonth, bYear;
 	char				*bDate;
 	GSList				*next;
 	GString				*cardString;
 
 	cardString = g_string_new(NULL);
+
+	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
 	g_string_append(cardString, "BEGIN:VCARD\n");
 	g_string_append(cardString, "VERSION:3.0\n");
@@ -287,6 +334,15 @@ char *buildCard(GSList *list){
 			case CARDTYPE_FN_LAST:
 				lastN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
 				break;
+			case CARDTYPE_FN_PREFIX:
+				prefixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_MIDDLE:
+				middleN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_SUFFIX:
+				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
 			case CARDTYPE_BDAY:
 				gtk_calendar_get_date(GTK_CALENDAR(item->element), &bYear, &bMonth, &bDay);
 				bMonth++;
@@ -297,6 +353,9 @@ char *buildCard(GSList *list){
 				break;
 			case CARDTYPE_EMAIL:
 				g_string_append(cardString, buildEMail(item->element));
+				break;
+			case CARDTYPE_URL:
+				g_string_append(cardString, buildUrl(item->element));
 				break;
 			default:
 				break;
@@ -319,7 +378,12 @@ stepForward:
 	g_string_append(cardString, lastN);
 	g_string_append(cardString, ";");
 	g_string_append(cardString, firstN);
-	g_string_append(cardString, ";;;");
+	g_string_append(cardString, ";");
+	g_string_append(cardString, middleN);
+	g_string_append(cardString, ";");
+	g_string_append(cardString, prefixN);
+	g_string_append(cardString, ";");
+	g_string_append(cardString, suffixN);
 	g_string_append(cardString, "\n");
 
 	g_string_append(cardString, "FN:");
@@ -528,4 +592,97 @@ char *getSingleCardAttribut(int type, char *card){
 	}
 
 	return value;
+}
+
+GString *salvagedItems(char *old){
+	printfunc(__func__);
+
+	GString		*salvaged;
+	int			i = 13;	/* to set i to the point after BEGIN:VCARD	*/
+	int			k;
+	int			whole = 0;
+
+	whole = strlen(old);
+	salvaged = g_string_new(NULL);
+
+	while(i < (whole - 11)){
+		if(g_regex_match_simple ("[^item]?TEL", &old[i], 0,0)){
+			dbgCC("\tTEL\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("^(VERSION|FN|N|REV|UID|PRODID):", &old[i], 0,0)){
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("^PHOTO", &old[i], 0,0)){
+			dbgCC("\tPhoto\n");
+			while(old[i++] != ':');
+			i++;
+			while(old[i++] != ':');
+			while(old[i--] != '\n');
+			i++;
+			continue;
+		}
+		if(g_regex_match_simple ("^BDAY:", &old[i], 0,0)){
+			dbgCC("\tBDAY\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("[^item]?ADR", &old[i], 0,0)){
+			dbgCC("\tADR\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("[^item]?URL", &old[i], 0,0)){
+			dbgCC("\tURL\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("[^item]?EMAIL", &old[i], 0,0)){
+			dbgCC("\tEMAIL\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		if(g_regex_match_simple ("^item", &old[i], 0,0)){
+			dbgCC("\titem\n");
+			while(old[i++] != '\n');
+			continue;
+		}
+		k = 0;
+		while(old[i+k] != ':')
+		g_string_append_unichar(salvaged, old[i+(k++)]);
+		k++;
+		while(old[i+k] != ':')
+		g_string_append_unichar(salvaged, old[i+(k++)]);
+		i+=k;
+		/* Remove unnecessary stuff	*/
+		k = salvaged->len;
+		while(salvaged->str[k--] != '\n');
+		g_string_truncate(salvaged, k);
+	}
+
+	return salvaged;
+}
+
+/**
+ * mergeCards - merge the old vCard from the database with the new changes
+ * This function is needed to keep the stuff alive which is not
+ * displayed and editable so far
+ */
+char *mergeCards(GSList *new, char *old){
+	printfunc(__func__);
+
+	char		*vCard = NULL;
+	GString		*savaged = salvagedItems(old);
+
+	dbgCC("============================\n%s\n", old);
+	if(savaged->len < 1){
+		dbgCC("there is nothing left\n");
+	} else {
+		dbgCC("============================\n%s\n", savaged->str);
+	}
+	dbgCC("============================\n%s\n", buildCard(new));
+
+	return vCard;
 }

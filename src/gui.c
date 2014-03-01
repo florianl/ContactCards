@@ -312,7 +312,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	elements = g_slist_alloc();
 
-	dbgCC("%s\n", value);
 	postalPtr = g_strsplit(value, ";", 8);
 	gtk_entry_buffer_set_text(boxBuf, g_strstrip(postalPtr[0]), -1);
 	gtk_entry_buffer_set_text(extBuf, g_strstrip(postalPtr[1]), -1);
@@ -368,7 +367,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	zipItem->itemID = CARDTYPE_ADR_ZIP;
 	zipItem->element = zipBuf;
-	elements = g_slist_append(elements, regItem);
+	elements = g_slist_append(elements, zipItem);
 
 	label = gtk_label_new(_("country"));
 	input = gtk_entry_new_with_buffer(countryBuf);
@@ -393,10 +392,14 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 
 	GtkWidget				*input;
 	GtkEntryBuffer			*buf;
-	ContactCards_item_t		*item;
+	GSList					*elements;
+	ContactCards_item_t		*item, *eleList;
 
 	item = g_new(ContactCards_item_t, 1);
+	eleList = g_new(ContactCards_item_t, 1);
 	buf = gtk_entry_buffer_new(NULL, -1);
+
+	elements = g_slist_alloc();
 
 	gtk_entry_buffer_set_text(buf, g_strstrip(value), -1);
 
@@ -404,7 +407,11 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	item->itemID = type;
 	item->element = buf;
-	list = g_slist_append(list, item);
+	elements = g_slist_append(elements, item);
+
+	eleList->itemID = type;
+	eleList->element = elements;
+	list = g_slist_append(list, eleList);
 
 	return line;
 }
@@ -582,14 +589,28 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 static void contactEditSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	char		*vData;
+	char			*vCard;
+	char			*dbCard;
 	GtkWidget		*card;
-	int			addrID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "addressbookID", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "");
+	int				addrID;
+	int				newID;
 
-	vData = buildCard(((ContactCards_add_t *)trans)->list);
-	pushCard(((ContactCards_add_t *)trans)->db, vData, addrID);
+	addrID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "addressbookID", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "");
+
+	dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
+	vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
+
+	return;
+
+	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID) == 1){
+		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
+		newID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "contactID", 12, "addressbookID", addrID, "vCard", vCard);
+	} else {
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
+		newID = ((ContactCards_add_t *)trans)->editID;
+	}
 	cleanCard(((ContactCards_add_t *)trans)->grid);
-	card = buildNewCard(((ContactCards_add_t *)trans)->db, ((ContactCards_add_t *)trans)->editID);
+	card = buildNewCard(((ContactCards_add_t *)trans)->db, newID);
 	gtk_widget_show_all(card);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
 
