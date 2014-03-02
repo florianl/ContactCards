@@ -41,7 +41,7 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 	ContactCards_trans_t		*data = trans;
 	char						*digest = calloc(1, NE_SSL_DIGESTLEN);
-	int							trust = 0;
+	int							trust = ContactCards_DIGEST_UNTRUSTED;
 	int							exists = 0;
 	int							serverID;
 	char						*newCer = NULL;
@@ -61,7 +61,13 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 	switch(trust){
 		case ContactCards_DIGEST_TRUSTED:
-			goto simpleCheck;
+			ne_ssl_cert_digest(cert, digest);
+			dbDigest = getSingleChar(data->db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+			if(dbDigest == NULL)
+				goto newCert;
+			if(g_strcmp0(digest, dbDigest) == 0){
+				goto fastExit;
+			}
 			break;
 		case ContactCards_DIGEST_UNTRUSTED:
 			return ContactCards_DIGEST_UNTRUSTED;
@@ -70,15 +76,6 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		case ContactCards_DIGEST_NEW:
 			return ContactCards_DIGEST_NEW;
 			break;
-	}
-
-simpleCheck:
-	ne_ssl_cert_digest(cert, digest);
-	dbDigest = getSingleChar(data->db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
-	if(dbDigest == NULL)
-		goto newCert;
-	if(g_strcmp0(digest, dbDigest) == 0){
-		goto fastExit;
 	}
 
 newCert:
