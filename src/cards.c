@@ -140,8 +140,7 @@ stepForward:
 	g_string_append(tmp, ";");
 	if(country)
 		g_string_append(tmp, country);
-	g_string_append(tmp, ";");
-	g_string_append(tmp, "\n");
+	g_string_append(tmp, "\r\n");
 	adr = g_strndup(tmp->str, tmp->len);
 
 stepEmpty:
@@ -547,7 +546,7 @@ char *getSingleCardAttribut(int type, char *card){
 				else 
 					goto next;
 			case CARDTYPE_N:
-				if(g_str_has_prefix(*line, "N"))
+				if(g_str_has_prefix(*line, "N:"))
 					goto getValue;
 				else 
 					goto next;
@@ -595,28 +594,55 @@ char *getSingleCardAttribut(int type, char *card){
 }
 
 /**
- * compareValue - compares a single value with the content from
- * the database
+ * 
  */
-static char *compareValue(int typ, char *old, char *item){
+static char *replaceAntiquatedLine(char *vCard, char *pattern, char *newLine){
 	printfunc(__func__);
 
-	char			*new = NULL;
-	char			*ptr = NULL;
-	char			**line = g_strsplit(item, ":", 0);
+	GString		*data;
+	const char	*end;
+	const char *p = vCard;
 
-	ptr = g_strstr_len(old, -1, g_strstrip(line[1]));
-	if(!ptr)
-	{
-		dbgCC("%d is new or changed. Need to do something\n", typ);
-		new = old;
-	} else {
-		return old;
+	int			i = 0;
+	int			k = 0;
+	int			sPos = 0;
+
+	data = g_string_new(NULL);
+	data = g_string_assign(data, vCard);
+
+	end = vCard + strlen(vCard) - strlen(pattern);
+
+	sPos = 0;
+	while(p <= end && *p){
+		for(i=0; i < strlen(pattern); i++){
+			if(p[i] != pattern[i]){
+				goto nextLoop;
+			}
+		}
+		break;
+nextLoop:
+		p++;
+		sPos++;
 	}
 
-	return new;
-}
+	if(i == (strlen(vCard) - strlen(pattern))){
+		dbgCC("[%s] didn't find %s\n", __func__, pattern);
+		return NULL;
+	}
+	if(pattern[0] == '\n')
+		sPos++;
 
+	k= 0;
+	while(vCard[sPos + k] != '\n')
+		k++;
+	k++;
+
+	g_string_erase(data, sPos, k);
+
+	g_string_insert(data, sPos, newLine);
+
+	return data->str;
+}
 /**
  * mergeCards - merge the old vCard from the database with the new changes
  * This function is needed to keep the stuff alive which is not
@@ -625,10 +651,11 @@ static char *compareValue(int typ, char *old, char *item){
 char *mergeCards(GSList *new, char *old){
 	printfunc(__func__);
 
-	char			*vCard = NULL;
 	char			*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	GSList			*next;
 	GString			*value;
+
+	dbgCC("===\n%s\n===\n", old);
 
 	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
@@ -655,18 +682,6 @@ char *mergeCards(GSList *new, char *old){
 			case CARDTYPE_FN_SUFFIX:
 				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
 				break;
-			case CARDTYPE_ADR:
-				g_string_append(value, buildAdr(item->element));
-				compareValue(CARDTYPE_ADR, old, value->str);
-				break;
-			case CARDTYPE_EMAIL:
-				g_string_append(value, buildEMail(item->element));
-				compareValue(CARDTYPE_EMAIL, old, value->str);
-				break;
-			case CARDTYPE_URL:
-				g_string_append(value, buildUrl(item->element));
-				compareValue(CARDTYPE_URL, old, value->str);
-				break;
 			default:
 				break;
 		}
@@ -691,8 +706,11 @@ stepForward:
 	if(g_strstr_len(old, -1, value->str) == NULL)
 	{
 		dbgCC("N has changed. Need to change it\n");
+		old = replaceAntiquatedLine(old, "\nN:", value->str);
 	}
 	g_string_free(value, TRUE);
 
-	return vCard;
+	dbgCC("===\n%s\n===\n", old);
+
+	return old;
 }

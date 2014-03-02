@@ -386,6 +386,8 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 /**
  * contactEditSingleItem - Add a single line value to edit a vCard
+ * Here a single linked list is added to a single linked list, to
+ * implement TYP-stuff in the future
  */
 static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int line, char *value){
 	printfunc(__func__);
