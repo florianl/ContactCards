@@ -128,6 +128,11 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 	g_file_set_contents(fileName, cert->str, cert->len, &error);
 	printGError(error);
 	g_string_free(cert, TRUE);
+
+	g_free(serverDesc);
+	g_free(certdata);
+	g_free(path);
+	g_free(fileName);
 }
 
 /**
@@ -139,7 +144,7 @@ void exportContacts(sqlite3 *ptr, char *base){
 	GSList				*serverList;
 	GSList				*addressbookList;
 	GSList				*contactList;
-	char				*path;
+	char				*path = NULL;
 	GError 				*error = NULL;
 
 	serverList = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "");
@@ -204,6 +209,8 @@ void exportContacts(sqlite3 *ptr, char *base){
 		}
 		g_slist_free(addressbookList);
 		serverList = next;
+		g_free(serverLoc);
 	}
 	g_slist_free(serverList);
+	g_free(path);
 }
