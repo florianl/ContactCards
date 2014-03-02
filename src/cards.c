@@ -655,8 +655,6 @@ char *mergeCards(GSList *new, char *old){
 	GSList			*next;
 	GString			*value;
 
-	dbgCC("===\n%s\n===\n", old);
-
 	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
 	while(new){
@@ -705,12 +703,37 @@ stepForward:
 
 	if(g_strstr_len(old, -1, value->str) == NULL)
 	{
-		dbgCC("N has changed. Need to change it\n");
 		old = replaceAntiquatedLine(old, "\nN:", value->str);
+		g_string_free(value, TRUE);
+
+		value = g_string_new(NULL);
+		g_string_append(value, "FN:");
+		g_string_append(value, prefixN);
+		g_string_append(value, " ");
+		g_string_append(value, firstN);
+		g_string_append(value, " ");
+		g_string_append(value, middleN);
+		g_string_append(value, " ");
+		g_string_append(value, lastN);
+		g_string_append(value, " ");
+		g_string_append(value, suffixN);
+		g_string_append(value, "\r\n");
+
+		old = replaceAntiquatedLine(old, "\nFN:", value->str);
+		g_string_free(value, TRUE);
 	}
+
+	value = g_string_new(NULL);
+	g_string_append(value, "PRODID:-//ContactCards//ContactCards");
+	g_string_append(value, VERSION);
+	g_string_append(value, "//EN\r\n");
+	g_string_append(value, "UID:");
+	g_string_append(value, getUID());
+	g_string_append(value, "\r\n");
+	old = replaceAntiquatedLine(old, "\nPRODID:", value->str);
 	g_string_free(value, TRUE);
 
-	dbgCC("===\n%s\n===\n", old);
+	old = replaceAntiquatedLine(old, "\nREV:", "");
 
 	return old;
 }

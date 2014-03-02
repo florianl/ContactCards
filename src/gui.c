@@ -597,12 +597,12 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 	int				addrID;
 	int				newID;
 
+	cleanCard(((ContactCards_add_t *)trans)->grid);
+
 	addrID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "addressbookID", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "");
 
 	dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
 	vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
-
-	return;
 
 	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID) == 1){
 		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
@@ -615,6 +615,8 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 	card = buildNewCard(((ContactCards_add_t *)trans)->db, newID);
 	gtk_widget_show_all(card);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
+
+	fillList(((ContactCards_add_t *)trans)->db, 2, addrID, contactList);
 
 	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
 	g_free(trans);
