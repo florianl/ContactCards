@@ -595,6 +595,29 @@ char *getSingleCardAttribut(int type, char *card){
 }
 
 /**
+ * compareValue - compares a single value with the content from
+ * the database
+ */
+static char *compareValue(int typ, char *old, char *item){
+	printfunc(__func__);
+
+	char			*new = NULL;
+	char			*ptr = NULL;
+	char			**line = g_strsplit(item, ":", 0);
+
+	ptr = g_strstr_len(old, -1, g_strstrip(line[1]));
+	if(!ptr)
+	{
+		dbgCC("%d is new or changed. Need to do something\n", typ);
+		new = old;
+	} else {
+		return old;
+	}
+
+	return new;
+}
+
+/**
  * mergeCards - merge the old vCard from the database with the new changes
  * This function is needed to keep the stuff alive which is not
  * displayed and editable so far
@@ -603,35 +626,73 @@ char *mergeCards(GSList *new, char *old){
 	printfunc(__func__);
 
 	char			*vCard = NULL;
+	char			*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	GSList			*next;
+	GString			*value;
+
+	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
 	while(new){
 		ContactCards_item_t		*item;
 		next = new->next;
-
-		if(!new->data){
+		if(!new->data)
 			goto stepForward;
-		}
-		item = (ContactCards_item_t *)list->data;
+		item = (ContactCards_item_t *)new->data;
+		value = g_string_new(NULL);
 		switch(item->itemID){
-			case CARDTYPE_FN:
-			case CARDTYPE_N:
-			case CARDTYPE_NICKNAME:
-			case CARDTYPE_PHOTO:
-			case CARDTYPE_BDAY:
+			case CARDTYPE_FN_FIRST:
+				firstN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_LAST:
+				lastN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_PREFIX:
+				prefixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_MIDDLE:
+				middleN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_SUFFIX:
+				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
 			case CARDTYPE_ADR:
-			case CARDTYPE_LABEL:
-			case CARDTYPE_TEL:
+				g_string_append(value, buildAdr(item->element));
+				compareValue(CARDTYPE_ADR, old, value->str);
+				break;
 			case CARDTYPE_EMAIL:
+				g_string_append(value, buildEMail(item->element));
+				compareValue(CARDTYPE_EMAIL, old, value->str);
+				break;
 			case CARDTYPE_URL:
-			case CARDTYPE_CLASS:
-			case CARDTYPE_KEY:
+				g_string_append(value, buildUrl(item->element));
+				compareValue(CARDTYPE_URL, old, value->str);
+				break;
 			default:
 				break;
 		}
+		g_string_free(value, TRUE);
 stepForward:
 		new = next;
 	}
+
+	value = g_string_new(NULL);
+	g_string_append(value, "N:");
+	g_string_append(value, lastN);
+	g_string_append(value, ";");
+	g_string_append(value, firstN);
+	g_string_append(value, ";");
+	g_string_append(value, middleN);
+	g_string_append(value, ";");
+	g_string_append(value, prefixN);
+	g_string_append(value, ";");
+	g_string_append(value, suffixN);
+	g_string_append(value, "\r\n");
+
+	if(g_strstr_len(old, -1, value->str) == NULL)
+	{
+		dbgCC("N has changed. Need to change it\n");
+	}
+	g_string_free(value, TRUE);
 
 	return vCard;
 }
