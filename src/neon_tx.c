@@ -189,9 +189,9 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 static int elementData(void *userdata, int state, const char *cdata, size_t len){
 	printfunc(__func__);
 
-	char				*newCtx;
-	char				*existingCtx;
-	char				*concat;
+	char				*newCtx = NULL;
+	char				*existingCtx = NULL;
+	char				*concat = NULL;
 
 	if(len < 3)
 		return 0;
@@ -204,6 +204,8 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 		existingCtx = g_strdup(((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->content);
 		concat = g_strconcat(existingCtx, newCtx, NULL);
 		((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->content = concat;
+		free(existingCtx);
+		free(newCtx);
 	}
 
 	dbgCC("[%s]\t\t%s\n", __func__, newCtx);
@@ -688,6 +690,7 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 		newuser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
 		ret = OAUTH_GRANT_FAILURE;
 		dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
+		free(newuser);
 	} else {
 		dbgCC("[%s] there is already a grant\n", __func__);
 	}
