@@ -343,8 +343,14 @@ void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *se
 	syncToken = elementGet(branch, DAV_ELE_SYNCTOKEN);
 	if(syncToken != NULL){
 		dbSyncToken = getSingleChar(ptr, "addressbooks", "syncToken", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
-		if(strlen(dbSyncToken) == 1) return;
-		if(!strncmp(syncToken, dbSyncToken, strlen(syncToken))) return;
+		if(strlen(dbSyncToken) == 1){
+			free(dbSyncToken);
+			return;
+		}
+		if(!strncmp(syncToken, dbSyncToken, strlen(syncToken))){
+			free(dbSyncToken);
+			return;
+		}
 		updateSyncToken(ptr, addressbookID, syncToken);
 		return;
 	}

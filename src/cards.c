@@ -144,6 +144,15 @@ stepForward:
 	g_string_append(tmp, "\n");
 	adr = g_strndup(tmp->str, tmp->len);
 
+	g_string_free(tmp, TRUE);
+	free(poBox);
+	free(extAdr);
+	free(str);
+	free(loc);
+	free(reg);
+	free(zip);
+	free(country);
+
 stepEmpty:
 	return adr;
 }
@@ -190,6 +199,8 @@ stepForward:
 	g_string_append(tmp, "\n");
 	mail = g_strndup(tmp->str, tmp->len);
 
+	g_string_free(tmp, TRUE);
+
 stepEmpty:
 	return mail;
 }
@@ -235,6 +246,8 @@ stepForward:
 
 	g_string_append(tmp, "\n");
 	tel = g_strndup(tmp->str, tmp->len);
+
+	g_string_free(tmp, TRUE);
 
 stepEmpty:
 	return tel;
@@ -331,6 +344,10 @@ stepForward:
 	g_string_append(cardString, "END:VCARD\n");
 
 	card = g_strndup(cardString->str, cardString->len);
+
+	free(firstN);
+	free(lastN);
+	g_string_free(cardString, TRUE);
 
 	return card;
 }
@@ -461,6 +478,9 @@ ContactCards_pix_t *getCardPhoto(char *card){
 	pix = g_base64_decode(tmp->str, &len);
 	pic->pixel = pix;
 	pic->size = (int) len;
+
+	g_string_free(buf, TRUE);
+	g_string_free(tmp, TRUE);
 
 	return pic;
 }

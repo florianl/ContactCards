@@ -63,8 +63,9 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		case ContactCards_DIGEST_TRUSTED:
 			ne_ssl_cert_digest(cert, digest);
 			dbDigest = getSingleChar(data->db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
-			if(dbDigest == NULL)
+			if(dbDigest == NULL){
 				goto newCert;
+			}
 			if(g_strcmp0(digest, dbDigest) == 0){
 				goto fastExit;
 			}
@@ -87,8 +88,7 @@ newCert:
 	setServerCert(data->db, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
-	free(digest);
-	free(newCer);
+	free(dbDigest);
 
 	return trust;
 }
@@ -125,6 +125,8 @@ ne_session *serverConnect(void *trans){
 	sess = ne_session_create(uri.scheme, uri.host, uri.port);
 
 	ne_ssl_set_verify(sess, verifyCert, data);
+
+	free(davServer);
 
 	return sess;
 }
@@ -637,6 +639,12 @@ failedRequest:
 	ne_buffer_destroy(req_buffer);
 	ne_xml_destroy(pXML);
 	g_free(trans);
+	free(davPath);
+	free(addrbookPath);
+	free(srvUrl);
+	free(davSyncToken);
+	free(oAuthSession);
+	free(ContactCardsIdent);
 
 	return userdata;
 }
@@ -700,6 +708,10 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 		ret = OAUTH_UP2DATE;
 	}
 
+	free(oAuthGrant);
+	free(oAuthToken);
+	free(oAuthRefresh);
+
 	return ret;
 }
 
@@ -757,6 +769,9 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 			break;
 	}
 
+	free(srvURI);
+	free(grant);
+
 	ne_close_connection(sess);
 	ne_session_destroy(sess);
 }
@@ -797,10 +812,12 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 		responseHandle(stack, sess, ptr);
 		postURI = getSingleChar(ptr, "addressbooks", "postURI", 14, "cardServer", srvID, "", "", "", "", "addressbookID", addrBookID);
 		if(strlen(postURI) <= 1){
+			free(postURI);
 			/* Without a URI, we can post to, we can't do anything so far	*/
 			return -1;
 		}
 	}
+	free(postURI);
 
 	stack = serverRequest(DAV_REQ_POST_CONTACT, srvID, newID, sess, ptr);
 

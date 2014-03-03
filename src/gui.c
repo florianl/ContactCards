@@ -158,7 +158,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
-	char				*issued, *issuer, *url = NULL;
+	char				*issued = NULL, *issuer = NULL, *url = NULL;
 	int					isOAuth;
 	gboolean			res = 0;
 
@@ -204,6 +204,13 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
 	}
+	
+	free(frameTitle);
+	free(user);
+	free(passwd);
+	free(issued);
+	free(issuer);
+	free(url);
 }
 
 /**
@@ -573,6 +580,7 @@ Forward:
 
 	fillList(data->db, 2, data->addrBookID, contactList);
 	g_slist_free_full(list, g_free);
+	free(card);
 }
 
 /**
@@ -809,6 +817,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	GtkWidget			*card, *label, *sep;
 	GtkWidget			*photo, *fn, *bday;
 	GSList				*list;
+	GError		 		*error = NULL;
 	int					line = 4;
 	char				*vData = NULL;
 	char				*markup;
@@ -831,7 +840,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	} else {
 		GdkPixbuf			*pixbuf = NULL;
 		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
-		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, NULL);
+		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, &error);
+		if(error){
+			dbgCC("[%s] %s\n", __func__, error->message);
+		}
 		photo = gtk_image_new_from_pixbuf (pixbuf);
 	}
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
@@ -929,6 +941,9 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	}
 	g_slist_free(list);
 	line++;
+
+	free(vData);
+	free(markup);
 
 	return card;
 }
@@ -1117,6 +1132,8 @@ static void *syncOneServer(void *trans){
 	gtk_statusbar_pop(GTK_STATUSBAR(statusBar), ctxID);
 
 	g_free(data);
+	free(srv);
+	free(msg);
 	g_mutex_unlock(&mutex);
 
 	return NULL;
@@ -1345,6 +1362,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
 			break;
 	}
 	g_free(uri);
+	free(newGrant);
 	gtk_widget_destroy(dialog);
 
 }
@@ -1689,6 +1707,8 @@ static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 
 	g_signal_connect (G_OBJECT(inputoAuth), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 	g_signal_connect (G_OBJECT(inputGrant), "changed", G_CALLBACK(newDialogEntryChanged), widget);
+
+	free(uri);
 }
 
 /**
