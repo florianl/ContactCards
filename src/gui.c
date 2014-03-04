@@ -599,10 +599,14 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 
-	addrID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "addressbookID", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "");
+	addrID = ((ContactCards_add_t *)trans)->aID;
 
-	dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
-	vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
+	if(((ContactCards_add_t *)trans)->editID){
+		dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
+		vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
+	} else {
+		vCard = buildCard(((ContactCards_add_t *)trans)->list);
+	}
 
 	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1) == 1){
 		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
@@ -626,7 +630,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 /**
  * buildEditCard - display the data of a selected vCard for editing
  */
-static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
+static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	printfunc(__func__);
 
 	GtkWidget			*card, *label, *sep, *input;
@@ -642,9 +646,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	ContactCards_item_t	*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
 
 	card = gtk_grid_new();
-	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-	if(vData == NULL)
-		return card;
+	if(selID){
+		vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
+		if(vData == NULL)
+			return card;
+	}
 
 	transNew = g_new(ContactCards_add_t, 1);
 	items = g_slist_alloc();
@@ -661,18 +667,23 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	lastNBuf = gtk_entry_buffer_new(NULL, -1);
 	suffixBuf = gtk_entry_buffer_new(NULL, -1);
 
-	naming = getSingleCardAttribut(CARDTYPE_N, vData);
-	namingPtr = g_strsplit(naming, ";", 5);
-	gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
-	gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
-	gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
-	gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
-	gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
+	if(selID){
+		naming = getSingleCardAttribut(CARDTYPE_N, vData);
+		namingPtr = g_strsplit(naming, ";", 5);
+		gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
+		gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
+		gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
+		gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
+		gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
+	}
 
 	transNew->db = ptr;
 	transNew->grid = card;
 	transNew->list = items;
 	transNew->editID = selID;
+	if(!abID)
+		abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", selID, "", "");
+	transNew->aID = abID;
 
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
@@ -729,6 +740,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	items = g_slist_append(items, suffixItem);
 
 	/*	Phone	*/
+	/*
 	label = gtk_label_new(_("Phone"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	addPhone = gtk_button_new_from_icon_name("list-add", 1);
@@ -749,8 +761,10 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	}
 	g_slist_free(list);
 	line++;
+	*/
 
 	/*	Address	*/
+	/*
 	label = gtk_label_new(_("Address"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	addPostal = gtk_button_new_from_icon_name("list-add", 1);
@@ -770,8 +784,10 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 		}
 	}
 	g_slist_free(list);
+	*/
 
 	/*	EMAIL	*/
+	/*
 	label = gtk_label_new(_("EMail"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	addMail = gtk_button_new_from_icon_name("list-add", 1);
@@ -791,8 +807,10 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 		}
 	}
 	g_slist_free(list);
+	*/
 
 	/*	URL	*/
+	/*
 	label = gtk_label_new(_("URL"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	addUrl = gtk_button_new_from_icon_name("list-add", 1);
@@ -813,6 +831,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	}
 	g_slist_free(list);
 	line++;
+	*/
 
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactEditSave), transNew);
@@ -825,6 +844,34 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID){
 	return card;
 }
 
+/**
+ * contactNew - add a new vCard
+ */
+static void contactNew(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget			*newCard;
+	int					abID = 0;
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(((ContactCards_trans_t *)trans)->element), &model, &iter)) {
+		gtk_tree_model_get(model, &iter, ID_COLUMN, &abID,  -1);
+	}
+
+	dbgCC("[%s] %d\n",__func__, abID);
+
+	if(abID == 0){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
+		return;
+	}
+
+	newCard = buildEditCard(((ContactCards_trans_t *)trans)->db, 0, abID);
+	cleanCard(((ContactCards_trans_t *)trans)->element2);
+	gtk_widget_show_all(newCard);
+	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element2), newCard);
+}
 /**
  * contactEdit - edit the content of a vCard
  */
@@ -843,7 +890,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected to edit."));
 	}
 
-	editCard = buildEditCard(((ContactCards_trans_t *)trans)->db, selID);
+	editCard = buildEditCard(((ContactCards_trans_t *)trans)->db, selID, 0);
 	cleanCard(((ContactCards_trans_t *)trans)->element2);
 	gtk_widget_show_all(editCard);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element2), editCard);
@@ -1949,7 +1996,8 @@ void guiInit(sqlite3 *ptr){
 	cleanUpList = g_slist_append(cleanUpList, transAddContact);
 	transAddContact->db = ptr;
 	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
-//	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactAdd), transAddContact);
+	transAddContact->element2 = scroll;
+	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactNew), transAddContact);
 
 	transEditContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transEditContact);

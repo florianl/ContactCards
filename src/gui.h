@@ -75,6 +75,7 @@ typedef struct ContactCards_add {
 	GtkWidget			*grid;
 	GSList				*list;
 	int					editID;
+	int					aID;
 } ContactCards_add_t;
 
 /**
