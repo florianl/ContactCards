@@ -420,7 +420,9 @@ sendAgain:
 			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(vCard == NULL) goto failedRequest;
 			req = ne_request_create(sess, "PUT", davPath);
-			ne_add_request_header(req, "If-None-Match", "*");
+			ne_add_request_header(req, "Content-Type", "text/plain");
+			/* Remove this for new contacts	*/
+			//ne_add_request_header(req, "If-None-Match", "*");
 			ne_buffer_concat(req_buffer, vCard, NULL);
 			}
 			break;
@@ -856,14 +858,13 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID){
 
 	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
 	switch(stack->statuscode){
-		case 201:
+		case 200 ... 207:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/
 			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1){
-				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 				ret = -1;
 			} else {
 				ret = 1;
@@ -877,6 +878,9 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID){
 	}
 
 	serverDisconnect(sess, ptr, srvID);
+
+	if(ret == -1)
+		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 
 	g_mutex_unlock(&mutex);
 	return ret;

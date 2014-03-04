@@ -611,6 +611,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
 		newID = ((ContactCards_add_t *)trans)->editID;
 	}
+
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 	card = buildNewCard(((ContactCards_add_t *)trans)->db, newID);
 	gtk_widget_show_all(card);
