@@ -412,6 +412,8 @@ sendAgain:
 		/*
 		 * request to push a new contact to the server
 		 */
+		case DAV_REQ_PUT_NEW_CONTACT:
+			ne_add_request_header(req, "If-None-Match", "*");
 		case DAV_REQ_PUT_CONTACT:
 			{
 			char			*vCard = NULL;
@@ -824,7 +826,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 /**
  * postPushCard - send a new vCard to a server
  */
-int pushCard(sqlite3 *ptr, char *card, int addrBookID){
+int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
 	printfunc(__func__);
 
 	ne_session	 			*sess = NULL;
@@ -856,7 +858,11 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID){
 
 	sess = serverConnect(trans);
 
-	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	if(existing){
+		stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	} else {
+		stack = serverRequest(DAV_REQ_PUT_NEW_CONTACT, srvID, newID, sess, ptr);
+	}
 	switch(stack->statuscode){
 		case 200 ... 207:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);

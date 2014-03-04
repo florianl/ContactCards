@@ -785,10 +785,6 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 
 	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href) VALUES ('%d','%q', '%q');", addressbookID, card, path);
 
-	dbgCC("----\n");
-	dbgCC("%s\n", sql_query);
-	dbgCC("----\n");
-
 	doSimpleRequest(ptr, sql_query, __func__);
 
 	newID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "vCard", card);

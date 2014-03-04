@@ -604,7 +604,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 	dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
 	vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
 
-	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID) == 1){
+	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1) == 1){
 		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
 		newID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "contactID", 12, "addressbookID", addrID, "vCard", vCard);
 	} else {
