@@ -140,8 +140,7 @@ stepForward:
 	g_string_append(tmp, ";");
 	if(country)
 		g_string_append(tmp, country);
-	g_string_append(tmp, ";");
-	g_string_append(tmp, "\n");
+	g_string_append(tmp, "\r\n");
 	adr = g_strndup(tmp->str, tmp->len);
 
 	g_string_free(tmp, TRUE);
@@ -155,6 +154,52 @@ stepForward:
 
 stepEmpty:
 	return adr;
+}
+
+/**
+ * buildUrl - extract the Url of the user input
+ */
+static char *buildUrl(GSList *list){
+	printfunc(__func__);
+
+	char				*url = "";
+	GSList				*next;
+	GString				*tmp;
+
+	tmp = g_string_new(NULL);
+
+	g_string_append(tmp, "URL");
+
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_EMAIL_OPT:
+				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
+					break;
+				g_string_append(tmp,";TYPE=");
+				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
+				break;
+			default:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					goto stepEmpty;
+				g_string_append(tmp,":");
+				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
+		}
+stepForward:
+		list = next;
+	}
+
+	g_string_append(tmp, "\n");
+	url = g_strndup(tmp->str, tmp->len);
+
+stepEmpty:
+	return url;
 }
 
 /**
@@ -260,8 +305,7 @@ char *buildCard(GSList *list){
 	printfunc(__func__);
 
 	char				*card = NULL;
-	char				*firstN = NULL;
-	char				*lastN = NULL;
+	char				*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	int					bDay, bMonth, bYear;
 	char				*bDate;
 	GSList				*next;
@@ -269,15 +313,17 @@ char *buildCard(GSList *list){
 
 	cardString = g_string_new(NULL);
 
-	g_string_append(cardString, "BEGIN:VCARD\n");
-	g_string_append(cardString, "VERSION:3.0\n");
+	firstN = lastN = middleN = prefixN = suffixN = NULL;
+
+	g_string_append(cardString, "BEGIN:VCARD\r\n");
+	g_string_append(cardString, "VERSION:3.0\r\n");
 
 	g_string_append(cardString, "PRODID:-//ContactCards//ContactCards");
 	g_string_append(cardString, VERSION);
-	g_string_append(cardString, "//EN\n");
+	g_string_append(cardString, "//EN\r\n");
 	g_string_append(cardString, "UID:");
 	g_string_append(cardString, getUID());
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, "\r\n");
 
 	while(list){
 		ContactCards_item_t		*item;
@@ -300,16 +346,28 @@ char *buildCard(GSList *list){
 			case CARDTYPE_FN_LAST:
 				lastN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
 				break;
+			case CARDTYPE_FN_PREFIX:
+				prefixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_MIDDLE:
+				middleN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_SUFFIX:
+				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
 			case CARDTYPE_BDAY:
 				gtk_calendar_get_date(GTK_CALENDAR(item->element), &bYear, &bMonth, &bDay);
 				bMonth++;
 				bDate = g_strdup_printf("%04d-%02d-%02d", bYear, bMonth, bDay);
 				g_string_append(cardString, "BDAY:");
 				g_string_append(cardString, bDate);
-				g_string_append(cardString, "\n");
+				g_string_append(cardString, "\r\n");
 				break;
 			case CARDTYPE_EMAIL:
 				g_string_append(cardString, buildEMail(item->element));
+				break;
+			case CARDTYPE_URL:
+				g_string_append(cardString, buildUrl(item->element));
 				break;
 			default:
 				break;
@@ -332,14 +390,25 @@ stepForward:
 	g_string_append(cardString, lastN);
 	g_string_append(cardString, ";");
 	g_string_append(cardString, firstN);
-	g_string_append(cardString, ";;;");
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, ";");
+	g_string_append(cardString, middleN);
+	g_string_append(cardString, ";");
+	g_string_append(cardString, prefixN);
+	g_string_append(cardString, ";");
+	g_string_append(cardString, suffixN);
+	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "FN:");
+	g_string_append(cardString, prefixN);
+	g_string_append(cardString, " ");
 	g_string_append(cardString, firstN);
 	g_string_append(cardString, " ");
+	g_string_append(cardString, middleN);
+	g_string_append(cardString, " ");
 	g_string_append(cardString, lastN);
-	g_string_append(cardString, "\n");
+	g_string_append(cardString, " ");
+	g_string_append(cardString, suffixN);
+	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "END:VCARD\n");
 
@@ -503,7 +572,7 @@ char *getSingleCardAttribut(int type, char *card){
 				else 
 					goto next;
 			case CARDTYPE_N:
-				if(g_str_has_prefix(*line, "N"))
+				if(g_str_has_prefix(*line, "N:"))
 					goto getValue;
 				else 
 					goto next;
@@ -548,4 +617,149 @@ char *getSingleCardAttribut(int type, char *card){
 	}
 
 	return value;
+}
+
+/**
+ * 
+ */
+static char *replaceAntiquatedLine(char *vCard, char *pattern, char *newLine){
+	printfunc(__func__);
+
+	GString		*data;
+	const char	*end;
+	const char *p = vCard;
+
+	int			i = 0;
+	int			k = 0;
+	int			sPos = 0;
+
+	data = g_string_new(NULL);
+	data = g_string_assign(data, vCard);
+
+	end = vCard + strlen(vCard) - strlen(pattern);
+
+	sPos = 0;
+	while(p <= end && *p){
+		for(i=0; i < strlen(pattern); i++){
+			if(p[i] != pattern[i]){
+				goto nextLoop;
+			}
+		}
+		break;
+nextLoop:
+		p++;
+		sPos++;
+	}
+
+	if(i == (strlen(vCard) - strlen(pattern))){
+		dbgCC("[%s] didn't find %s\n", __func__, pattern);
+		return NULL;
+	}
+	if(pattern[0] == '\n')
+		sPos++;
+
+	k= 0;
+	while(vCard[sPos + k] != '\n')
+		k++;
+	k++;
+
+	g_string_erase(data, sPos, k);
+
+	g_string_insert(data, sPos, newLine);
+
+	return data->str;
+}
+/**
+ * mergeCards - merge the old vCard from the database with the new changes
+ * This function is needed to keep the stuff alive which is not
+ * displayed and editable so far
+ */
+char *mergeCards(GSList *new, char *old){
+	printfunc(__func__);
+
+	char			*firstN , *lastN, *middleN, *prefixN, *suffixN;
+	GSList			*next;
+	GString			*value;
+
+	firstN = lastN = middleN = prefixN = suffixN = NULL;
+
+	while(new){
+		ContactCards_item_t		*item;
+		next = new->next;
+		if(!new->data)
+			goto stepForward;
+		item = (ContactCards_item_t *)new->data;
+		value = g_string_new(NULL);
+		switch(item->itemID){
+			case CARDTYPE_FN_FIRST:
+				firstN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_LAST:
+				lastN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_PREFIX:
+				prefixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_MIDDLE:
+				middleN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			case CARDTYPE_FN_SUFFIX:
+				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
+				break;
+			default:
+				break;
+		}
+		g_string_free(value, TRUE);
+stepForward:
+		new = next;
+	}
+
+	value = g_string_new(NULL);
+	g_string_append(value, "N:");
+	g_string_append(value, lastN);
+	g_string_append(value, ";");
+	g_string_append(value, firstN);
+	g_string_append(value, ";");
+	g_string_append(value, middleN);
+	g_string_append(value, ";");
+	g_string_append(value, prefixN);
+	g_string_append(value, ";");
+	g_string_append(value, suffixN);
+	g_string_append(value, "\r\n");
+
+	if(g_strstr_len(old, -1, value->str) == NULL)
+	{
+		old = replaceAntiquatedLine(old, "\nN:", value->str);
+		g_string_free(value, TRUE);
+
+		value = g_string_new(NULL);
+		g_string_append(value, "FN:");
+		g_string_append(value, prefixN);
+		g_string_append(value, " ");
+		g_string_append(value, firstN);
+		g_string_append(value, " ");
+		g_string_append(value, middleN);
+		g_string_append(value, " ");
+		g_string_append(value, lastN);
+		g_string_append(value, " ");
+		g_string_append(value, suffixN);
+		g_string_append(value, "\r\n");
+
+		old = replaceAntiquatedLine(old, "\nFN:", value->str);
+		g_string_free(value, TRUE);
+	}
+
+	value = g_string_new(NULL);
+	g_string_append(value, "PRODID:-//ContactCards//ContactCards");
+	g_string_append(value, VERSION);
+	g_string_append(value, "//EN\r\n");
+	g_string_append(value, "UID:");
+	g_string_append(value, getUID());
+	g_string_append(value, "\r\n");
+	old = replaceAntiquatedLine(old, "\nPRODID:", value->str);
+	g_string_free(value, TRUE);
+
+	old = replaceAntiquatedLine(old, "\nREV:", "");
+
+	return old;
 }

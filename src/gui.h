@@ -74,12 +74,9 @@ typedef struct ContactCards_add {
 	sqlite3				*db;
 	GtkWidget			*grid;
 	GSList				*list;
-	int					addrBookID;
-	GtkEntryBuffer		*fnBuff;
-	GtkEntryBuffer		*lnBuff;
+	int					editID;
+	int					aID;
 } ContactCards_add_t;
-
-#define	CONTACT_ADD_WINDOW		1
 
 /**
  * struct ContactCards_add	- helping structure for creating a new vCard

@@ -784,7 +784,7 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 	basePath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
 	cardPath = getSingleCardAttribut(CARDTYPE_UID, card);
 
-	path = g_strconcat(basePath, cardPath, ".vcf", NULL);
+	path = g_strconcat(g_strstrip(basePath), g_strstrip(cardPath), ".vcf", NULL);
 
 	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href) VALUES ('%d','%q', '%q');", addressbookID, card, path);
 
@@ -794,7 +794,7 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 	free(cardPath);
 	free(path);
 
-	newID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", path);
+	newID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "vCard", card);
 
 	setDisplayname(ptr, newID, card);
 

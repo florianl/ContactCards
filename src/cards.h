@@ -11,6 +11,9 @@
 #define	CARDTYPE_FN				11
 #define	CARDTYPE_FN_FIRST		111
 #define	CARDTYPE_FN_LAST		112
+#define	CARDTYPE_FN_PREFIX		113
+#define	CARDTYPE_FN_MIDDLE		114
+#define	CARDTYPE_FN_SUFFIX		115
 #define	CARDTYPE_N				12
 #define	CARDTYPE_NICKNAME		13
 #define	CARDTYPE_PHOTO			14
@@ -54,5 +57,6 @@ extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 extern GSList *getMultipleCardAttribut(int type, char *card);
 extern ContactCards_pix_t *getCardPhoto(char *card);
+extern char *mergeCards(GSList *new, char *old);
 
 #endif	/*	cards_H		*/

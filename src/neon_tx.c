@@ -413,6 +413,8 @@ sendAgain:
 		/*
 		 * request to push a new contact to the server
 		 */
+		case DAV_REQ_PUT_NEW_CONTACT:
+			ne_add_request_header(req, "If-None-Match", "*");
 		case DAV_REQ_PUT_CONTACT:
 			{
 			char			*vCard = NULL;
@@ -421,7 +423,9 @@ sendAgain:
 			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(vCard == NULL) goto failedRequest;
 			req = ne_request_create(sess, "PUT", davPath);
-			ne_add_request_header(req, "If-None-Match", "*");
+			ne_add_request_header(req, "Content-Type", "text/plain");
+			/* Remove this for new contacts	*/
+			//ne_add_request_header(req, "If-None-Match", "*");
 			ne_buffer_concat(req_buffer, vCard, NULL);
 			}
 			break;
@@ -839,13 +843,14 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 /**
  * postPushCard - send a new vCard to a server
  */
-void pushCard(sqlite3 *ptr, char *card, int addrBookID){
+int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
 	printfunc(__func__);
 
 	ne_session	 			*sess = NULL;
 	int						srvID;
 	int						isOAuth = 0;
 	int						newID = 0;
+	int						ret = 0;
 	ContactCards_trans_t	*trans = NULL;
 	ContactCards_stack_t	*stack;
 
@@ -858,7 +863,7 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 		ret = oAuthUpdate(ptr, srvID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
-			return;
+			return -1;
 		}
 	}
 
@@ -870,25 +875,38 @@ void pushCard(sqlite3 *ptr, char *card, int addrBookID){
 
 	sess = serverConnect(trans);
 
-	stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	if(existing){
+		stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);
+	} else {
+		stack = serverRequest(DAV_REQ_PUT_NEW_CONTACT, srvID, newID, sess, ptr);
+	}
 	switch(stack->statuscode){
-		case 201:
+		case 200 ... 207:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
+			ret = 1;
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/
-			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1)
-				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1){
+				ret = -1;
+			} else {
+				ret = 1;
+			}
 			break;
 		default:
 			dbgCC("[%s] %d\n", __func__ , stack->statuscode);
 			/* server didn't accept the new contact	*/
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+			ret = -1;
 	}
 
 	serverDisconnect(sess, ptr, srvID);
 
+	if(ret == -1)
+		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
+
 	g_mutex_unlock(&mutex);
+	return ret;
 }
 
 /**
