@@ -755,18 +755,20 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 //	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
-	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
-	if (g_slist_length(list) > 1){
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					line = contactEditSingleItem(card, items, CARDTYPE_TEL, line, g_strstrip(value));
-				}
-				list = next;
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+		if (g_slist_length(list) > 1){
+			while(list){
+					GSList				*next = list->next;
+					char				*value = list->data;
+					if(value != NULL){
+						line = contactEditSingleItem(card, items, CARDTYPE_TEL, line, g_strstrip(value));
+					}
+					list = next;
+			}
 		}
+		g_slist_free(list);
 	}
-	g_slist_free(list);
 	line++;
 
 	/*	Address	*/
@@ -777,18 +779,21 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 //	gtk_grid_attach(GTK_GRID(card), addPostal, 3, line++, 1, 1);
-	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
-	if (g_slist_length(list) > 1){
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					line = contactEditPostalItem(card, items, line, g_strstrip(value));
-				}
-				list = next;
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+		if (g_slist_length(list) > 1){
+			while(list){
+					GSList				*next = list->next;
+					char				*value = list->data;
+					if(value != NULL){
+						line = contactEditPostalItem(card, items, line, g_strstrip(value));
+					}
+					list = next;
+			}
 		}
+		g_slist_free(list);
 	}
-	g_slist_free(list);
+	line++;
 
 	/*	EMAIL	*/
 	label = gtk_label_new(_("EMail"));
@@ -798,18 +803,21 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 //	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
-	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
-	if (g_slist_length(list) > 1){
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					line = contactEditSingleItem(card, items, CARDTYPE_EMAIL, line, g_strstrip(value));
-				}
-				list = next;
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+		if (g_slist_length(list) > 1){
+			while(list){
+					GSList				*next = list->next;
+					char				*value = list->data;
+					if(value != NULL){
+						line = contactEditSingleItem(card, items, CARDTYPE_EMAIL, line, g_strstrip(value));
+					}
+					list = next;
+			}
 		}
+		g_slist_free(list);
 	}
-	g_slist_free(list);
+	line++;
 
 	/*	URL	*/
 	label = gtk_label_new(_("URL"));
@@ -819,18 +827,20 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 //	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
-	list = getMultipleCardAttribut(CARDTYPE_URL, vData);
-	if (g_slist_length(list) > 1){
-		while(list){
-				GSList				*next = list->next;
-				char				*value = list->data;
-				if(value != NULL){
-					line = contactEditSingleItem(card, items, CARDTYPE_URL, line, g_strstrip(value));
-				}
-				list = next;
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_URL, vData);
+		if (g_slist_length(list) > 1){
+			while(list){
+					GSList				*next = list->next;
+					char				*value = list->data;
+					if(value != NULL){
+						line = contactEditSingleItem(card, items, CARDTYPE_URL, line, g_strstrip(value));
+					}
+					list = next;
+			}
 		}
+		g_slist_free(list);
 	}
-	g_slist_free(list);
 	line++;
 
 	/*		Connect Signales		*/
