@@ -423,9 +423,7 @@ sendAgain:
 			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(vCard == NULL) goto failedRequest;
 			req = ne_request_create(sess, "PUT", davPath);
-			ne_add_request_header(req, "Content-Type", "text/plain");
-			/* Remove this for new contacts	*/
-			//ne_add_request_header(req, "If-None-Match", "*");
+			ne_add_request_header(req, "Content-Type", "text/vcard");
 			ne_buffer_concat(req_buffer, vCard, NULL);
 			}
 			break;
@@ -451,10 +449,11 @@ sendAgain:
 			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
 			if(vCard == NULL) goto failedRequest;
 			req = ne_request_create(sess, "POST", davPath);
-			ne_add_request_header(req, "Content-Type", "text/plain");
+			ne_add_request_header(req, "Content-Type", "text/vcard");
 			ne_buffer_concat(req_buffer, vCard, NULL);
 			}
 			break;
+
 		/*
 		 * oAuth-Stuff
 		 */
@@ -896,7 +895,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
 		default:
 			dbgCC("[%s] %d\n", __func__ , stack->statuscode);
 			/* server didn't accept the new contact	*/
-			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 			ret = -1;
 	}
 
