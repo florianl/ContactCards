@@ -386,9 +386,15 @@ stepForward:
 	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "FN:");
+	g_string_append(cardString, prefixN);
+	g_string_append(cardString, " ");
 	g_string_append(cardString, firstN);
 	g_string_append(cardString, " ");
+	g_string_append(cardString, middleN);
+	g_string_append(cardString, " ");
 	g_string_append(cardString, lastN);
+	g_string_append(cardString, " ");
+	g_string_append(cardString, suffixN);
 	g_string_append(cardString, "\r\n");
 
 	g_string_append(cardString, "END:VCARD\n");
