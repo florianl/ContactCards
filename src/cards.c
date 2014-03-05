@@ -753,13 +753,8 @@ stepForward:
 	g_string_append(value, "PRODID:-//ContactCards//ContactCards");
 	g_string_append(value, VERSION);
 	g_string_append(value, "//EN\r\n");
-	g_string_append(value, "UID:");
-	g_string_append(value, getUID());
-	g_string_append(value, "\r\n");
 	old = replaceAntiquatedLine(old, "\nPRODID:", value->str);
 	g_string_free(value, TRUE);
-
-	old = replaceAntiquatedLine(old, "\nREV:", "");
 
 	return old;
 }
