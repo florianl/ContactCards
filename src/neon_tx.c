@@ -914,16 +914,21 @@ static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	printfunc(__func__);
 
 	ContactCards_stack_t		*stack;
+	int							failed = 0;
 
+sendAgain:
 	stack = serverRequest(DAV_REQ_EMPTY, serverID, 0, sess, ptr);
-	responseHandle(stack, sess, ptr);
 
 	switch(stack->statuscode){
 		case 200 ... 299:
 			break;
+		case 301:
+			if(failed++ < 3) goto sendAgain;
+			break;
 		default:
 			return;
 	}
+	responseHandle(stack, sess, ptr);
 
 	stack = serverRequest(DAV_REQ_CUR_PRINCIPAL, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
@@ -935,6 +940,7 @@ static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	responseHandle(stack, sess, ptr);
 
 	checkAddressbooks(ptr, serverID, 10, sess);
+	checkAddressbooks(ptr, serverID, 20, sess);
 }
 
 /**
@@ -948,7 +954,7 @@ void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
 		 * 	Initial request to find the base stuff
 		 */
 		syncInitial(ptr, sess, serverID);
+	} else {
+		checkAddressbooks(ptr, serverID, 20, sess);
 	}
-
-	checkAddressbooks(ptr, serverID, 20, sess);
 }
