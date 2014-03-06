@@ -57,6 +57,28 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		goto newCert;
 	}
 
+#ifdef ContactCards_DEBUG
+
+	if (failures & NE_SSL_NOTYETVALID)
+		dbgCC("certificate is not yet valid");
+
+	if (failures & NE_SSL_EXPIRED)
+		dbgCC("certificate has expired");
+
+	if (failures & NE_SSL_IDMISMATCH)
+		dbgCC("hostname does not match the hostname of the server");
+
+	if (failures & NE_SSL_UNTRUSTED)
+		dbgCC("authority which signed the certificate is not trusted");
+
+	if (failures & NE_SSL_BADCHAIN)
+		dbgCC("certificate chain contained a certificate other than the server cert");
+
+	if (failures & NE_SSL_REVOKED)
+		dbgCC("certificate has been revoked");
+
+#endif  /* ContactCards_DEBUG */
+
 	trust = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 
 	switch(trust){
