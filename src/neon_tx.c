@@ -689,11 +689,8 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
 	dbgCC("[%s] connecting to a oAuth-Server\n", __func__);
 	if(strlen(oAuthGrant) == 1){
-		char		*newuser = NULL;
-		newuser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
 		ret = OAUTH_GRANT_FAILURE;
-		dialogRequestGrant(ptr, serverID, oAuthEntity, newuser);
-		free(newuser);
+		dialogRequestGrant(ptr, serverID, oAuthEntity);
 	} else {
 		dbgCC("[%s] there is already a grant\n", __func__);
 	}

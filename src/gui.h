@@ -39,7 +39,7 @@ extern void listAppend(GtkWidget *list, gchar *text, guint id);
 extern void comboAppend(GtkListStore *store, gchar *text, guint id);
 extern void listFlush(GtkWidget *list);
 extern void comboFlush(GtkListStore *store);
-extern void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser);
+extern void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity);
 
 /**
  * struct ContactCards_pref	- structure for handling the preference dialog

@@ -1272,7 +1272,7 @@ GtkWidget *comboInit(sqlite3 *ptr){
  * 
  * This is required for OAuth
  */
-void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity, char *newuser){
+void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
 	printfunc(__func__);
 
 	GtkWidget			*dialog, *area, *box, *label;
