@@ -105,7 +105,7 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 	char				*path = NULL;
 	char				*certdata = NULL;
 	GError				*error = NULL;
-	int					i = 0;
+	unsigned int		i = 0;
 
 	serverDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
 	fileName = g_strconcat(serverDesc, ".pem", NULL);

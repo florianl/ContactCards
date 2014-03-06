@@ -629,7 +629,7 @@ static char *replaceAntiquatedLine(char *vCard, char *pattern, char *newLine){
 	const char	*end;
 	const char *p = vCard;
 
-	int			i = 0;
+	unsigned int	i = 0;
 	int			k = 0;
 	int			sPos = 0;
 
