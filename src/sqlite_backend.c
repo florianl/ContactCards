@@ -22,14 +22,14 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
 	ret = sqlite3_step(vm);
 
 	if (ret != SQLITE_DONE){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		dbgCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
