@@ -189,19 +189,24 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		url = getSingleChar(data->db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
 
-		issued = getSingleChar(data->db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
-		if(issued == NULL) issued = "";
-		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
+		gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 
-		issuer = getSingleChar(data->db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
-		if(issuer == NULL) issuer = "";
-		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
+		if(countElements(data->db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
 
-		res = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", selID, "", "");
-		if(res == ContactCards_DIGEST_TRUSTED){
-			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
-		} else {
-			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+			issued = getSingleChar(data->db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
+			if(issued == NULL) issued = "";
+			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
+
+			issuer = getSingleChar(data->db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
+			if(issuer == NULL) issuer = "";
+			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
+
+			res = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", selID, "", "");
+			if(res == ContactCards_DIGEST_TRUSTED){
+				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
+			} else {
+				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+			}
 		}
 	}
 	
