@@ -509,6 +509,8 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	free(davBase);
 
+	fillCombo(ptr, comboList);
+
 	return;
 }
 
