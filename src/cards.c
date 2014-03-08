@@ -620,7 +620,8 @@ char *getSingleCardAttribut(int type, char *card){
 }
 
 /**
- * 
+ * replaceAntiquatedLine - replaces a line of a vCard with a new value
+ * This function only works for values which occur only once
  */
 static char *replaceAntiquatedLine(char *vCard, char *pattern, char *newLine){
 	printfunc(__func__);
