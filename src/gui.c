@@ -99,6 +99,15 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	cleanUpRequest(data->db, buffers->srvID, 0);
 	fillList(data->db, 3, 0, buffers->srvPrefList);
 	fillList(data->db, 1, 0, addressbookList);
+
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), "", -1);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), "", -1);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->userBuf), "", -1);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
+
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
+	gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 }
 
 /**
@@ -207,6 +216,10 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			} else {
 				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 			}
+		} else {
+			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
+			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
+			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
 	}
 	
