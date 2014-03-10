@@ -848,6 +848,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 
 	switch(stack->statuscode){
 		case 201:
+		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
 			break;
@@ -899,7 +900,8 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
 		stack = serverRequest(DAV_REQ_PUT_NEW_CONTACT, srvID, newID, sess, ptr);
 	}
 	switch(stack->statuscode){
-		case 200 ... 207:
+		case 201:
+		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
 			break;
