@@ -659,12 +659,16 @@ nextLoop:
 	if(pattern[0] == '\n')
 		sPos++;
 
-	k= 0;
-	while(vCard[sPos + k] != '\n')
+	/*	sPos has to be before END:VCARD	*/
+	if(sPos > ((int) strlen(vCard) - 11)){
+		sPos = (int) strlen(vCard) - 11;
+	} else {
+		k= 0;
+		while(vCard[sPos + k] != '\n')
+			k++;
 		k++;
-	k++;
-
-	g_string_erase(data, sPos, k);
+		g_string_erase(data, sPos, k);
+	}
 
 	g_string_insert(data, sPos, newLine);
 
