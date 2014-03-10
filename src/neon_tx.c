@@ -60,22 +60,22 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 #ifdef ContactCards_DEBUG
 
 	if (failures & NE_SSL_NOTYETVALID)
-		dbgCC("certificate is not yet valid");
+		dbgCC("[%s] certificate is not yet valid", __func__);
 
 	if (failures & NE_SSL_EXPIRED)
-		dbgCC("certificate has expired");
+		dbgCC("[%s] certificate has expired", __func__);
 
 	if (failures & NE_SSL_IDMISMATCH)
-		dbgCC("hostname does not match the hostname of the server");
+		dbgCC("[%s] hostname does not match the hostname of the server", __func__);
 
 	if (failures & NE_SSL_UNTRUSTED)
-		dbgCC("authority which signed the certificate is not trusted");
+		dbgCC("[%s] authority which signed the certificate is not trusted", __func__);
 
 	if (failures & NE_SSL_BADCHAIN)
-		dbgCC("certificate chain contained a certificate other than the server cert");
+		dbgCC("[%s] certificate chain contained a certificate other than the server cert", __func__);
 
 	if (failures & NE_SSL_REVOKED)
-		dbgCC("certificate has been revoked");
+		dbgCC("[%s] certificate has been revoked", __func__);
 
 #endif  /* ContactCards_DEBUG */
 
