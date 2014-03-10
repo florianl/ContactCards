@@ -650,7 +650,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1) == 1){
 		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
-		newID = getSingleInt(((ContactCards_add_t *)trans)->db, "contacts", "contactID", 12, "addressbookID", addrID, "vCard", vCard);
+		newID = sqlite3_last_insert_rowid(((ContactCards_add_t *)trans)->db);
 	} else {
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
 		newID = ((ContactCards_add_t *)trans)->editID;

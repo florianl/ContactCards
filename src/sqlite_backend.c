@@ -796,7 +796,7 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 	free(cardPath);
 	free(path);
 
-	newID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "vCard", card);
+	newID = sqlite3_last_insert_rowid(ptr);
 
 	setDisplayname(ptr, newID, card);
 
