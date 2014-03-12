@@ -636,20 +636,21 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 	GtkWidget		*card;
 	int				addrID;
 	int				newID;
+	int				oldID = ((ContactCards_add_t *)trans)->editID;
 
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 
 	addrID = ((ContactCards_add_t *)trans)->aID;
 
-	if(((ContactCards_add_t *)trans)->editID){
-		dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", ((ContactCards_add_t *)trans)->editID, "", "", "", "", "", 0);
+	if(oldID){
+		dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
 		vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
 	} else {
 		vCard = buildCard(((ContactCards_add_t *)trans)->list);
 	}
 
-	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1) == 1){
-		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", ((ContactCards_add_t *)trans)->editID);
+	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1, oldID) == 1){
+		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", oldID);
 		newID = sqlite3_last_insert_rowid(((ContactCards_add_t *)trans)->db);
 	} else {
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));

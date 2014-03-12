@@ -825,7 +825,7 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 /**
  * postPushCard - send a new vCard using RFC 5995
  */
-int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID){
+int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID, int oldID){
 	printfunc(__func__);
 
 	char					*postURI = NULL;
@@ -848,6 +848,8 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 
 	switch(stack->statuscode){
 		case 201:
+			dbgCC("[%s] 201\n", __func__);
+			serverDelContact(ptr, sess, srvID, oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
@@ -862,7 +864,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 /**
  * postPushCard - send a new vCard to a server
  */
-int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
+int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	printfunc(__func__);
 
 	ne_session	 			*sess = NULL;
@@ -901,13 +903,15 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing){
 	}
 	switch(stack->statuscode){
 		case 201:
+			dbgCC("[%s] 201\n", __func__);
+			serverDelContact(ptr, sess, srvID, oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/
-			if(postPushCard(ptr, sess, srvID, addrBookID, newID) != 1){
+			if(postPushCard(ptr, sess, srvID, addrBookID, newID, oldID) != 1){
 				ret = -1;
 			} else {
 				ret = 1;
