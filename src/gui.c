@@ -572,7 +572,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_link_button_new(g_strstrip(value));
+					label = gtk_link_button_new (g_strcompress((g_strstrip(value))));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
@@ -592,7 +592,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_link_button_new (g_strstrip(value));
+					label = gtk_link_button_new (g_strcompress((g_strstrip(value))));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
