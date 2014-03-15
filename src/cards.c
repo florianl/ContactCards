@@ -674,6 +674,112 @@ nextLoop:
 
 	return data->str;
 }
+
+/**
+ * removeValue - remove a value from vCard
+ */
+char *removeValue(char *card, char *value){
+	printfunc(__func__);
+
+	char			*new = NULL;
+	GString			*data;
+	const char		*end;
+	const char 		*p = card;
+
+	unsigned int	i = 0;
+	int				sPos = 0;
+	int				ePos = 0;
+
+	data = g_string_new(NULL);
+	data = g_string_assign(data, card);
+
+	end = card + strlen(card) - strlen(value);
+
+	sPos = 0;
+	while(p <= end && *p){
+		for(i=0; i < strlen(value); i++){
+			if(p[i] != value[i]){
+				goto nextLoop;
+			}
+		}
+		break;
+nextLoop:
+		p++;
+		sPos++;
+	}
+
+	for(i=0;data->str[sPos-i] != '\n';i++);
+	sPos = sPos -i;
+
+	for(i=0;data->str[sPos+1+i] != '\n';i++);
+	ePos = sPos +1 +i;
+
+	data = g_string_erase(data, sPos, ePos-sPos);
+
+	new = g_strdup(data->str);
+	g_free(card);
+	g_string_free(data, TRUE);
+
+	return new;
+}
+
+/**
+ * valueCmp - compares the values of two lists
+ */
+int valueCmp(gconstpointer a, gconstpointer b){
+	printfunc(__func__);
+
+	return g_strcmp0((char *)a, (char *)b);
+}
+
+/**
+ * mergeMultipleItems - merges items, which can occur multiple times, into
+ * the vCard
+ */
+char *mergeMultipleItems(char *old, char *new){
+	printfunc(__func__);
+
+	GSList				*present;
+	GSList				*future;
+
+	/*	Phone	*/
+	present = getMultipleCardAttribut(CARDTYPE_TEL, old);
+	future = getMultipleCardAttribut(CARDTYPE_TEL, new);
+	if (g_slist_length(present) > 1){
+		while(present){
+				GSList				*next = present->next;
+				char				*value = present->data;
+				if(value != NULL){
+					GSList			*strike;
+					dbgCC("\t%s\t", g_strstrip(value));
+					strike = g_slist_find_custom(future, value, valueCmp);
+					if(strike != NULL){
+						future = g_slist_remove_link(future, strike);
+					} else {
+						old = removeValue(old, value);
+					}
+				}
+				present = next;
+		}
+	}
+	if (g_slist_length(future) > 1){
+		dbgCC("there is something left\n");
+		while(future){
+			GSList				*next = future->next;
+			char				*value = future->data;
+			if(value != NULL){
+				dbgCC("%s\n", value);
+			}
+			future = next;
+//			old = appendAttribut(CARDTYPE_TEL, future);
+		}
+	}
+	g_slist_free(future);
+	g_slist_free(present);
+
+	return old;
+}
+
 /**
  * mergeCards - merge the old vCard from the database with the new changes
  * This function is needed to keep the stuff alive which is not
@@ -684,9 +790,11 @@ char *mergeCards(GSList *new, char *old){
 
 	char			*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	GSList			*next;
-	GString			*value;
+	GString			*value, *cmp;
 
 	firstN = lastN = middleN = prefixN = suffixN = NULL;
+
+	cmp = g_string_new(NULL);
 
 	while(new){
 		ContactCards_item_t		*item;
@@ -711,6 +819,20 @@ char *mergeCards(GSList *new, char *old){
 			case CARDTYPE_FN_SUFFIX:
 				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
 				break;
+
+			case CARDTYPE_ADR:
+				g_string_append(cmp, buildAdr(item->element));
+				break;
+			case CARDTYPE_TEL:
+				g_string_append(cmp, buildTele(item->element));
+				break;
+			case CARDTYPE_EMAIL:
+				g_string_append(cmp, buildEMail(item->element));
+				break;
+			case CARDTYPE_URL:
+				g_string_append(cmp, buildUrl(item->element));
+				break;
+
 			default:
 				break;
 		}
@@ -760,6 +882,12 @@ stepForward:
 	g_string_append(value, "//EN\r\n");
 	old = replaceAntiquatedLine(old, "\nPRODID:", value->str);
 	g_string_free(value, TRUE);
+
+	dbgCC("\tcmp\n%s\n", cmp->str);
+	dbgCC("\tnew\n%s\n", old);
+
+	old = mergeMultipleItems(old, cmp->str);
+	g_string_free(cmp, TRUE);
 
 	return old;
 }
