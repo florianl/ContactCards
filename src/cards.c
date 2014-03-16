@@ -676,9 +676,50 @@ nextLoop:
 }
 
 /**
+ * appendAttribut - add a new value to a card
+ */
+static char *appendAttribut(int type, char *card, char *content){
+	printfunc(__func__);
+
+	char			*new = NULL;
+	char			*value = NULL;
+	GString			*data;
+
+	data = g_string_new(NULL);
+	data = g_string_assign(data, card);
+
+	switch(type){
+		case CARDTYPE_TEL:
+			value = g_strdup_printf("TEL:%s\r\n", content);
+			break;
+		case CARDTYPE_EMAIL:
+			value = g_strdup_printf("EMAIL:%s\r\n", content);
+			break;
+		case CARDTYPE_URL:
+			value = g_strdup_printf("URL:%s\r\n", content);
+			break;
+		default:
+			g_string_free(data, TRUE);
+			return card;
+	}
+
+	/* Insert the new value before END:VCARD	*/
+	data = g_string_insert(data, data->len - 11, value);
+
+	dbgCC("%s\n", data->str);
+
+	new = g_strdup(data->str);
+	g_free(card);
+	g_free(value);
+	g_string_free(data, TRUE);
+
+	return new;
+}
+
+/**
  * removeValue - remove a value from vCard
  */
-char *removeValue(char *card, char *value){
+static char *removeValue(char *card, char *value){
 	printfunc(__func__);
 
 	char			*new = NULL;
@@ -769,9 +810,9 @@ char *mergeMultipleItems(char *old, char *new){
 			char				*value = future->data;
 			if(value != NULL){
 				dbgCC("%s\n", value);
+				old = appendAttribut(CARDTYPE_TEL, old, value);
 			}
 			future = next;
-//			old = appendAttribut(CARDTYPE_TEL, future);
 		}
 	}
 	g_slist_free(future);
