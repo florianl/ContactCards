@@ -653,8 +653,8 @@ nextLoop:
 	}
 
 	if(i == (strlen(vCard) - strlen(pattern))){
-		dbgCC("[%s] didn't find %s\n", __func__, pattern);
-		return NULL;
+		/* didn't find it	*/
+		return vCard;
 	}
 	if(pattern[0] == '\n')
 		sPos++;
@@ -676,56 +676,15 @@ nextLoop:
 }
 
 /**
- * appendAttribut - add a new value to a card
- */
-static char *appendAttribut(int type, char *card, char *content){
-	printfunc(__func__);
-
-	char			*new = NULL;
-	char			*value = NULL;
-	GString			*data;
-
-	data = g_string_new(NULL);
-	data = g_string_assign(data, card);
-
-	switch(type){
-		case CARDTYPE_TEL:
-			value = g_strdup_printf("TEL:%s\r\n", content);
-			break;
-		case CARDTYPE_EMAIL:
-			value = g_strdup_printf("EMAIL:%s\r\n", content);
-			break;
-		case CARDTYPE_URL:
-			value = g_strdup_printf("URL:%s\r\n", content);
-			break;
-		default:
-			g_string_free(data, TRUE);
-			return card;
-	}
-
-	/* Insert the new value before END:VCARD	*/
-	data = g_string_insert(data, data->len - 11, value);
-
-	dbgCC("%s\n", data->str);
-
-	new = g_strdup(data->str);
-	g_free(card);
-	g_free(value);
-	g_string_free(data, TRUE);
-
-	return new;
-}
-
-/**
  * removeValue - remove a value from vCard
  */
 static char *removeValue(char *card, char *value){
 	printfunc(__func__);
 
 	char			*new = NULL;
+	char			*p;
+	char			*end;
 	GString			*data;
-	const char		*end;
-	const char 		*p = card;
 
 	unsigned int	i = 0;
 	int				sPos = 0;
@@ -734,26 +693,28 @@ static char *removeValue(char *card, char *value){
 	data = g_string_new(NULL);
 	data = g_string_assign(data, card);
 
-	end = card + strlen(card) - strlen(value);
+	p = g_strstr_len(card, strlen(card), value);
 
-	sPos = 0;
-	while(p <= end && *p){
-		for(i=0; i < strlen(value); i++){
-			if(p[i] != value[i]){
-				goto nextLoop;
-			}
-		}
-		break;
-nextLoop:
+	if(!p){
+		/*	didn't find value in card	*/
+		return card;
+	}
+	end = card + strlen(card);
+	while(p <= end && *p) {
+		i++;
 		p++;
-		sPos++;
 	}
 
-	for(i=0;data->str[sPos-i] != '\n';i++);
+	sPos = data->len - i;
+
+	for(i=0;(data->str[sPos-i] != '\n') && (sPos-i > 0) ;i++);
 	sPos = sPos -i;
 
 	for(i=0;data->str[sPos+1+i] != '\n';i++);
-	ePos = sPos +1 +i;
+	ePos = sPos + 1 +i;
+
+	if(sPos == 0)
+		ePos++;
 
 	data = g_string_erase(data, sPos, ePos-sPos);
 
@@ -773,6 +734,25 @@ int valueCmp(gconstpointer a, gconstpointer b){
 	return g_strcmp0((char *)a, (char *)b);
 }
 
+static inline int findData(GSList *list, char *data){
+	printfunc(__func__);
+
+	int			ret = 0;
+
+	while(list){
+		GSList				*next = list->next;
+		char				*value = list->data;
+		if(value != NULL){
+			if(g_strstr_len(value, strlen(value), data) != NULL){
+				return 1;
+			}
+		}
+		list = next;
+	}
+
+	return ret;
+}
+
 /**
  * mergeMultipleItems - merges items, which can occur multiple times, into
  * the vCard
@@ -782,6 +762,7 @@ char *mergeMultipleItems(char *old, char *new){
 
 	GSList				*present;
 	GSList				*future;
+	GString				*data;
 
 	/*	Phone	*/
 	present = getMultipleCardAttribut(CARDTYPE_TEL, old);
@@ -791,11 +772,8 @@ char *mergeMultipleItems(char *old, char *new){
 				GSList				*next = present->next;
 				char				*value = present->data;
 				if(value != NULL){
-					GSList			*strike;
-					dbgCC("\t%s\t", g_strstrip(value));
-					strike = g_slist_find_custom(future, value, valueCmp);
-					if(strike != NULL){
-						future = g_slist_remove_link(future, strike);
+					if(findData(future, value) == 1){
+						new = removeValue(new, value);
 					} else {
 						old = removeValue(old, value);
 					}
@@ -803,20 +781,55 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	if (g_slist_length(future) > 1){
-		dbgCC("there is something left\n");
-		while(future){
-			GSList				*next = future->next;
-			char				*value = future->data;
-			if(value != NULL){
-				dbgCC("%s\n", value);
-				old = appendAttribut(CARDTYPE_TEL, old, value);
-			}
-			future = next;
+	g_slist_free(future);
+	g_slist_free(present);
+
+	/*	Url	*/
+	present = getMultipleCardAttribut(CARDTYPE_URL, old);
+	future = getMultipleCardAttribut(CARDTYPE_URL, new);
+	if (g_slist_length(present) > 1){
+		while(present){
+				GSList				*next = present->next;
+				char				*value = present->data;
+				if(value != NULL){
+					if(findData(future, value) == 1){
+						new = removeValue(new, value);
+					} else {
+						old = removeValue(old, value);
+					}
+				}
+				present = next;
 		}
 	}
 	g_slist_free(future);
 	g_slist_free(present);
+
+	/*	EMail	*/
+	present = getMultipleCardAttribut(CARDTYPE_EMAIL, old);
+	future = getMultipleCardAttribut(CARDTYPE_EMAIL, new);
+	if (g_slist_length(present) > 1){
+		while(present){
+				GSList				*next = present->next;
+				char				*value = present->data;
+				if(value != NULL){
+					if(findData(future, value) == 1){
+						new = removeValue(new, value);
+					} else {
+						old = removeValue(old, value);
+					}
+				}
+				present = next;
+		}
+	}
+	g_slist_free(future);
+	g_slist_free(present);
+
+	data = g_string_new(NULL);
+	data = g_string_assign(data, old);
+	g_free(old);
+	data = g_string_insert(data, data->len - 11, new);
+
+	old = g_strdup(data->str);
 
 	return old;
 }
@@ -924,11 +937,8 @@ stepForward:
 	old = replaceAntiquatedLine(old, "\nPRODID:", value->str);
 	g_string_free(value, TRUE);
 
-	dbgCC("\tcmp\n%s\n", cmp->str);
-	dbgCC("\tnew\n%s\n", old);
-
 	old = mergeMultipleItems(old, cmp->str);
-	g_string_free(cmp, TRUE);
+	g_string_free(cmp, FALSE);
 
 	return old;
 }
