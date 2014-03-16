@@ -195,7 +195,7 @@ stepForward:
 		list = next;
 	}
 
-	g_string_append(tmp, "\n");
+	g_string_append(tmp, "\r\n");
 	url = g_strndup(tmp->str, tmp->len);
 
 stepEmpty:
@@ -241,7 +241,7 @@ stepForward:
 		list = next;
 	}
 
-	g_string_append(tmp, "\n");
+	g_string_append(tmp, "\r\n");
 	mail = g_strndup(tmp->str, tmp->len);
 
 	g_string_free(tmp, TRUE);
@@ -289,7 +289,7 @@ stepForward:
 		list = next;
 	}
 
-	g_string_append(tmp, "\n");
+	g_string_append(tmp, "\r\n");
 	tel = g_strndup(tmp->str, tmp->len);
 
 	g_string_free(tmp, TRUE);
