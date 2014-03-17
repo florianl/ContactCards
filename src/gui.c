@@ -348,7 +348,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("post office box"));
 	input = gtk_entry_new_with_buffer(boxBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	boxItem->itemID = CARDTYPE_ADR_OFFICE_BOX;
@@ -357,7 +356,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("extended address"));
 	input = gtk_entry_new_with_buffer(extBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	extItem->itemID = CARDTYPE_ADR_EXT_ADDR;
@@ -366,7 +364,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("street"));
 	input = gtk_entry_new_with_buffer(streetBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	streetItem->itemID = CARDTYPE_ADR_STREET;
@@ -375,7 +372,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("city"));
 	input = gtk_entry_new_with_buffer(cityBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	cityItem->itemID = CARDTYPE_ADR_CITY;
@@ -384,7 +380,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("region"));
 	input = gtk_entry_new_with_buffer(regBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	regItem->itemID = CARDTYPE_ADR_REGION;
@@ -393,7 +388,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("zip"));
 	input = gtk_entry_new_with_buffer(zipBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	zipItem->itemID = CARDTYPE_ADR_ZIP;
@@ -402,7 +396,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("country"));
 	input = gtk_entry_new_with_buffer(countryBuf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	countryItem->itemID = CARDTYPE_ADR_COUNTRY;
@@ -438,7 +431,6 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 	gtk_entry_buffer_set_text(buf, g_strstrip(value), -1);
 
 	input = gtk_entry_new_with_buffer(buf);
-	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 2, 1);
 	item->itemID = type;
 	item->element = buf;
@@ -626,46 +618,63 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 }
 
 /**
+ * pushingCard - Threadfunction to push a vCard
+ */
+static void *pushingCard(void *trans){
+	printfunc(__func__);
+
+	ContactCards_trans_t		*data = trans;
+	ContactCards_add_t			*value = data->element;
+	char						*vCard = NULL;
+	char						*dbCard = NULL;
+	int							oldID = value->editID;
+	int							addrID = value->aID;
+
+	g_mutex_lock(&mutex);
+
+	if(oldID){
+		dbCard = getSingleChar(data->db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
+		vCard = mergeCards(value->list, dbCard);
+	} else {
+		vCard = buildCard(value->list);
+	}
+
+	if(pushCard(data->db, vCard, addrID, 1, oldID) == 1){
+		dbRemoveItem(data->db, "contacts", 2, "", "", "contactID", oldID);
+	} else {
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
+	}
+
+	g_slist_free_full(value->list, g_free);
+	g_free(trans);
+	g_free(vCard);
+	g_free(dbCard);
+
+	g_mutex_unlock(&mutex);
+	return NULL;
+}
+
+/**
  * contactEditSave - save the changes on a vCard
  */
 static void contactEditSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	char			*vCard;
-	char			*dbCard;
-	GtkWidget		*card;
-	int				addrID;
-	int				newID;
-	int				oldID = ((ContactCards_add_t *)trans)->editID;
+	ContactCards_trans_t		*buff = NULL;
+	GError						*error = NULL;
 
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 
-	addrID = ((ContactCards_add_t *)trans)->aID;
+	buff = g_new(ContactCards_trans_t, 1);
+	buff->db = ((ContactCards_add_t *)trans)->db;
+	buff->element = (ContactCards_add_t *)trans;
 
-	if(oldID){
-		dbCard = getSingleChar(((ContactCards_add_t *)trans)->db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
-		vCard = mergeCards(((ContactCards_add_t *)trans)->list, dbCard);
-	} else {
-		vCard = buildCard(((ContactCards_add_t *)trans)->list);
+	g_thread_try_new("pushing vCard", pushingCard, buff, &error);
+	if(error){
+		dbgCC("[%s] something has gone wrong with threads\n", __func__);
+		dbgCC("%s\n", error->message);
 	}
 
-	if(pushCard(((ContactCards_add_t *)trans)->db, vCard, addrID, 1, oldID) == 1){
-		dbRemoveItem(((ContactCards_add_t *)trans)->db, "contacts", 2, "", "", "contactID", oldID);
-		newID = sqlite3_last_insert_rowid(((ContactCards_add_t *)trans)->db);
-	} else {
-		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
-		newID = ((ContactCards_add_t *)trans)->editID;
-	}
-
-	cleanCard(((ContactCards_add_t *)trans)->grid);
-	card = buildNewCard(((ContactCards_add_t *)trans)->db, newID);
-	gtk_widget_show_all(card);
-	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
-
-	fillList(((ContactCards_add_t *)trans)->db, 2, addrID, contactList);
-
-	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
-	g_free(trans);
 }
 
 /**

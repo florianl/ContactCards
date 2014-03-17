@@ -875,8 +875,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	ContactCards_trans_t	*trans = NULL;
 	ContactCards_stack_t	*stack;
 
-	g_mutex_lock(&mutex);
-
 	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
 	if(isOAuth){
@@ -928,7 +926,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	if(ret == -1)
 		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 
-	g_mutex_unlock(&mutex);
 	return ret;
 }
 
