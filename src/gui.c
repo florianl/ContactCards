@@ -662,6 +662,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	ContactCards_trans_t		*buff = NULL;
 	GError						*error = NULL;
+	GThread						*thread;
 
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 
@@ -669,11 +670,12 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 	buff->db = ((ContactCards_add_t *)trans)->db;
 	buff->element = (ContactCards_add_t *)trans;
 
-	g_thread_try_new("pushing vCard", pushingCard, buff, &error);
+	thread = g_thread_try_new("pushing vCard", pushingCard, buff, &error);
 	if(error){
 		dbgCC("[%s] something has gone wrong with threads\n", __func__);
 		dbgCC("%s\n", error->message);
 	}
+	g_thread_unref(thread);
 
 }
 
@@ -1167,6 +1169,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 	GtkWidget					*statusBar;
 	GError		 				*error = NULL;
 	ContactCards_trans_t		*buff = NULL;
+	GThread						*thread;
 
 	statusBar = data->element;
 
@@ -1175,11 +1178,12 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 		buff->db = data->db;
 		buff->element = GINT_TO_POINTER(selectedSrv);
 		buff->element2 = statusBar;
-		g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+		thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
 			dbgCC("[%s] something has gone wrong with threads\n", __func__);
 			dbgCC("%s\n", error->message);
 		}
+		g_thread_unref(thread);
 	} else {
 
 		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "");
@@ -1195,11 +1199,12 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			buff->db = data->db;
 			buff->element = GINT_TO_POINTER(serverID);
 			buff->element2 = statusBar;
-			g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+			thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 			if(error){
 				dbgCC("[%s] something has gone wrong with threads\n", __func__);
 				dbgCC("%s\n", error->message);
 			}
+			g_thread_unref(thread);
 			retList = next;
 		}
 		g_slist_free(retList);
