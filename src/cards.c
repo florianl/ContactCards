@@ -676,6 +676,40 @@ nextLoop:
 }
 
 /**
+ * removeGroupMember - remove private group member of a value
+ */
+GString *removeGroupMember(GString *data, GString *group){
+	printfunc(__func__);
+
+	char			*p = NULL;
+	char			*end = NULL;
+	int				i = 0 ;
+	int				sPos = 0;
+	int				ePos = 0;
+
+	p = g_strstr_len(data->str, data->len, group->str);
+
+	while(p){
+		end = data->str + data->len;
+		while(p <= end && *p) {
+			i++;
+			p++;
+		}
+		sPos = data->len - i;
+
+		for(i=0;data->str[sPos+1+i] != '\n';i++);
+		ePos = sPos + 1 +i;
+
+		data = g_string_erase(data, sPos, ePos-sPos);
+
+		p = NULL;
+		p = g_strstr_len(data->str, data->len, group->str);
+	}
+
+	return data;
+}
+
+/**
  * removeValue - remove a value from vCard
  */
 static char *removeValue(char *card, char *value){
@@ -685,10 +719,12 @@ static char *removeValue(char *card, char *value){
 	char			*p;
 	char			*end;
 	GString			*data;
+	GString			*group;
 
 	unsigned int	i = 0;
 	int				sPos = 0;
 	int				ePos = 0;
+	int				isGroup = 0;
 
 	data = g_string_new(NULL);
 	data = g_string_assign(data, card);
@@ -707,7 +743,12 @@ static char *removeValue(char *card, char *value){
 
 	sPos = data->len - i;
 
-	for(i=0;(data->str[sPos-i] != '\n') && (sPos-i > 0) ;i++);
+	for(i=0;(data->str[sPos-i] != '\n') && (sPos-i > 0) ;i++){
+		/* search for group members	*/
+		if(data->str[sPos-i] == '.'){
+			isGroup = 1;
+		}
+	}
 	sPos = sPos -i;
 
 	for(i=0;data->str[sPos+1+i] != '\n';i++);
@@ -716,7 +757,19 @@ static char *removeValue(char *card, char *value){
 	if(sPos == 0)
 		ePos++;
 
+	if(isGroup){
+		group = g_string_new(NULL);
+		for(i=0; data->str[sPos+i] != '.' ;i++)
+			group = g_string_append_c(group, data->str[sPos+i]);
+		group = g_string_append_c(group, '.');
+	}
+
 	data = g_string_erase(data, sPos, ePos-sPos);
+
+	if(isGroup){
+		data = removeGroupMember(data, group);
+		g_string_free(group, TRUE);
+	}
 
 	new = g_strdup(data->str);
 	g_free(card);
