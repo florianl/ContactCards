@@ -598,8 +598,14 @@ sendAgain:
 				updateContactUri(ptr, itemID, (char *)ne_get_response_header(req, "Location"));
 			}
 			break;
+		case 204:
+			if(method == DAV_REQ_PUT_CONTACT){
+				setSingleChar(ptr, "contacts", "etag", (char *)ne_get_response_header(req, "ETag"), "contactID", itemID);
+			}
+			break;
 		case 200:
-		case 202 ... 206:
+		case 202 ... 203:
+		case 205 ... 206:
 		case 208 ... 299:
 			dbgCC("==\t2xx Success\t==\n");
 			break;
