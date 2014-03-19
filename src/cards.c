@@ -877,6 +877,26 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free(future);
 	g_slist_free(present);
 
+	/*	Postal Address	*/
+	present = getMultipleCardAttribut(CARDTYPE_ADR, old);
+	future = getMultipleCardAttribut(CARDTYPE_ADR, new);
+	if (g_slist_length(present) > 1){
+		while(present){
+				GSList				*next = present->next;
+				char				*value = present->data;
+				if(value != NULL){
+					if(findData(future, value) == 1){
+						new = removeValue(new, value);
+					} else {
+						old = removeValue(old, value);
+					}
+				}
+				present = next;
+		}
+	}
+	g_slist_free(future);
+	g_slist_free(present);
+
 	data = g_string_new(NULL);
 	data = g_string_assign(data, old);
 	g_free(old);
