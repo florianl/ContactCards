@@ -689,7 +689,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	printfunc(__func__);
 
 	GtkWidget			*card, *label, *sep, *input;
-//	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal;
+	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal;
 	GSList				*list, *items;
 	GtkWidget			*discardBtn, *saveBtn, *row;
 	GtkEntryBuffer		*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
@@ -751,13 +751,13 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	saveBtn = gtk_button_new_with_label(_("Save"));
 	gtk_box_pack_end(GTK_BOX(row), discardBtn, FALSE, FALSE, 1);
 	gtk_box_pack_end(GTK_BOX(row), saveBtn, FALSE, FALSE, 1);
-	gtk_grid_attach(GTK_GRID(card), row, 0, line++, 5, 1);
+	gtk_grid_attach(GTK_GRID(card), row, 0, line++, 8, 1);
 
 	/*	Naming	*/
 	label = gtk_label_new(_("Prefix"));
 	input = gtk_entry_new_with_buffer(prefixBuf);
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 3, 1);
 	prefixItem->itemID = CARDTYPE_FN_PREFIX;
 	prefixItem->element = prefixBuf;
 	items = g_slist_append(items, prefixItem);
@@ -797,11 +797,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	/*	Phone	*/
 	label = gtk_label_new(_("Phone"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-//	addPhone = gtk_button_new_from_icon_name("list-add", 1);
-//	gtk_widget_set_tooltip_text(GTK_WIDGET(addPhone), _("Add a phone"));
+	addPhone = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addPhone), _("Add a phone"));
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-//	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
+	gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
 		if (g_slist_length(list) > 1){
@@ -821,11 +821,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	/*	Address	*/
 	label = gtk_label_new(_("Address"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-//	addPostal = gtk_button_new_from_icon_name("list-add", 1);
-//	gtk_widget_set_tooltip_text(GTK_WIDGET(addPostal), _("Add a postal address"));
+	addPostal = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addPostal), _("Add a postal address"));
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-//	gtk_grid_attach(GTK_GRID(card), addPostal, 3, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), addPostal, 3, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
 		if (g_slist_length(list) > 1){
@@ -845,11 +845,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	/*	EMAIL	*/
 	label = gtk_label_new(_("EMail"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-//	addMail = gtk_button_new_from_icon_name("list-add", 1);
-//	gtk_widget_set_tooltip_text(GTK_WIDGET(addMail), _("Add a EMail"));
+	addMail = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addMail), _("Add a EMail"));
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-//	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
 		if (g_slist_length(list) > 1){
@@ -869,11 +869,11 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	/*	URL	*/
 	label = gtk_label_new(_("URL"));
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-//	addUrl = gtk_button_new_from_icon_name("list-add", 1);
-//	gtk_widget_set_tooltip_text(GTK_WIDGET(addUrl), _("Add a Url"));
+	addUrl = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addUrl), _("Add a Url"));
 	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
-//	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 2, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_URL, vData);
 		if (g_slist_length(list) > 1){
@@ -1958,7 +1958,7 @@ void guiInit(sqlite3 *ptr){
 	/*		Addressbookstuff		*/
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(addressbookWindow, 128, -1);
+	gtk_widget_set_size_request(addressbookWindow, 160, -1);
 	addressbookList = gtk_tree_view_new();
 	listInit(addressbookList);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(addressbookList), FALSE);
@@ -1967,12 +1967,10 @@ void guiInit(sqlite3 *ptr){
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(contactWindow, 192, -1);
+	gtk_widget_set_size_request(contactWindow, 160, -1);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	emptyCard = gtk_grid_new();
-	gtk_widget_set_hexpand(GTK_WIDGET(emptyCard), TRUE);
-	gtk_widget_set_vexpand(GTK_WIDGET(emptyCard), TRUE);
 	gtk_widget_set_halign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(GTK_WIDGET(emptyCard), GTK_ALIGN_CENTER);
 	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
