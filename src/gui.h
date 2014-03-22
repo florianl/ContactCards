@@ -79,6 +79,15 @@ typedef struct ContactCards_add {
 } ContactCards_add_t;
 
 /**
+ * struct ContactCards_new_Value	- structure for adding a new value to a vCard
+ */
+typedef struct ContactCards_new_Value {
+	GtkWidget			*grid;
+	GSList				*list;
+	int					type;
+} ContactCards_new_Value_t;
+
+/**
  * struct ContactCards_add	- helping structure for creating a new vCard
  */
 typedef struct ContactCards_item {
