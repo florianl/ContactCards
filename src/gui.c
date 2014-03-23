@@ -438,6 +438,9 @@ static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
 		case CARDTYPE_URL:
 			label = gtk_label_new(_("URL"));
 			break;
+		case CARDTYPE_IM:
+			label = gtk_label_new(_("IM"));
+			break;
 		default:
 			label = gtk_label_new(NULL);
 			break;
@@ -740,7 +743,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	printfunc(__func__);
 
 	GtkWidget			*card, *label, *sep, *input;
-	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal;
+	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal, *addIM;
 	GSList				*list, *items;
 	GtkWidget			*discardBtn, *saveBtn, *row;
 	GtkEntryBuffer		*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
@@ -751,7 +754,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	ContactCards_add_t				*transNew = NULL;
 	ContactCards_new_Value_t		*transPhone = NULL,
 									*transUrl = NULL,
-									*transEMail = NULL;
+									*transEMail = NULL,
+									*transIM = NULL;
 	ContactCards_item_t				*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
 
 	card = gtk_grid_new();
@@ -765,6 +769,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	transPhone = g_new(ContactCards_new_Value_t, 1);
 	transUrl = g_new(ContactCards_new_Value_t, 1);
 	transEMail = g_new(ContactCards_new_Value_t, 1);
+	transIM = g_new(ContactCards_new_Value_t, 1);
 	items = g_slist_alloc();
 
 	prefixItem = g_new(ContactCards_item_t, 1);
@@ -956,6 +961,33 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	transUrl->type = CARDTYPE_URL;
 	line++;
 
+	/*	IM	*/
+	label = gtk_label_new(_("IM"));
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	addIM = gtk_button_new_from_icon_name("list-add", 1);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addUrl), _("Add a IM"));
+	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), addIM, 3, line++, 1, 1);
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_IM, vData);
+		if (g_slist_length(list) > 1){
+			while(list){
+					GSList				*next = list->next;
+					char				*value = list->data;
+					if(value != NULL){
+						line = contactEditSingleItem(card, items, CARDTYPE_IM, line, g_strstrip(value));
+					}
+					list = next;
+			}
+		}
+		g_slist_free(list);
+	}
+	transIM->grid = card;
+	transIM->list = items;
+	transIM->type = CARDTYPE_IM;
+	line++;
+
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactEditSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactEditDiscard), transNew);
@@ -963,6 +995,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	g_signal_connect(G_OBJECT(addPhone), "clicked", G_CALLBACK(contactNewSingleItem), transPhone);
 	g_signal_connect(G_OBJECT(addMail), "clicked", G_CALLBACK(contactNewSingleItem), transEMail);
 	g_signal_connect(G_OBJECT(addUrl), "clicked", G_CALLBACK(contactNewSingleItem), transUrl);
+	g_signal_connect(G_OBJECT(addIM), "clicked", G_CALLBACK(contactNewSingleItem), transIM);
 
 	return card;
 }

@@ -54,6 +54,12 @@
 #define	CARDTYPE_CLASS			71
 #define	CARDTYPE_KEY			72
 
+/*
+ *	RFC 4770
+ */
+#define	CARDTYPE_IM				9910
+#define	CARDTYPE_IM_OPT			9911
+
 extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 extern GSList *getMultipleCardAttribut(int type, char *card);

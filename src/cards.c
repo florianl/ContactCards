@@ -157,112 +157,31 @@ stepEmpty:
 }
 
 /**
- * buildUrl - extract the Url of the user input
+ * buildSingleLine - builds a single line for a vCard
  */
-static char *buildUrl(GSList *list){
+static char *buildSingleLine(int type, GSList *list){
 	printfunc(__func__);
 
-	char				*url = "";
+	char				*line = "";
 	GSList				*next;
 	GString				*tmp;
 
 	tmp = g_string_new(NULL);
 
-	g_string_append(tmp, "URL");
-
-	while(list){
-		ContactCards_item_t		*item;
-		next = list->next;
-
-		if(!list->data){
-			goto stepForward;
-		}
-		item = (ContactCards_item_t *)list->data;
-		switch(item->itemID){
-			case CARDTYPE_EMAIL_OPT:
-				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
-					break;
-				g_string_append(tmp,";TYPE=");
-				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
-				break;
-			default:
-				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
-					goto stepEmpty;
-				g_string_append(tmp,":");
-				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
-		}
-stepForward:
-		list = next;
+	switch(type){
+		case CARDTYPE_TEL:
+			g_string_append(tmp, "TEL");
+			break;
+		case CARDTYPE_EMAIL:
+			g_string_append(tmp, "EMAIL");
+			break;
+		case CARDTYPE_URL:
+			g_string_append(tmp, "URL");
+			break;
+		case CARDTYPE_IM:
+			g_string_append(tmp, "IMPP");
+			break;
 	}
-
-	g_string_append(tmp, "\r\n");
-	url = g_strndup(tmp->str, tmp->len);
-
-stepEmpty:
-	return url;
-}
-
-/**
- * buildEMail - extract the EMail of the user input
- */
-static char *buildEMail(GSList *list){
-	printfunc(__func__);
-
-	char				*mail = "";
-	GSList				*next;
-	GString				*tmp;
-
-	tmp = g_string_new(NULL);
-
-	g_string_append(tmp, "EMAIL");
-
-	while(list){
-		ContactCards_item_t		*item;
-		next = list->next;
-
-		if(!list->data){
-			goto stepForward;
-		}
-		item = (ContactCards_item_t *)list->data;
-		switch(item->itemID){
-			case CARDTYPE_EMAIL_OPT:
-				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
-					break;
-				g_string_append(tmp,";TYPE=");
-				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
-				break;
-			default:
-				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
-					goto stepEmpty;
-				g_string_append(tmp,":");
-				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
-		}
-stepForward:
-		list = next;
-	}
-
-	g_string_append(tmp, "\r\n");
-	mail = g_strndup(tmp->str, tmp->len);
-
-	g_string_free(tmp, TRUE);
-
-stepEmpty:
-	return mail;
-}
-
-/**
- * buildTele - extract the  telephone number of the user input
- */
-static char *buildTele(GSList *list){
-	printfunc(__func__);
-
-	char				*tel = "";
-	GSList				*next;
-	GString				*tmp;
-
-	tmp = g_string_new(NULL);
-
-	g_string_append(tmp, "TEL");
 
 	while(list){
 		ContactCards_item_t		*item;
@@ -290,12 +209,12 @@ stepForward:
 	}
 
 	g_string_append(tmp, "\r\n");
-	tel = g_strndup(tmp->str, tmp->len);
+	line = g_strndup(tmp->str, tmp->len);
 
 	g_string_free(tmp, TRUE);
 
 stepEmpty:
-	return tel;
+	return line;
 }
 
 /**
@@ -338,7 +257,7 @@ char *buildCard(GSList *list){
 				g_string_append(cardString, buildAdr(item->element));
 				break;
 			case CARDTYPE_TEL:
-				g_string_append(cardString, buildTele(item->element));
+				g_string_append(cardString, buildSingleLine(CARDTYPE_TEL, item->element));
 				break;
 			case CARDTYPE_FN_FIRST:
 				firstN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
@@ -364,10 +283,13 @@ char *buildCard(GSList *list){
 				g_string_append(cardString, "\r\n");
 				break;
 			case CARDTYPE_EMAIL:
-				g_string_append(cardString, buildEMail(item->element));
+				g_string_append(cardString, buildSingleLine(CARDTYPE_EMAIL, item->element));
 				break;
 			case CARDTYPE_URL:
-				g_string_append(cardString, buildUrl(item->element));
+				g_string_append(cardString, buildSingleLine(CARDTYPE_URL, item->element));
+				break;
+			case CARDTYPE_IM:
+				g_string_append(cardString, buildSingleLine(CARDTYPE_IM, item->element));
 				break;
 			default:
 				break;
@@ -951,13 +873,16 @@ char *mergeCards(GSList *new, char *old){
 				g_string_append(cmp, buildAdr(item->element));
 				break;
 			case CARDTYPE_TEL:
-				g_string_append(cmp, buildTele(item->element));
+				g_string_append(cmp, buildSingleLine(CARDTYPE_TEL, item->element));
 				break;
 			case CARDTYPE_EMAIL:
-				g_string_append(cmp, buildEMail(item->element));
+				g_string_append(cmp, buildSingleLine(CARDTYPE_EMAIL, item->element));
 				break;
 			case CARDTYPE_URL:
-				g_string_append(cmp, buildUrl(item->element));
+				g_string_append(cmp, buildSingleLine(CARDTYPE_URL, item->element));
+				break;
+			case CARDTYPE_IM:
+				g_string_append(cmp, buildSingleLine(CARDTYPE_IM, item->element));
 				break;
 
 			default:
