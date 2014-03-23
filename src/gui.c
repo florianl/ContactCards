@@ -857,8 +857,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	addPhone = gtk_button_new_from_icon_name("list-add", 1);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addPhone), _("Add a phone"));
 	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), addPhone, 2, line++, 1,1);
+	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
 		if (g_slist_length(list) > 1){
@@ -884,8 +884,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	addPostal = gtk_button_new_from_icon_name("list-add", 1);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addPostal), _("Add a postal address"));
 	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), addPostal, 2, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 1, line++, 2, 1);
+	//gtk_grid_attach(GTK_GRID(card), addPostal, 2, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
 		if (g_slist_length(list) > 1){
@@ -908,8 +908,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	addMail = gtk_button_new_from_icon_name("list-add", 1);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addMail), _("Add a EMail"));
 	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), addMail, 2, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
 		if (g_slist_length(list) > 1){
@@ -935,8 +935,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	addUrl = gtk_button_new_from_icon_name("list-add", 1);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addUrl), _("Add a Url"));
 	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), addUrl, 2, line++, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_URL, vData);
 		if (g_slist_length(list) > 1){
