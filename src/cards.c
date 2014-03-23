@@ -191,14 +191,12 @@ static char *buildSingleLine(int type, GSList *list){
 			goto stepForward;
 		}
 		item = (ContactCards_item_t *)list->data;
-		switch(item->itemID){
-			case CARDTYPE_TEL_OPT:
+		if(item->itemID == (type +1)){
 				if(!gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)))
 					break;
 				g_string_append(tmp,";TYPE=");
 				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
-				break;
-			default:
+		} else {
 				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
 					goto stepEmpty;
 				g_string_append(tmp,":");
