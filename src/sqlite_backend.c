@@ -740,6 +740,7 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 	basePath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
 	if(strlen(basePath) == 1) return;
+	/*	This is for modifying the href	*/
 	if(strncmp(href, basePath, strlen(basePath))){
 		char				*tmp = NULL;
 		tmp = fixURI(basePath, href);
@@ -748,6 +749,11 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 		} else {
 			href = tmp;
 		}
+	}
+
+	if(strlen(href) == strlen(basePath)){
+		/* If the href == basePath, then go on	*/
+		return;
 	}
 	free(basePath);
 
