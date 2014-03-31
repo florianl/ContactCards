@@ -178,7 +178,7 @@ static char *buildSingleLine(int type, GSList *list){
 		case CARDTYPE_URL:
 			g_string_append(tmp, "URL");
 			break;
-		case CARDTYPE_IM:
+		case CARDTYPE_IMPP:
 			g_string_append(tmp, "IMPP");
 			break;
 	}
@@ -233,7 +233,7 @@ char *buildCard(GSList *list){
 	firstN = lastN = middleN = prefixN = suffixN = NULL;
 
 	g_string_append(cardString, "BEGIN:VCARD\r\n");
-	g_string_append(cardString, "VERSION:3.0\r\n");
+	g_string_append(cardString, "VERSION:4.0\r\n");
 
 	g_string_append(cardString, "PRODID:-//ContactCards//ContactCards");
 	g_string_append(cardString, VERSION);
@@ -286,8 +286,8 @@ char *buildCard(GSList *list){
 			case CARDTYPE_URL:
 				g_string_append(cardString, buildSingleLine(CARDTYPE_URL, item->element));
 				break;
-			case CARDTYPE_IM:
-				g_string_append(cardString, buildSingleLine(CARDTYPE_IM, item->element));
+			case CARDTYPE_IMPP:
+				g_string_append(cardString, buildSingleLine(CARDTYPE_IMPP, item->element));
 				break;
 			default:
 				break;
@@ -330,7 +330,7 @@ stepForward:
 	g_string_append(cardString, suffixN);
 	g_string_append(cardString, "\r\n");
 
-	g_string_append(cardString, "END:VCARD\n");
+	g_string_append(cardString, "END:VCARD\r\n");
 
 	card = g_strndup(cardString->str, cardString->len);
 
@@ -386,6 +386,81 @@ GSList *getMultipleCardAttribut(int type, char *card){
 					goto next;
 			case CARDTYPE_EMAIL:
 				if(g_regex_match_simple ("[^item]?EMAIL", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_SOURCE:
+				if(g_regex_match_simple ("[^item]?SOURCE", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_NICKNAME:
+				if(g_regex_match_simple ("[^item]?NICKNAME", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_IMPP:
+				if(g_regex_match_simple ("[^item]?IMPP", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_LANG:
+				if(g_regex_match_simple ("[^item]?LANG", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_TZ:
+				if(g_regex_match_simple ("[^item]?TZ", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_GEO:
+				if(g_regex_match_simple ("[^item]?GEO", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_TITLE:
+				if(g_regex_match_simple ("[^item]?TITLE", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_ROLE:
+				if(g_regex_match_simple ("[^item]?ROLE", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_LOGO:
+				if(g_regex_match_simple ("[^item]?LOGO", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_ORG:
+				if(g_regex_match_simple ("[^item]?ORG", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_MEMBER:
+				if(g_regex_match_simple ("[^item]?MEMBER", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_RELATED:
+				if(g_regex_match_simple ("[^item]?RELATED", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_CATEGORIES:
+				if(g_regex_match_simple ("[^item]?CATEGORIES", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_NOTE:
+				if(g_regex_match_simple ("[^item]?NOTE", *line, 0,0))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_SOUND:
+				if(g_regex_match_simple ("[^item]?SOUND", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
@@ -496,26 +571,6 @@ char *getSingleCardAttribut(int type, char *card){
 					goto getValue;
 				else 
 					goto next;
-			case CARDTYPE_NICKNAME:
-				if(g_str_has_prefix(*line, "NICKNAME"))
-					goto getValue;
-				else 
-					goto next;
-			case CARDTYPE_LABEL:
-				if(g_str_has_prefix(*line, "LABEL"))
-					goto getValue;
-				else 
-					goto next;
-			case CARDTYPE_CLASS:
-				if(g_str_has_prefix(*line, "CLASS"))
-					goto getValue;
-				else 
-					goto next;
-			case CARDTYPE_KEY:
-				if(g_str_has_prefix(*line, "KEY"))
-					goto getValue;
-				else 
-					goto next;
 			case CARDTYPE_UID:
 				if(g_str_has_prefix(*line, "UID"))
 					goto getValue;
@@ -523,6 +578,21 @@ char *getSingleCardAttribut(int type, char *card){
 					goto next;
 			case CARDTYPE_BDAY:
 				if(g_str_has_prefix(*line, "BDAY"))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_KIND:
+				if(g_str_has_prefix(*line, "KIND"))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_ANNIVERSARY:
+				if(g_str_has_prefix(*line, "ANNIVERSARY"))
+					goto getValue;
+				else
+					goto next;
+			case CARDTYPE_GENDER:
+				if(g_str_has_prefix(*line, "GENDER"))
 					goto getValue;
 				else
 					goto next;
@@ -879,8 +949,8 @@ char *mergeCards(GSList *new, char *old){
 			case CARDTYPE_URL:
 				g_string_append(cmp, buildSingleLine(CARDTYPE_URL, item->element));
 				break;
-			case CARDTYPE_IM:
-				g_string_append(cmp, buildSingleLine(CARDTYPE_IM, item->element));
+			case CARDTYPE_IMPP:
+				g_string_append(cmp, buildSingleLine(CARDTYPE_IMPP, item->element));
 				break;
 
 			default:

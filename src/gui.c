@@ -438,7 +438,7 @@ static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
 		case CARDTYPE_URL:
 			label = gtk_label_new(_("URL"));
 			break;
-		case CARDTYPE_IM:
+		case CARDTYPE_IMPP:
 			label = gtk_label_new(_("IM"));
 			break;
 		default:
@@ -970,13 +970,13 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addIM, 3, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_IM, vData);
+		list = getMultipleCardAttribut(CARDTYPE_IMPP, vData);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
 					char				*value = list->data;
 					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_IM, line, g_strstrip(value));
+						line = contactEditSingleItem(card, items, CARDTYPE_IMPP, line, g_strstrip(value));
 					}
 					list = next;
 			}
@@ -985,7 +985,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	}
 	transIM->grid = card;
 	transIM->list = items;
-	transIM->type = CARDTYPE_IM;
+	transIM->type = CARDTYPE_IMPP;
 	line++;
 
 	/*		Connect Signales		*/
