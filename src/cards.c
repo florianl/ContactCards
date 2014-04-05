@@ -202,10 +202,16 @@ static char *buildSingleLine(int type, GSList *list){
 				g_string_append(tmp,";TYPE=");
 				g_string_append(tmp, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(item->element)));
 		} else {
-				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
-					goto stepEmpty;
 				g_string_append(tmp,":");
-				g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
+				if(type == CARDTYPE_NOTE){
+					GtkTextIter		start, end;
+					gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(item->element), &start, &end);
+					g_string_append(tmp, g_strescape(gtk_text_buffer_get_text(GTK_TEXT_BUFFER(item->element), &start, &end, FALSE), NULL));
+				} else {
+					if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+						goto stepEmpty;
+					g_string_append(tmp, gtk_entry_buffer_get_text (GTK_ENTRY_BUFFER(item->element)));
+				}
 		}
 stepForward:
 		list = next;

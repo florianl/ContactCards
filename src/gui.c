@@ -441,9 +441,6 @@ static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
 		case CARDTYPE_IMPP:
 			label = gtk_label_new(_("IM"));
 			break;
-		case CARDTYPE_NOTE:
-			label = gtk_label_new(_("NOTE"));
-			break;
 		default:
 			label = gtk_label_new(NULL);
 			break;
@@ -452,6 +449,51 @@ static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
 	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), label, NULL, GTK_POS_BOTTOM, 1, 1);
 
 	input = gtk_entry_new_with_buffer(buf);
+	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), input, label, GTK_POS_RIGHT, 2, 1);
+	item->itemID = ((ContactCards_new_Value_t *)trans)->type;
+	item->element = buf;
+	elements = g_slist_append(elements, item);
+
+	gtk_widget_show_all(GTK_WIDGET(input));
+
+	eleList->itemID = ((ContactCards_new_Value_t *)trans)->type;
+	eleList->element = elements;
+	((ContactCards_new_Value_t *)trans)->list = g_slist_append(((ContactCards_new_Value_t *)trans)->list, eleList);
+
+	return;
+}
+
+/**
+ * contactNewSingleMultilineItem - Add a single multiline value to edit a vCard
+ * Here a single linked list is added to a single linked list, to
+ * implement TYP-stuff in the future
+ */
+static void contactNewSingleMultilineItem(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	GtkWidget				*input, *label;
+	GtkTextBuffer			*buf;
+	GSList					*elements;
+	ContactCards_item_t		*item, *eleList;
+
+	item = g_new(ContactCards_item_t, 1);
+	eleList = g_new(ContactCards_item_t, 1);
+	buf = gtk_text_buffer_new(NULL);
+
+	elements = g_slist_alloc();
+
+	switch(((ContactCards_new_Value_t *)trans)->type){
+		case CARDTYPE_NOTE:
+			label = gtk_label_new(_("Note"));
+			break;
+		default:
+			label = gtk_label_new(NULL);
+			break;
+	}
+	gtk_widget_show_all(label);
+	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), label, NULL, GTK_POS_BOTTOM, 1, 1);
+
+	input = gtk_text_view_new_with_buffer(buf);
 	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), input, label, GTK_POS_RIGHT, 2, 1);
 	item->itemID = ((ContactCards_new_Value_t *)trans)->type;
 	item->element = buf;
@@ -488,6 +530,40 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 	gtk_entry_buffer_set_text(buf, g_strstrip(value), -1);
 
 	input = gtk_entry_new_with_buffer(buf);
+	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	item->itemID = type;
+	item->element = buf;
+	elements = g_slist_append(elements, item);
+
+	eleList->itemID = type;
+	eleList->element = elements;
+	list = g_slist_append(list, eleList);
+
+	return line;
+}
+
+/**
+ * contactEditSingleMultilineItem - Add a single line value to edit a vCard
+ * Here a single linked list is added to a single linked list, to
+ * implement TYP-stuff in the future
+ */
+static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int type, int line, char *value){
+	printfunc(__func__);
+
+	GtkWidget				*input;
+	GtkTextBuffer			*buf;
+	GSList					*elements;
+	ContactCards_item_t		*item, *eleList;
+
+	item = g_new(ContactCards_item_t, 1);
+	eleList = g_new(ContactCards_item_t, 1);
+	buf = gtk_text_buffer_new(NULL);
+
+	elements = g_slist_alloc();
+
+	gtk_text_buffer_set_text(buf, g_strcompress(value), -1);
+
+	input = gtk_text_view_new_with_buffer(buf);
 	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
 	item->itemID = type;
 	item->element = buf;
@@ -666,7 +742,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				GSList				*next = list->next;
 				char				*value = list->data;
 				if(value != NULL){
-					label = gtk_label_new(g_strstrip(value));
+					label = gtk_label_new(g_strcompress(value));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), label, 2, line++, 1, 1);
 				}
@@ -1030,7 +1106,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					GSList				*next = list->next;
 					char				*value = list->data;
 					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_NOTE, line, g_strstrip(value));
+						line = contactEditSingleMultilineItem(card, items, CARDTYPE_NOTE, line, g_strstrip(value));
 					}
 					list = next;
 			}
@@ -1050,7 +1126,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	g_signal_connect(G_OBJECT(addMail), "clicked", G_CALLBACK(contactNewSingleItem), transEMail);
 	g_signal_connect(G_OBJECT(addUrl), "clicked", G_CALLBACK(contactNewSingleItem), transUrl);
 	g_signal_connect(G_OBJECT(addIM), "clicked", G_CALLBACK(contactNewSingleItem), transIM);
-	g_signal_connect(G_OBJECT(addNote), "clicked", G_CALLBACK(contactNewSingleItem), transNote);
+	g_signal_connect(G_OBJECT(addNote), "clicked", G_CALLBACK(contactNewSingleMultilineItem), transNote);
 
 	return card;
 }
