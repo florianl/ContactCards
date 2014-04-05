@@ -181,6 +181,11 @@ static char *buildSingleLine(int type, GSList *list){
 		case CARDTYPE_IMPP:
 			g_string_append(tmp, "IMPP");
 			break;
+		case CARDTYPE_NOTE:
+			g_string_append(tmp, "NOTE");
+			break;
+		default:
+			return line;
 	}
 
 	while(list){
@@ -289,7 +294,11 @@ char *buildCard(GSList *list){
 			case CARDTYPE_IMPP:
 				g_string_append(cardString, buildSingleLine(CARDTYPE_IMPP, item->element));
 				break;
+			case CARDTYPE_NOTE:
+				g_string_append(cardString, buildSingleLine(CARDTYPE_NOTE, item->element));
+				break;
 			default:
+				dbgCC("[%s] %s\n", __func__, g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element))));
 				break;
 		}
 stepForward:
@@ -887,6 +896,26 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free(future);
 	g_slist_free(present);
 
+	/*	Note	*/
+	present = getMultipleCardAttribut(CARDTYPE_NOTE, old);
+	future = getMultipleCardAttribut(CARDTYPE_NOTE, new);
+	if (g_slist_length(present) > 1){
+		while(present){
+				GSList				*next = present->next;
+				char				*value = present->data;
+				if(value != NULL){
+					if(findData(future, value) == 1){
+						new = removeValue(new, value);
+					} else {
+						old = removeValue(old, value);
+					}
+				}
+				present = next;
+		}
+	}
+	g_slist_free(future);
+	g_slist_free(present);
+
 	data = g_string_new(NULL);
 	data = g_string_assign(data, old);
 	g_free(old);
@@ -936,7 +965,6 @@ char *mergeCards(GSList *new, char *old){
 			case CARDTYPE_FN_SUFFIX:
 				suffixN = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element)));
 				break;
-
 			case CARDTYPE_ADR:
 				g_string_append(cmp, buildAdr(item->element));
 				break;
@@ -952,7 +980,9 @@ char *mergeCards(GSList *new, char *old){
 			case CARDTYPE_IMPP:
 				g_string_append(cmp, buildSingleLine(CARDTYPE_IMPP, item->element));
 				break;
-
+			case CARDTYPE_NOTE:
+				g_string_append(cmp, buildSingleLine(CARDTYPE_NOTE, item->element));
+				break;
 			default:
 				break;
 		}
