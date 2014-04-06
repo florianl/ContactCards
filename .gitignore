@@ -1,6 +1,6 @@
-src/*.o
+*.o
 ContactCards.sql
-
+src/ContactCards
 *~
 config.guess
 config.rpath
