@@ -994,7 +994,10 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				 */
 				syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
 				if(syncType == -1) return;
-				if(syncType & DAV_SYNC_COLLECTION){
+				if(syncType & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+					goto nextBoook;
+				}
+				if(syncType & (1<<DAV_SYNC_COLLECTION)){
 					if(!checkSyncToken(ptr, addressbookID)){
 						stack = serverRequest(DAV_REQ_REP_1, serverID, addressbookID, sess, ptr);
 					} else {
@@ -1009,6 +1012,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				return;
 		}
 		responseHandle(stack, sess, ptr);
+nextBoook:
 		retList = next;
 	}
 

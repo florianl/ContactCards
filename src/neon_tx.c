@@ -938,7 +938,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 /**
  * syncInitial - starts a initial synchronisation of a server
  */
-static void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
+void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
 	printfunc(__func__);
 
 	ContactCards_stack_t		*stack;
@@ -966,9 +966,6 @@ sendAgain:
 
 	stack = serverRequest(DAV_REQ_ADDRBOOKS, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
-
-	checkAddressbooks(ptr, serverID, 10, sess);
-	checkAddressbooks(ptr, serverID, 20, sess);
 }
 
 /**
@@ -982,6 +979,8 @@ void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
 		 * 	Initial request to find the base stuff
 		 */
 		syncInitial(ptr, sess, serverID);
+		checkAddressbooks(ptr, serverID, 10, sess);
+		checkAddressbooks(ptr, serverID, 20, sess);
 	} else {
 		checkAddressbooks(ptr, serverID, 20, sess);
 	}

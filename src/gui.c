@@ -127,6 +127,44 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 }
 
 /**
+ * prefServerCheck - checking for address books
+ */
+void prefServerCheck(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	ContactCards_trans_t		*data = trans;
+	ContactCards_trans_t		*checkData = NULL;
+	ContactCards_pref_t			*buffers;
+	int							isOAuth = 0;
+	ne_session					*sess = NULL;
+
+	buffers = data->element2;
+	g_mutex_lock(&mutex);
+
+	isOAuth = getSingleInt(data->db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "");
+
+	if(isOAuth){
+		int		ret = 0;
+		ret = oAuthUpdate(data->db, buffers->srvID);
+		if(ret != OAUTH_UP2DATE){
+			g_mutex_unlock(&mutex);
+			return;
+		}
+	}
+
+	checkData = g_new(ContactCards_trans_t, 1);
+	checkData->db = data->db;
+	checkData->element = GINT_TO_POINTER(buffers->srvID);
+
+	sess = serverConnect(checkData);
+	syncInitial(data->db, sess, buffers->srvID);
+	serverDisconnect(sess, data->db, buffers->srvID);
+	g_free(checkData);
+	g_mutex_unlock(&mutex);
+	return;
+}
+
+/**
  * prefExportCert - export the certificate of a server
  */
 void prefExportCert(GtkWidget *widget, gpointer trans){
@@ -1625,7 +1663,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*serverPrefList;
 	GtkWidget			*vbox, *hbox;
 	GtkWidget			*label, *input;
-	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn;
+	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
 	GtkWidget			*digSwitch;
 	GtkWidget			*sep;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
@@ -1726,6 +1764,14 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	checkBtn = gtk_button_new_with_label(_("Check for address books"));
+	gtk_box_pack_start(GTK_BOX(hbox), checkBtn, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	deleteBtn = gtk_button_new_with_label(_("Delete Server"));
 	gtk_box_pack_start(GTK_BOX(hbox), deleteBtn, FALSE, FALSE, 2);
 	saveBtn = gtk_button_new_with_label(_("Save changes"));
@@ -1742,9 +1788,6 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->passwdBuf = passwd;
 	buffers->issuedBuf = issued;
 	buffers->issuerBuf = issuer;
-	buffers->btnDel = deleteBtn;
-	buffers->btnSave = saveBtn;
-	buffers->btnExportCert = exportCertBtn;
 	buffers->srvPrefList = serverPrefList;
 	buffers->certSel = digSwitch;
 	data->element2 = buffers;
@@ -1755,9 +1798,10 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	g_signal_connect(serverSel, "changed", G_CALLBACK(prefServerSelect), data);
 	g_signal_connect(G_OBJECT(prefWindow), "destroy", G_CALLBACK(prefExit), buffers);
 
-	g_signal_connect(buffers->btnDel, "clicked", G_CALLBACK(prefServerDelete), data);
-	g_signal_connect(buffers->btnSave, "clicked", G_CALLBACK(prefServerSave), data);
-	g_signal_connect(buffers->btnExportCert, "clicked", G_CALLBACK(prefExportCert), data);
+	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefServerDelete), data);
+	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefServerSave), data);
+	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), data);
+	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), data);
 
 	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), buffers);
 

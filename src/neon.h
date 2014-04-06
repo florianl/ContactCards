@@ -27,6 +27,7 @@
 #define	DAV_SYNC_COLLECTION				1
 #define	DAV_ADDRBOOK_MULTIGET			2
 #define	DAV_ADDRBOOK_QUERY				4
+#define	DAV_ADDRBOOK_DONT_SYNC			8
 
 /*
  * Request-Methods
@@ -172,5 +173,6 @@ extern int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int 
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
 extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);
+extern void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID);
 
 #endif	/*	neon_H	*/

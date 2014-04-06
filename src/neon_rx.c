@@ -311,15 +311,15 @@ void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
 	if(synDB == -1) return;
 
 	if(elementCheck(branch, DAV_ELE_ADDRBOOK_MULTIGET) == TRUE){
-		synMethod |= DAV_ADDRBOOK_MULTIGET;
+		synMethod |= (1<<DAV_ADDRBOOK_MULTIGET);
 	}
 
 	if(elementCheck(branch, DAV_ELE_ADDRBOOK_QUERY) == TRUE){
-		synMethod |= DAV_ADDRBOOK_QUERY;
+		synMethod |= (1<<DAV_ADDRBOOK_QUERY);
 	}
 
 	if(elementCheck(branch, DAV_ELE_SYNC_COLLECTION) == TRUE){
-		synMethod |= DAV_SYNC_COLLECTION;
+		synMethod |= (1<<DAV_SYNC_COLLECTION);
 	}
 
 	if(synDB == synMethod){
