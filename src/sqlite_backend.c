@@ -127,75 +127,6 @@ sqlError:
 }
 
 /**
- * multiCheck - check a table of the local database for some stuff
- *	@ptr			pointer to the database
- *	@tableName		name of the table in the database
- *	@rows			combination of rowX and/or rowY
- *	@row1			row 1 to select
- *	@value1			value for row 1
- *	@row2			row 2 to select
- *	@value2			value for row 2
- *	@row3			row 3 to select
- *	@value4			value for row 3
- *
- *	This functions returns a list as the result to the request
- *	to the database
- */
-GSList *multiCheck(sqlite3 *ptr, char *tableName, int rows, char *sel, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
-	printfunc(__func__);
-
-	sqlite3_stmt 		*vm;
-	char 				*sql_query = NULL;
-	int 				ret;
-	GSList				*list = g_slist_alloc();
-
-	g_strstrip(tableName);
-	g_strstrip(sel);
-	g_strstrip(row1);
-	g_strstrip(row2);
-	g_strstrip(value2);
-	g_strstrip(row3);
-	g_strstrip(value3);
-
-	switch(rows){
-		case 1:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d';", sel, tableName, row1, value1);
-			break;
-		case 2:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", sel, tableName, row2, value2);
-			break;
-		case 12:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", sel, tableName, row1, value1, row2, value2);
-			break;
-		case 23:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", sel, tableName, row2, value2,  row3, value3);
-			break;
-		case 123:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", sel, tableName, row1, value1, row2, value2, row3, value3);
-			break;
-		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, rows);
-	}
-
-	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
-
-	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
-		return list;
-	}
-
-	while(sqlite3_step(vm) != SQLITE_DONE){
-		dbgCC("[%s] append: %d\n", __func__, sqlite3_column_int(vm, 0));
-		list = g_slist_append(list,  GINT_TO_POINTER(sqlite3_column_int(vm, 0)));
-	}
-
-	sqlite3_finalize(vm);
-	sqlite3_free(sql_query);
-
-	return list;
-}
-
-/**
  * countElements - returns quantity of a element in a table of the local database
  * returns 0 if it does not exist
  */
@@ -274,13 +205,22 @@ void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue
 /**
  * getListInt - returns a list of integers of a table of the local database
  */
-GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2){
+GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
 	printfunc(__func__);
 
 	sqlite3_stmt 		*vm;
 	char 				*sql_query = NULL;
 	int 				ret;
 	GSList				*list = g_slist_alloc();
+
+	g_strstrip(tableName);
+	g_strstrip(selValue);
+	g_strstrip(row1);
+	g_strstrip(row2);
+	g_strstrip(value2);
+	g_strstrip(row3);
+	g_strstrip(value3);
+
 
 	switch(selRow){
 		case 1:
@@ -294,6 +234,12 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			break;
 		case 0:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q;", selValue, tableName);
+			break;
+		case 23:
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, value2,  row3, value3);
+			break;
+		case 123:
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
 			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
@@ -489,7 +435,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	davBase = getSingleChar(ptr, "oAuthServer", "davURI", 1, "oAuthID", oAuthEntity, "", "", "", "", "", 0);
 
-	retList = multiCheck(ptr, "cardServer", 12, "serverID", "oAuthType", oAuthEntity, "user", newuser, "", "");
+	retList = getListInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser, "", "");
 
 	if(g_slist_length(retList) != 1) {
 		dbgCC("[%s] there is something similar\n", __func__);
@@ -531,7 +477,7 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 
 	ne_uri_parse(url, &uri);
 
-	retList = multiCheck(ptr, "cardServer", 23, "serverID", "", 0, "user", user, "authority", uri.host);
+	retList = getListInt(ptr, "cardServer", "serverID", 23, "", 0, "user", user, "authority", uri.host);
 
 	if(g_slist_length(retList) != 1){
 		while(retList){
@@ -1023,7 +969,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 
 	GSList			*retList;
 
-	retList = getListInt(ptr, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "");
+	retList = getListInt(ptr, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "", "", "");
 
 	while(retList) {
 		GSList				*next = retList->next;

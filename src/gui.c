@@ -1421,7 +1421,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 		g_thread_unref(thread);
 	} else {
 
-		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "");
+		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 
 		while(retList){
 			GSList				*next = retList->next;
