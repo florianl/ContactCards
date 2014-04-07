@@ -193,6 +193,22 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 }
 
 /**
+ * buildRow - creates a row for the list of address books
+ */
+static GtkWidget *buildRow(sqlite3 *ptr, int aID){
+	printfunc(__func__);
+
+	GtkWidget *row, *check;
+
+	row = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	check = gtk_check_button_new();
+
+	gtk_container_add (GTK_CONTAINER (row), check);
+
+	return row;
+}
+
+/**
  * prefServerSelect - select a server in the preferences dialog
  */
 void prefServerSelect(GtkWidget *widget, gpointer trans){
@@ -202,6 +218,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	GtkTreeModel		*model;
 	GtkWidget			*prefFrame;
 	int					selID;
+	GSList				*addressbookList;
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
@@ -259,8 +276,17 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
+		addressbookList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "");
+		while(addressbookList){
+			GSList				*next = addressbookList->next;
+			GtkWidget			*row;
+			row = buildRow(data->db, GPOINTER_TO_INT(addressbookList->data));
+			gtk_list_box_insert(GTK_LIST_BOX(buffers->list), row, -1);
+			addressbookList = next;
+		}
 	}
-	
+
+	g_slist_free(addressbookList);
 	free(frameTitle);
 	free(user);
 	free(passwd);
@@ -1666,6 +1692,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
 	GtkWidget			*digSwitch;
 	GtkWidget			*sep;
+	GtkWidget			*ablist;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkEntryBuffer		*issued, *issuer;
 	GtkTreeSelection	*serverSel;
@@ -1768,6 +1795,11 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(hbox), checkBtn, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	ablist = gtk_list_box_new();
+	gtk_box_pack_start(GTK_BOX(hbox), ablist, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
@@ -1790,6 +1822,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->issuerBuf = issuer;
 	buffers->srvPrefList = serverPrefList;
 	buffers->certSel = digSwitch;
+	buffers->list = ablist;
 	data->element2 = buffers;
 
 	/*		Connect Signales		*/

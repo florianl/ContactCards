@@ -53,6 +53,7 @@ typedef struct ContactCards_pref {
 	GtkEntryBuffer		*issuerBuf;
 	GtkWidget			*srvPrefList;
 	GtkWidget			*certSel;
+	GtkWidget			*list;
 	int					srvID;
 } ContactCards_pref_t;
 
