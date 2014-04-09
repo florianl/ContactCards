@@ -230,6 +230,8 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	buffers = data->element2;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
+		GList *children, *iter2;
+
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		dbgCC("[%s] %d\n",__func__, selID);
 		frameTitle = getSingleChar(data->db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
@@ -276,7 +278,15 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
-		addressbookList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "");
+		addressbookList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
+
+		/* Flush the list box before adding new items	*/
+		children = gtk_container_get_children(GTK_CONTAINER(buffers->list));
+		for(iter2 = children; iter2 != NULL; iter2 = g_list_next(iter2)) {
+			gtk_widget_destroy(GTK_WIDGET(iter2->data));
+		}
+		g_list_free(children);
+
 		while(addressbookList){
 			GSList				*next = addressbookList->next;
 			GtkWidget			*row;
