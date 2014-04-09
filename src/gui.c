@@ -198,12 +198,20 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 static GtkWidget *buildRow(sqlite3 *ptr, int aID){
 	printfunc(__func__);
 
-	GtkWidget *row, *check;
+	GtkWidget		*row, *box, *check, *label;
+	char			*abName = NULL;
 
-	row = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	row = gtk_list_box_row_new ();
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	check = gtk_check_button_new();
+	abName = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", aID, "", "", "", "", "", 0);
+	label = gtk_label_new(abName);
+	g_free(abName);
 
-	gtk_container_add (GTK_CONTAINER (row), check);
+	gtk_container_add(GTK_CONTAINER (box), check);
+	gtk_container_add(GTK_CONTAINER (box), label);
+	gtk_container_add(GTK_CONTAINER (row), box);
+	gtk_widget_show_all(row);
 
 	return row;
 }
@@ -290,6 +298,12 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		while(addressbookList){
 			GSList				*next = addressbookList->next;
 			GtkWidget			*row;
+
+			if(GPOINTER_TO_INT(addressbookList->data) == 0){
+				addressbookList = next;
+				continue;
+			}
+
 			row = buildRow(data->db, GPOINTER_TO_INT(addressbookList->data));
 			gtk_list_box_insert(GTK_LIST_BOX(buffers->list), row, -1);
 			addressbookList = next;
