@@ -200,10 +200,17 @@ static GtkWidget *buildRow(sqlite3 *ptr, int aID){
 
 	GtkWidget		*row, *box, *check, *label;
 	char			*abName = NULL;
+	int				active = 0;
 
 	row = gtk_list_box_row_new ();
 	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	check = gtk_check_button_new();
+	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "");
+	if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
+	} else {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
+	}
 	abName = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", aID, "", "", "", "", "", 0);
 	label = gtk_label_new(abName);
 	g_free(abName);

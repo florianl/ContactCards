@@ -13,6 +13,7 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	sqlite3_stmt	 	*vm;
 	char 				*sql_query = NULL;
 	int					ret;
+	int					active = 0;
 
 	listFlush(list);
 
@@ -47,6 +48,13 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	}
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
+		if(type == 1){
+			active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", sqlite3_column_int(vm, 0), "", "");
+			if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+				/* Don't display address books which are not synced	*/
+				continue;
+			}
+		}
 		listAppend(list, (gchar *) sqlite3_column_text(vm, 1), (guint) sqlite3_column_int(vm, 0));
 	}
 
