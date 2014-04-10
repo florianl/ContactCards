@@ -1711,7 +1711,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	GtkWidget			*prefWindow, *prefView, *prefFrame, *prefList;
 	GtkWidget			*serverPrefList;
-	GtkWidget			*vbox, *hbox;
+	GtkWidget			*vbox, *hbox, *abbox;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
 	GtkWidget			*digSwitch;
@@ -1820,8 +1820,12 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	abbox = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(abbox), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_size_request(abbox, 256, 128);
 	ablist = gtk_list_box_new();
-	gtk_box_pack_start(GTK_BOX(hbox), ablist, FALSE, FALSE, 2);
+	gtk_container_add(GTK_CONTAINER(abbox), ablist);
+	gtk_box_pack_start(GTK_BOX(hbox), abbox, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
