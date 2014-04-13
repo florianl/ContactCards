@@ -814,9 +814,49 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 }
 
 /**
+ * updateAddressbooks - update the flags for the address books
+ */
+void updateAddressbooks(sqlite3 *ptr, GSList *list){
+	printfunc(__func__);
+
+	ContactCards_aBooks_t		*item;
+	GSList						*next;
+
+	while(list){
+		int							check = 0;
+		int							flags = 0;
+		char				 		*sql_query = NULL;
+
+		next = list->next;
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_aBooks_t *)list->data;
+		flags = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", item->aBookID, "", "");
+		if(flags == -1)
+			goto stepForward;
+		check = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item->check));
+		if(check){
+			/* Clear the bit	*/
+			flags &= ~(1<<DAV_ADDRBOOK_DONT_SYNC);
+		} else {
+			/* Set the bit		*/
+			flags |= (1<<DAV_ADDRBOOK_DONT_SYNC);
+		}
+		dbgCC("Updating %d", item->aBookID);
+
+		sql_query = sqlite3_mprintf("UPDATE addressbooks SET syncMethod = '%d' WHERE addressbookID = '%d';", flags, item->aBookID);
+		doSimpleRequest(ptr, sql_query, __func__);
+stepForward:
+		list = next;
+	}
+}
+
+/**
  * updateServerDetails - update changes to the server settings
  */
 void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel){
+	printfunc(__func__);
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
 

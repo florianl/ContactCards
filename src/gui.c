@@ -121,6 +121,7 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 
 	buffers = data->element2;
 
+	updateAddressbooks(data->db, buffers->aBooks);
 	updateServerDetails(data->db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
@@ -195,17 +196,21 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 /**
  * buildRow - creates a row for the list of address books
  */
-static GtkWidget *buildRow(sqlite3 *ptr, int aID){
+static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
 	printfunc(__func__);
 
 	GtkWidget		*row, *box, *check, *label;
 	char			*abName = NULL;
 	int				active = 0;
+	ContactCards_aBooks_t		*element;
+
+	element = g_new(ContactCards_aBooks_t, 1);
 
 	row = gtk_list_box_row_new ();
 	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	check = gtk_check_button_new();
 	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "");
+
 	if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
 	} else {
@@ -214,6 +219,10 @@ static GtkWidget *buildRow(sqlite3 *ptr, int aID){
 	abName = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", aID, "", "", "", "", "", 0);
 	label = gtk_label_new(abName);
 	g_free(abName);
+
+	element->aBookID = aID;
+	element->check = check;
+	list = g_slist_append(list, element);
 
 	gtk_container_add(GTK_CONTAINER (box), check);
 	gtk_container_add(GTK_CONTAINER (box), label);
@@ -296,11 +305,17 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		addressbookList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
 
 		/* Flush the list box before adding new items	*/
-		children = gtk_container_get_children(GTK_CONTAINER(buffers->list));
+		children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
 		for(iter2 = children; iter2 != NULL; iter2 = g_list_next(iter2)) {
 			gtk_widget_destroy(GTK_WIDGET(iter2->data));
 		}
 		g_list_free(children);
+
+		if (g_slist_length(buffers->aBooks) > 1){
+			/* Yes, you're right. It's really ugly	*/
+			g_slist_free_full(buffers->aBooks, g_free);
+			buffers->aBooks = g_slist_alloc();
+		}
 
 		while(addressbookList){
 			GSList				*next = addressbookList->next;
@@ -311,8 +326,8 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 				continue;
 			}
 
-			row = buildRow(data->db, GPOINTER_TO_INT(addressbookList->data));
-			gtk_list_box_insert(GTK_LIST_BOX(buffers->list), row, -1);
+			row = buildRow(data->db, GPOINTER_TO_INT(addressbookList->data), buffers->aBooks);
+			gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
 			addressbookList = next;
 		}
 	}
@@ -1727,6 +1742,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkEntryBuffer		*issued, *issuer;
 	GtkTreeSelection	*serverSel;
+	GSList				*aBooks = g_slist_alloc();
+
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers = NULL;
 
@@ -1857,7 +1874,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->issuerBuf = issuer;
 	buffers->srvPrefList = serverPrefList;
 	buffers->certSel = digSwitch;
-	buffers->list = ablist;
+	buffers->listbox = ablist;
+	buffers->aBooks = aBooks;
 	data->element2 = buffers;
 
 	/*		Connect Signales		*/

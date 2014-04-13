@@ -38,6 +38,7 @@ extern void setServerCert(sqlite3 *ptr, int serverID, int counter, int trustFlag
 extern void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue, char *row1, int value1);
 extern void setSingleInt(sqlite3 *ptr, char *tableName, char *setValue, int newValue, char *row1, int value1);
 extern void sync_addressbook(sqlite3 *ptr, int serverID);
+extern void updateAddressbooks(sqlite3 *ptr, GSList *list);
 extern void updateContact(sqlite3 *ptr, int contactID, char *vData);
 extern void updateContactUri(sqlite3 *ptr, int contactID, char *uri);
 extern void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value);

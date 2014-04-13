@@ -53,9 +53,18 @@ typedef struct ContactCards_pref {
 	GtkEntryBuffer		*issuerBuf;
 	GtkWidget			*srvPrefList;
 	GtkWidget			*certSel;
-	GtkWidget			*list;
+	GtkWidget			*listbox;
+	GSList				*aBooks;
 	int					srvID;
 } ContactCards_pref_t;
+
+/**
+ * struct ContactCards_aBooks	- structure for handling address books in the preferences dialog
+ */
+typedef struct ContactCards_aBooks {
+	int					aBookID;
+	GtkWidget			*check;
+} ContactCards_aBooks_t;
 
 /**
  * struct ContactCards_pix	- structure for handling a picture of a vCard
