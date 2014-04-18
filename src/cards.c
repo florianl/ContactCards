@@ -364,11 +364,8 @@ static char *getAttributValue(char *line){
 
 	char				**elements = g_strsplit(line, ":", 2);
 	char				**element = elements;
-	char				*value = NULL;
 
-	value = element[1];
-
-	return value;
+	return g_strdup(element[1]);
 }
 
 /**
@@ -489,6 +486,7 @@ GSList *getMultipleCardAttribut(int type, char *card){
 			line++;
 	}
 
+	g_strfreev(lines);
 	return list;
 }
 
@@ -621,6 +619,7 @@ char *getSingleCardAttribut(int type, char *card){
 			line++;
 	}
 
+	g_strfreev(lines);
 	return value;
 }
 

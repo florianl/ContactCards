@@ -464,6 +464,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 	gtk_entry_buffer_set_text(regBuf, g_strstrip(postalPtr[4]), -1);
 	gtk_entry_buffer_set_text(zipBuf, g_strstrip(postalPtr[5]), -1);
 	gtk_entry_buffer_set_text(countryBuf, g_strstrip(postalPtr[6]), -1);
+	g_strfreev(postalPtr);
 
 	label = gtk_label_new(_("post office box"));
 	input = gtk_entry_new_with_buffer(boxBuf);
@@ -1014,6 +1015,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
 		gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
 		gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
+		g_strfreev(namingPtr);
 	}
 
 	transNew->db = ptr;
@@ -1709,7 +1711,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
 			break;
 	}
 	g_free(uri);
-	free(newGrant);
+	g_free(newGrant);
 	gtk_widget_destroy(dialog);
 
 }
@@ -2075,7 +2077,7 @@ static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 	g_signal_connect (G_OBJECT(inputoAuth), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 	g_signal_connect (G_OBJECT(inputGrant), "changed", G_CALLBACK(newDialogEntryChanged), widget);
 
-	free(uri);
+	g_free(uri);
 }
 
 /**
