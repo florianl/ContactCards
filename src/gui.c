@@ -89,6 +89,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
+	GList					*children, *iter;
 
 	buffers = data->element2;
 
@@ -108,6 +109,14 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 	gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), "", -1);
+
+	children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
+	for(iter = children; iter != NULL; iter = g_list_next(iter)) {
+		gtk_widget_destroy(GTK_WIDGET(iter->data));
+	}
+	g_list_free(children);
 }
 
 /**
