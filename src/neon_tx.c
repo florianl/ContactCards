@@ -678,8 +678,6 @@ failedRequest:
 	free(davSyncToken);
 	free(oAuthSession);
 	free(ContactCardsIdent);
-	g_free(tmpCard);
-	g_free(vCard);
 
 	return userdata;
 }
