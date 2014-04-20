@@ -7,6 +7,7 @@ ContactCards_SOURCES = 	ContactCards.c \
 						gui.c \
 						neon_rx.c \
 						neon_tx.c \
+						settings.c \
 						sqlite_frontend.c \
 						sqlite_backend.c
 

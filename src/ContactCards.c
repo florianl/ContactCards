@@ -18,13 +18,21 @@ int main(int argc, char **argv){
 
 	int					ret;
 	sqlite3				*db_handler;
+	ContactCards_app_t	*app;
+	char				*db;
 
-    /* Set up internationalization */
-    setlocale (LC_ALL, "");
-    bindtextdomain (PACKAGE, LOCALEDIR);
-    textdomain (PACKAGE);
+	/* Set up internationalization */
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
 
-	ret = sqlite3_open_v2(DATABASE, &db_handler, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+	app = parseCmdLine(&argc, &argv);
+
+	checkAndSetConfig(app);
+
+	db = g_build_filename(app->configdir, "ContactCards.sql", NULL);
+
+	ret = sqlite3_open_v2(db, &db_handler, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 	sqlite3_extended_result_codes(db_handler, TRUE);
 
 	if (ret != SQLITE_OK) {
@@ -51,6 +59,9 @@ int main(int argc, char **argv){
 	guiRun(db_handler);
 
 	dbClose(db_handler);
+
+	g_free(app->configdir);
+	g_free(db);
 
 	return 0;
 }

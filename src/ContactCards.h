@@ -29,6 +29,10 @@
 #include "neon.h"
 #endif	/*	neon_H		*/
 
+#ifndef settings_H
+#include "settings.h"
+#endif	/*	settings_H	*/
+
 /*	GLOBALS		*/
 GtkWidget				*addressbookList, *contactList;
 GtkListStore			*comboList;
@@ -50,7 +54,5 @@ int						selectedSrv;
 #else
 #define dbgCC(...)	do { } while (0)
 #endif  /* ContactCards_DEBUG */
-
-#define DATABASE		"ContactCards.sql"
 
 #endif	/*	ContactCards_H		*/
