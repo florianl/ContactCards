@@ -57,8 +57,6 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		goto newCert;
 	}
 
-#ifdef ContactCards_DEBUG
-
 	if (failures & NE_SSL_NOTYETVALID)
 		dbgCC("[%s] certificate is not yet valid\n", __func__);
 
@@ -76,8 +74,6 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 
 	if (failures & NE_SSL_REVOKED)
 		dbgCC("[%s] certificate has been revoked\n", __func__);
-
-#endif  /* ContactCards_DEBUG */
 
 	trust = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 

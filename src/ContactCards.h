@@ -47,12 +47,4 @@ int						selectedSrv;
 #define printfunc(X)	do { } while (0)
 #endif
 
-// #define ContactCards_DEBUG
-#ifdef ContactCards_DEBUG
-#define G_LOG_PROTO		(8)
-#define dbgCC(...)	g_log(NULL, G_LOG_PROTO, __VA_ARGS__)
-#else
-#define dbgCC(...)	do { } while (0)
-#endif  /* ContactCards_DEBUG */
-
 #endif	/*	ContactCards_H		*/

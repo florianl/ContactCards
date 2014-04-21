@@ -11,8 +11,10 @@
  */
 typedef struct ContactCards_app {
 	char		*configdir;
+	gboolean	debug;
 } ContactCards_app_t;
 
+extern void dbgCC(gchar const *format, ...);
 extern void checkAndSetConfig(ContactCards_app_t *app);
 extern ContactCards_app_t *parseCmdLine(int *argc, char **argv[]);
 

@@ -6,7 +6,7 @@
 
 static char			*alternate_config = NULL;
 static char			*version = NULL;
-static char			*verbose = NULL;
+static gboolean		verbose = FALSE;
 
 static GOptionEntry entries[] =
 {
@@ -40,6 +40,8 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 
 	app = g_new(ContactCards_app_t, 1);
 
+	app->debug = verbose;
+
 	if(alternate_config){
 		app->configdir = alternate_config;
 	}else {
@@ -65,8 +67,30 @@ static void checkConfigDir(char *dir){
 	}
 }
 
+void dbgCC(gchar const *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	g_logv("ContactCards", G_LOG_LEVEL_INFO, format, args);
+	va_end(args);
+}
+
+static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *msg, gpointer data){
+	printf("[%s] %s", domain, msg);
+
+	g_log_default_handler(domain, level, msg, data);
+}
+
+static void configDebug(gboolean flag){
+
+	if(flag){
+		g_log_set_default_handler(logHandler, NULL);
+	}
+}
+
 void checkAndSetConfig(ContactCards_app_t *app){
 	printfunc(__func__);
 
 	checkConfigDir(app->configdir);
+	configDebug(app->debug);
 }
