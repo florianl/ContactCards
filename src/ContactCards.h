@@ -40,11 +40,6 @@ GMutex 					mutex;
 GtkWidget				*mainWindow;
 int						selectedSrv;
 
-// #define ContactCards_FUNC
-#ifdef ContactCards_FUNC
-#define printfunc(X)	printf("[%s]\n", X)
-#else
-#define printfunc(X)	do { } while (0)
-#endif
+#define	printfunc(X)	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", X);
 
 #endif	/*	ContactCards_H		*/

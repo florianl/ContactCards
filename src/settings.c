@@ -7,11 +7,13 @@
 static char			*alternate_config = NULL;
 static char			*version = NULL;
 static gboolean		verbose = FALSE;
+static gboolean		debug = FALSE;
 
 static GOptionEntry entries[] =
 {
 	{ "config", 'c', 0, G_OPTION_ARG_FILENAME, &alternate_config, "Alternate configuration directory", NULL },
-	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Show debug stuff", NULL },
+	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "debugging output", NULL },
+	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "verbose output", NULL },
 	{ "version", 'V', 0, G_OPTION_ARG_NONE, &version, "Show version", NULL },
 	{ NULL, 0, 0, 0, NULL, NULL, NULL }
 };
@@ -40,7 +42,8 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 
 	app = g_new(ContactCards_app_t, 1);
 
-	app->debug = verbose;
+	app->verbose = verbose;
+	app->debug = debug;
 
 	if(alternate_config){
 		app->configdir = alternate_config;
@@ -67,8 +70,7 @@ static void checkConfigDir(char *dir){
 	}
 }
 
-void dbgCC(gchar const *format, ...)
-{
+void dbgCC(gchar const *format, ...){
 	va_list args;
 	va_start(args, format);
 	g_logv("ContactCards", G_LOG_LEVEL_INFO, format, args);
@@ -77,20 +79,26 @@ void dbgCC(gchar const *format, ...)
 
 static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *msg, gpointer data){
 	printf("[%s] %s", domain, msg);
-
-	g_log_default_handler(domain, level, msg, data);
 }
 
-static void configDebug(gboolean flag){
+static void configOutput(ContactCards_app_t *app){
+	printfunc(__func__);
 
-	if(flag){
-		g_log_set_default_handler(logHandler, NULL);
+	int			handler = 0;
+
+	if(app->verbose){
+		handler = g_log_set_handler("ContactCards", G_LOG_LEVEL_INFO, logHandler, NULL);
 	}
+
+	if(app->debug){
+		g_log_set_handler("ContactCards", G_LOG_LEVEL_DEBUG, logHandler, NULL);
+	}
+
 }
 
 void checkAndSetConfig(ContactCards_app_t *app){
 	printfunc(__func__);
 
 	checkConfigDir(app->configdir);
-	configDebug(app->debug);
+	configOutput(app);
 }

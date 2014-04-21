@@ -12,6 +12,7 @@
 typedef struct ContactCards_app {
 	char		*configdir;
 	gboolean	debug;
+	gboolean	verbose;
 } ContactCards_app_t;
 
 extern void dbgCC(gchar const *format, ...);
