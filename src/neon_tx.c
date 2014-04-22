@@ -925,6 +925,8 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 
 	serverDisconnect(sess, ptr, srvID);
 
+	g_free(trans);
+
 	if(ret == -1)
 		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);
 

@@ -927,6 +927,7 @@ char *mergeMultipleItems(char *old, char *new){
 	data = g_string_insert(data, data->len - 11, new);
 
 	old = g_strdup(data->str);
+	g_string_free(data, TRUE);
 
 	return old;
 }
