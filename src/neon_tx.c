@@ -851,7 +851,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 	switch(stack->statuscode){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
-			serverDelContact(ptr, sess, srvID, oldID);
+			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
@@ -904,7 +904,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	switch(stack->statuscode){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
-			serverDelContact(ptr, sess, srvID, oldID);
+			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
