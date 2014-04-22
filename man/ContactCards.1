@@ -1,13 +1,21 @@
-.Dd
-.Dt CONTACTCARDS 1
-.Sh NAME
-.Nm contactcards
-.Nd a simple address book
-.\"
-.Sh DESCRIPTION
+.TH CONTACTCARDS 1
+.SH NAME
+contactcards \- a simple address book
+.SH DESCRIPTION
 contactcards is a simple address book written in C.
 vCards are safed  in a local database and fetched from a remote server using the cardDav protocoll.
-.\"
-.Sh AUTHOR
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-config \ \fI/path/to/a/directory/\fR
+Sets the alternate configuration directory.
+.TP
+.BR \-d ", " \-\-debug
+Runs contactcards in debugging mode.
+.TP
+.BR \-v ", " \-\-verbose
+Runs contactcards in verbose mode.
+.TP
+.BR \-V ", " \-\-version
+Shows the version of contactcards.
+.SH AUTHOR
 Written by Florian Lehner.
-.\"
