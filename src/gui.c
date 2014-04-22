@@ -75,7 +75,7 @@ static void selBook(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
-		dbgCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] %d\n",__func__, selID);
 		fillList(((ContactCards_trans_t *) trans)->db, 2, selID, contactList);
 		g_free(selText);
 	}
@@ -93,7 +93,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 
 	buffers = data->element2;
 
-	dbgCC("[%s] %d\n", __func__, buffers->srvID);
+	verboseCC("[%s] %d\n", __func__, buffers->srvID);
 
 	dbRemoveItem(data->db, "cardServer", 2, "", "", "serverID", buffers->srvID);
 	dbRemoveItem(data->db, "certs", 2, "", "", "serverID", buffers->srvID);
@@ -266,7 +266,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		GList *children, *iter2;
 
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		dbgCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] %d\n",__func__, selID);
 		frameTitle = getSingleChar(data->db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
 		if (frameTitle == NULL) return;
 		gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
@@ -386,7 +386,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
 		int				isOAuth = 0;
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		dbgCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] %d\n",__func__, selID);
 
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
 
@@ -744,7 +744,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
 		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, &error);
 		if(error){
-			dbgCC("[%s] %s\n", __func__, error->message);
+			verboseCC("[%s] %s\n", __func__, error->message);
 		}
 		photo = gtk_image_new_from_pixbuf (pixbuf);
 	}
@@ -950,8 +950,8 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	thread = g_thread_try_new("pushing vCard", pushingCard, buff, &error);
 	if(error){
-		dbgCC("[%s] something has gone wrong with threads\n", __func__);
-		dbgCC("%s\n", error->message);
+		verboseCC("[%s] something has gone wrong with threads\n", __func__);
+		verboseCC("%s\n", error->message);
 	}
 	g_thread_unref(thread);
 
@@ -1268,7 +1268,7 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &abID,  -1);
 	}
 
-	dbgCC("[%s] %d\n",__func__, abID);
+	verboseCC("[%s] %d\n",__func__, abID);
 
 	if(abID == 0){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
@@ -1293,7 +1293,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(((ContactCards_trans_t *)trans)->element), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		dbgCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] %d\n",__func__, selID);
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected to edit."));
 		return;
@@ -1318,7 +1318,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 	int							selID;
 
 	gtk_tree_model_get(model, iter, ID_COLUMN, &selID,  -1);
-	dbgCC("[%s] %d\n",__func__, selID);
+	verboseCC("[%s] %d\n",__func__, selID);
 	card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
 	gtk_widget_show_all(card);
 	cleanCard(((ContactCards_trans_t *)trans)->element);
@@ -1338,7 +1338,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		dbgCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] %d\n",__func__, selID);
 		card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
 		gtk_widget_show_all(card);
 		cleanCard(((ContactCards_trans_t *)trans)->element);
@@ -1536,8 +1536,8 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 		buff->element2 = statusBar;
 		thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
-			dbgCC("[%s] something has gone wrong with threads\n", __func__);
-			dbgCC("%s\n", error->message);
+			verboseCC("[%s] something has gone wrong with threads\n", __func__);
+			verboseCC("%s\n", error->message);
 		}
 		g_thread_unref(thread);
 	} else {
@@ -1557,8 +1557,8 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			buff->element2 = statusBar;
 			thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 			if(error){
-				dbgCC("[%s] something has gone wrong with threads\n", __func__);
-				dbgCC("%s\n", error->message);
+				verboseCC("[%s] something has gone wrong with threads\n", __func__);
+				verboseCC("%s\n", error->message);
 			}
 			g_thread_unref(thread);
 			retList = next;

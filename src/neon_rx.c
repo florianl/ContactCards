@@ -94,7 +94,7 @@ gboolean elementCheck(GNode *branch, int elementType){
 								break;
 							}
 					default:
-							dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
+							verboseCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 							break;
 				}
 				branch = branch->next;
@@ -140,7 +140,7 @@ char *elementGet(GNode *branch, int elementType){
 					}
 					break;
 				default:
-					dbgCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
+					verboseCC("[%s] %s\n%s\n", __func__, ((ContactCards_node_t *)branch->data)->name, ((ContactCards_node_t *)branch->data)->content);
 					break;
 			}
 		branch = branch->next;
@@ -208,7 +208,7 @@ void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
 	}
 
 	if(elementCheck(branch, DAV_ELE_PROXY) == TRUE){
-		dbgCC("\tProxyelement found...\n");
+		verboseCC("\tProxyelement found...\n");
 		return;
 	}
 
@@ -236,7 +236,7 @@ void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod
 				locateAddressbookHomeSet(branch, serverID, ptr);
 				break;
 			default:
-				dbgCC("Can't handle %d\n", reqMethod);
+				verboseCC("Can't handle %d\n", reqMethod);
 		}
 		return;
 	}
@@ -270,7 +270,7 @@ void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
 
 	href = elementGet(branch, DAV_ELE_HREF);
 
-	dbgCC("[%s] %s\n", __func__, href);
+	verboseCC("[%s] %s\n", __func__, href);
 
 	updatePostURI(ptr, addressbookID, href);
 }
@@ -404,7 +404,7 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
 				locateAddMember(branch, addressbookID, ptr);
 				break;
 			default:
-				dbgCC("Can't handle %d\n", reqMethod);
+				verboseCC("Can't handle %d\n", reqMethod);
 		}
 
 	branchDestroy(branch);
@@ -419,7 +419,7 @@ void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr)
 	GNode				*child;
 
 	if(stack->statuscode != 207){
-		dbgCC(">> statuscode: %d <<\n", stack->statuscode);
+		verboseCC(">> statuscode: %d <<\n", stack->statuscode);
 		return;
 	}
 
@@ -458,7 +458,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		g_strstrip(ptr[i]);
 		item = g_shell_unquote(ptr[i], NULL);
 		if(g_strcmp0(item, "error") == 0){
-			dbgCC("[%s] had to handle: %s - %s\n", __func__, item, ptr[++i]);
+			verboseCC("[%s] had to handle: %s - %s\n", __func__, item, ptr[++i]);
 			break;
 		} else if(g_strcmp0(item, "access_token") == 0){
 			tokenType = OAUTH_ACCESS_TOKEN;
@@ -469,7 +469,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		} else if(g_strcmp0(item, "expires_in") == 0){
 			tokenType = OAUTH_EXPIRES_IN;
 		} else {
-			dbgCC("[%s] had to handle: %s\n", __func__, item);
+			verboseCC("[%s] had to handle: %s\n", __func__, item);
 			break;
 		}
 		g_free(item);

@@ -31,7 +31,7 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 	g_option_context_free(context);
 
 	if(error){
-		dbgCC("%s\n", error->message);
+		verboseCC("%s\n", error->message);
 		exit(EXIT_FAILURE);
 	}
 
@@ -59,18 +59,18 @@ static void checkConfigDir(char *dir){
 
 	if (!g_file_test(dir, G_FILE_TEST_EXISTS)){
 		int			ret = 0;
-		dbgCC("[%s] configuration directory doesn't exist yet\n", __func__);
+		verboseCC("[%s] configuration directory doesn't exist yet\n", __func__);
 
 		if (dir == NULL || strlen(dir) == 0)
 			exit(EXIT_FAILURE);
 
 		ret = g_mkdir_with_parents(dir, 0700);
 		if(ret)
-			dbgCC("[%s] failed to create the configuration directory with error %d\n", __func__, ret);
+			verboseCC("[%s] failed to create the configuration directory with error %d\n", __func__, ret);
 	}
 }
 
-void dbgCC(gchar const *format, ...){
+void verboseCC(gchar const *format, ...){
 	va_list args;
 	va_start(args, format);
 	g_logv("ContactCards", G_LOG_LEVEL_INFO, format, args);
@@ -84,10 +84,8 @@ static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *m
 static void configOutput(ContactCards_app_t *app){
 	printfunc(__func__);
 
-	int			handler = 0;
-
 	if(app->verbose){
-		handler = g_log_set_handler("ContactCards", G_LOG_LEVEL_INFO, logHandler, NULL);
+		g_log_set_handler("ContactCards", G_LOG_LEVEL_INFO, logHandler, NULL);
 	}
 
 	if(app->debug){

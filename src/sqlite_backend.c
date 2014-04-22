@@ -22,14 +22,14 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
 	ret = sqlite3_step(vm);
 
 	if (ret != SQLITE_DONE){
-		dbgCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
@@ -122,7 +122,7 @@ void dbCreate(sqlite3 *ptr){
 	return;
 
 sqlError:
-	dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+	verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	return;
 }
 
@@ -156,13 +156,13 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 			sql_query = sqlite3_mprintf("SELECT COUNT(*) FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, rows);
+			verboseCC("[%s] can't handle this number: %d\n", __func__, rows);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return 0;
 	}
 
@@ -242,13 +242,13 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return list;
 	}
 
@@ -297,13 +297,13 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, value2);
 			break;
 		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return count;
 	}
 
@@ -317,7 +317,7 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	}
 
 	if(count != 1){
-		dbgCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
+		verboseCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
 		return -1;
 	}
 
@@ -371,13 +371,13 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return NULL;
 	}
 
@@ -391,7 +391,7 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	}
 
 	if(count != 1){
-		dbgCC("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
+		verboseCC("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
 		return NULL;
 	}
 
@@ -438,7 +438,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	retList = getListInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser, "", "");
 
 	if(g_slist_length(retList) != 1) {
-		dbgCC("[%s] there is something similar\n", __func__);
+		verboseCC("[%s] there is something similar\n", __func__);
 		g_slist_free(retList);
 		return;
 	}
@@ -482,19 +482,19 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	if(g_slist_length(retList) != 1){
 		while(retList){
 			GSList *next = retList->next;
-			dbgCC("[%s] checking: %d\n", __func__, GPOINTER_TO_INT(retList->data));
+			verboseCC("[%s] checking: %d\n", __func__, GPOINTER_TO_INT(retList->data));
 			if(countElements(ptr, "addressbooks", 12, "cardServer", GPOINTER_TO_INT(retList->data), "path", uri.path, "", "") !=0){
-				dbgCC("[%s] there is something similar\n", __func__);
+				verboseCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
 			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "srvUrl", url) !=0){
-				dbgCC("[%s] there is something similar\n", __func__);
+				verboseCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
 			if(countElements(ptr, "cardServer", 23, "", 0, "user", user, "authority", uri.host) !=0){
-				dbgCC("[%s] there is something similar\n", __func__);
+				verboseCC("[%s] there is something similar\n", __func__);
 				g_slist_free(retList);
 				return;
 			}
@@ -570,7 +570,7 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
@@ -611,7 +611,7 @@ void dbRemoveItem(sqlite3 *ptr, char *tableName, int selRow, char *row1, char *v
 			sql_query = sqlite3_mprintf("DELETE FROM %q WHERE %q = '%q' AND %q = '%d';", tableName, row1, value1, row2, value2);
 			break;
 		default:
-			dbgCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 			return;
 	}
 
@@ -633,7 +633,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
-		dbgCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
 
@@ -843,7 +843,7 @@ void updateAddressbooks(sqlite3 *ptr, GSList *list){
 			/* Set the bit		*/
 			flags |= (1<<DAV_ADDRBOOK_DONT_SYNC);
 		}
-		dbgCC("Updating %d", item->aBookID);
+		verboseCC("Updating %d", item->aBookID);
 
 		sql_query = sqlite3_mprintf("UPDATE addressbooks SET syncMethod = '%d' WHERE addressbookID = '%d';", flags, item->aBookID);
 		doSimpleRequest(ptr, sql_query, __func__);
@@ -954,15 +954,15 @@ void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	ne_uri_parse(old, &oldUri);
 
 	if(force == FALSE){
-		dbgCC("[%s] %s - %s\n", __func__, oldUri.path, newUri.path);
+		verboseCC("[%s] %s - %s\n", __func__, oldUri.path, newUri.path);
 		if(strlen(oldUri.path) > strlen(newUri.path)){
-			dbgCC("[%s] will not update URI\n", __func__);
+			verboseCC("[%s] will not update URI\n", __func__);
 			return;
 		} else {
-			dbgCC("[%s] update URI\n", __func__);
+			verboseCC("[%s] update URI\n", __func__);
 		}
 	} else {
-		dbgCC("[%s] %s%s - %s%s\n", __func__, oldUri.host, oldUri.path, newUri.host, newUri.path);
+		verboseCC("[%s] %s%s - %s%s\n", __func__, oldUri.host, oldUri.path, newUri.host, newUri.path);
 	}
 
 	newUri.scheme = newUri.scheme ? newUri.scheme : "https";
@@ -1048,7 +1048,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				}
 				break;
 			default:
-				dbgCC("[%s] can't handle this number: %d\n", __func__, type);
+				verboseCC("[%s] can't handle this number: %d\n", __func__, type);
 				return;
 		}
 		responseHandle(stack, sess, ptr);

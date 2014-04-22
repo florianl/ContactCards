@@ -17,7 +17,7 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
     memset(&key, 0, sizeof(key));
 
 	if (attempts > 4){
-		dbgCC("[%s] must EXIT now\n", __func__);
+		verboseCC("[%s] must EXIT now\n", __func__);
 		return 5;
 	}
 
@@ -58,22 +58,22 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	}
 
 	if (failures & NE_SSL_NOTYETVALID)
-		dbgCC("[%s] certificate is not yet valid\n", __func__);
+		verboseCC("[%s] certificate is not yet valid\n", __func__);
 
 	if (failures & NE_SSL_EXPIRED)
-		dbgCC("[%s] certificate has expired\n", __func__);
+		verboseCC("[%s] certificate has expired\n", __func__);
 
 	if (failures & NE_SSL_IDMISMATCH)
-		dbgCC("[%s] hostname does not match the hostname of the server\n", __func__);
+		verboseCC("[%s] hostname does not match the hostname of the server\n", __func__);
 
 	if (failures & NE_SSL_UNTRUSTED)
-		dbgCC("[%s] authority which signed the certificate is not trusted\n", __func__);
+		verboseCC("[%s] authority which signed the certificate is not trusted\n", __func__);
 
 	if (failures & NE_SSL_BADCHAIN)
-		dbgCC("[%s] certificate chain contained a certificate other than the server cert\n", __func__);
+		verboseCC("[%s] certificate chain contained a certificate other than the server cert\n", __func__);
 
 	if (failures & NE_SSL_REVOKED)
-		dbgCC("[%s] certificate has been revoked\n", __func__);
+		verboseCC("[%s] certificate has been revoked\n", __func__);
 
 	trust = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 
@@ -133,10 +133,10 @@ ne_session *serverConnect(void *trans){
 
 	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
 
-	dbgCC("[%s] %s %s %d\n", __func__, uri.scheme, uri.host, uri.port);
+	verboseCC("[%s] %s %s %d\n", __func__, uri.scheme, uri.host, uri.port);
 
 	 if (ne_sock_init() != 0){
-		dbgCC("[%s] failed to init socket library \n", __func__);
+		verboseCC("[%s] failed to init socket library \n", __func__);
 		return NULL;
 	}
 
@@ -177,12 +177,12 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 	char				*ctxName = NULL;
 
 	while(atts[i] != NULL){
-		dbgCC("\tatts[%d]: %s\n",i, nspace);
+		verboseCC("\tatts[%d]: %s\n",i, nspace);
 		i++;
 	}
 
 	if(parent == NE_XML_STATEROOT){
-		dbgCC(" >> ROOT <<\n");
+		verboseCC(" >> ROOT <<\n");
 		stack->tree = g_node_new(ctx);
 		stack->lastBranch = stack->tree;
 	} else {
@@ -196,7 +196,7 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
 	ctxName = g_strdup(name);
 	((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->name = ctxName;
 
-	dbgCC("[%s]\t%s\n", __func__, ctxName);
+	verboseCC("[%s]\t%s\n", __func__, ctxName);
 
 	return 1;
 }
@@ -226,7 +226,7 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 		free(newCtx);
 	}
 
-	dbgCC("[%s]\t\t%s\n", __func__, newCtx);
+	verboseCC("[%s]\t\t%s\n", __func__, newCtx);
 
 	return 0;
 }
@@ -311,7 +311,7 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	davPath = g_strndup(uri.path, strlen(uri.path));
 	ne_uri_free(&uri);
 
-	dbgCC("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
+	verboseCC("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
@@ -512,8 +512,8 @@ sendAgain:
 			break;
 
 		default:
-			dbgCC("no request without method\n");
-			dbgCC("method: %d\n", method);
+			verboseCC("no request without method\n");
+			verboseCC("method: %d\n", method);
 			goto failedRequest;
 	}
 
@@ -525,18 +525,18 @@ sendAgain:
 		char 		*authToken = NULL;
 		oAuthSession = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 		authToken = g_strconcat(" Bearer ", oAuthSession, NULL);
-		dbgCC("[%s] adding:Authorization %s\n", __func__, authToken);
+		verboseCC("[%s] adding:Authorization %s\n", __func__, authToken);
 		ne_add_request_header(req, "Authorization", authToken);
 	} else {
 		ne_set_server_auth(sess, getUserAuth, trans);
 	}
 
 	if(davCookie != NULL){
-		dbgCC("[%s] add Cookie %s to header\n", __func__, davCookie);
+		verboseCC("[%s] add Cookie %s to header\n", __func__, davCookie);
 		ne_add_request_header(req, "Cookie", davCookie);
 		ne_add_request_header(req, "Cookie2", "$Version=1");
 	} else {
-		dbgCC("[%s] cookie not set\n", __func__);
+		verboseCC("[%s] cookie not set\n", __func__);
 	}
 
 	ne_set_request_body_buffer(req, req_buffer->data, ne_buffer_size(req_buffer));
@@ -573,7 +573,7 @@ sendAgain:
 			case NE_OK:
 				break;
 			default:
-				dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
+				verboseCC("[%s] %s\n", __func__, ne_get_error(sess));
 				if(failed++ > 3) goto failedRequest;
 				goto sendAgain;
 		}
@@ -584,10 +584,10 @@ sendAgain:
 
 	switch(statuscode){
 		case 100 ... 199:
-			dbgCC("==\t1xx Informational\t==\n");
+			verboseCC("==\t1xx Informational\t==\n");
 			break;
 		case 207:
-			dbgCC("==\t207\t==\n");
+			verboseCC("==\t207\t==\n");
 			break;
 		case 201:
 			if(method == DAV_REQ_POST_CONTACT){
@@ -603,64 +603,64 @@ sendAgain:
 		case 202 ... 203:
 		case 205 ... 206:
 		case 208 ... 299:
-			dbgCC("==\t2xx Success\t==\n");
+			verboseCC("==\t2xx Success\t==\n");
 			break;
 		case 301:
-			dbgCC("==\t301 Moved Permanently\t==\n");
-			dbgCC("%s\n", ne_get_response_header(req, "Location"));
+			verboseCC("==\t301 Moved Permanently\t==\n");
+			verboseCC("%s\n", ne_get_response_header(req, "Location"));
 			updateUri(ptr, serverID, g_strdup(ne_get_response_header(req, "Location")), TRUE);
 			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 			break;
 		case 300:
 		case 302 ... 399:
-			dbgCC("==\t3xx Redirection\t==\n");
+			verboseCC("==\t3xx Redirection\t==\n");
 			break;
 		case 401:
-			dbgCC("==\t401\t==\n");
-			dbgCC("Unauthorized\n");
+			verboseCC("==\t401\t==\n");
+			verboseCC("Unauthorized\n");
 			if(failed++ > 3) goto failedRequest;
 			goto sendAgain;
 			break;
 		case 405:
-			dbgCC("==\t405\t==\n");
-			dbgCC("Method not Allowed\n");
+			verboseCC("==\t405\t==\n");
+			verboseCC("Method not Allowed\n");
 			break;
 		case 400:
 		case 402 ... 404:
 		case 406 ... 499:
-			dbgCC("==\t4xx Client Error\t==\n");
-			dbgCC("\t\t%d\n", statuscode);
+			verboseCC("==\t4xx Client Error\t==\n");
+			verboseCC("\t\t%d\n", statuscode);
 			if(failed++ > 3) goto failedRequest;
 
 			const char *srvTx = NULL;
 			srvTx = ne_get_response_header(req, "Set-Cookie");
 
 			if(srvTx != NULL) {
-				dbgCC("[%s] Set-Cookie\t%s\n", __func__, srvTx);
+				verboseCC("[%s] Set-Cookie\t%s\n", __func__, srvTx);
 			} else {
 				srvTx = ne_get_response_header(req, "Set-Cookie2");
 				if(srvTx != NULL){
-					dbgCC("[%s] Set-Cookie2\t%s\n", __func__, srvTx);
+					verboseCC("[%s] Set-Cookie2\t%s\n", __func__, srvTx);
 				} else {
 					goto sendAgain;
 				}
 			}
 			if(srvTx){
 				davCookie =  cookieSet(srvTx);
-				dbgCC("[%s] => %s\n", __func__, davCookie);
+				verboseCC("[%s] => %s\n", __func__, davCookie);
 			}
 
-			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
+			verboseCC("[%s] %s\n", __func__, ne_get_error(sess));
 
 			goto sendAgain;
 			break;
 		case 500 ... 599:
-			dbgCC("==\t5xx Server Error\t==\n");
-			dbgCC("[%s] %s\n", __func__, ne_get_error(sess));
+			verboseCC("==\t5xx Server Error\t==\n");
+			verboseCC("[%s] %s\n", __func__, ne_get_error(sess));
 			break;
 		default:
-			dbgCC("[%s] Can't handle %d\n", __func__, statuscode);
+			verboseCC("[%s] Can't handle %d\n", __func__, statuscode);
 	}
 
 failedRequest:
@@ -711,25 +711,25 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 
 	oAuthGrant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
 	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
-	dbgCC("[%s] connecting to a oAuth-Server\n", __func__);
+	verboseCC("[%s] connecting to a oAuth-Server\n", __func__);
 	if(strlen(oAuthGrant) == 1){
 		ret = OAUTH_GRANT_FAILURE;
 		dialogRequestGrant(ptr, serverID, oAuthEntity);
 	} else {
-		dbgCC("[%s] there is already a grant\n", __func__);
+		verboseCC("[%s] there is already a grant\n", __func__);
 	}
 	oAuthRefresh = getSingleChar(ptr, "cardServer", "oAuthRefreshToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(strlen(oAuthRefresh) == 1){
-		dbgCC("[%s] there is no refresh_token\n", __func__);
+		verboseCC("[%s] there is no refresh_token\n", __func__);
 		ret = OAUTH_REFRESHTOKEN_FAILURE;
 		oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 	} else {
-		dbgCC("[%s] there is already a refresh_token\n", __func__);
+		verboseCC("[%s] there is already a refresh_token\n", __func__);
 		oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_REFRESH);
 	}
 	oAuthToken = getSingleChar(ptr, "cardServer", "oAuthAccessToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(strlen(oAuthToken) == 1){
-		dbgCC("[%s] there is no oAuthToken\n", __func__);
+		verboseCC("[%s] there is no oAuthToken\n", __func__);
 		ret = OAUTH_ACCESSTOKEN_FAILURE;
 	} else {
 		ret = OAUTH_UP2DATE;
@@ -756,7 +756,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	grant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
 
 	if(strlen(grant) < 5){
-		dbgCC("[%s] there is no oAuthAccessGrant\n", __func__);
+		verboseCC("[%s] there is no oAuthAccessGrant\n", __func__);
 		return;
 	}
 
@@ -777,7 +777,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	ne_uri_parse(srvURI, &uri);
 
 	if (ne_sock_init() != 0){
-		dbgCC("[%s] failed to init socket library \n", __func__);
+		verboseCC("[%s] failed to init socket library \n", __func__);
 		return;
 	}
 
@@ -850,7 +850,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 
 	switch(stack->statuscode){
 		case 201:
-			dbgCC("[%s] 201\n", __func__);
+			verboseCC("[%s] 201\n", __func__);
 			serverDelContact(ptr, sess, srvID, oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
@@ -903,7 +903,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	}
 	switch(stack->statuscode){
 		case 201:
-			dbgCC("[%s] 201\n", __func__);
+			verboseCC("[%s] 201\n", __func__);
 			serverDelContact(ptr, sess, srvID, oldID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
@@ -918,7 +918,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 			}
 			break;
 		default:
-			dbgCC("[%s] %d\n", __func__ , stack->statuscode);
+			verboseCC("[%s] %d\n", __func__ , stack->statuscode);
 			/* server didn't accept the new contact	*/
 			ret = -1;
 	}

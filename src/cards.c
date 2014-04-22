@@ -304,7 +304,7 @@ char *buildCard(GSList *list){
 				g_string_append(cardString, buildSingleLine(CARDTYPE_NOTE, item->element));
 				break;
 			default:
-				dbgCC("[%s] %s\n", __func__, g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element))));
+				verboseCC("[%s] %s\n", __func__, g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(item->element))));
 				break;
 		}
 stepForward:
