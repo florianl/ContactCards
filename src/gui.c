@@ -15,7 +15,6 @@
 
 GtkWidget				*addressbookList, *contactList;
 GtkWidget				*mainWindow;
-int						selectedSrv;
 
 /**
  * guiRun - run the basic GUI
@@ -1542,10 +1541,18 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 
 	statusBar = data->element;
 
-	if(selectedSrv != 0){
+	retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+
+	while(retList){
+		GSList				*next = retList->next;
+		int					serverID = GPOINTER_TO_INT(retList->data);
+		if(serverID == 0){
+			retList = next;
+			continue;
+		}
 		buff = g_new(ContactCards_trans_t, 1);
 		buff->db = data->db;
-		buff->element = GINT_TO_POINTER(selectedSrv);
+		buff->element = GINT_TO_POINTER(serverID);
 		buff->element2 = statusBar;
 		thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
 		if(error){
@@ -1553,31 +1560,9 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			verboseCC("%s\n", error->message);
 		}
 		g_thread_unref(thread);
-	} else {
-
-		retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
-
-		while(retList){
-			GSList				*next = retList->next;
-			int					serverID = GPOINTER_TO_INT(retList->data);
-			if(serverID == 0){
-				retList = next;
-				continue;
-			}
-			buff = g_new(ContactCards_trans_t, 1);
-			buff->db = data->db;
-			buff->element = GINT_TO_POINTER(serverID);
-			buff->element2 = statusBar;
-			thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
-			if(error){
-				verboseCC("[%s] something has gone wrong with threads\n", __func__);
-				verboseCC("%s\n", error->message);
-			}
-			g_thread_unref(thread);
-			retList = next;
-		}
-		g_slist_free(retList);
+		retList = next;
 	}
+	g_slist_free(retList);
 }
 
 /**
@@ -1601,11 +1586,9 @@ static void comboChanged(GtkComboBox *combo, gpointer trans){
 
 	if(counter == 1) {
 		fillList(data->db, 1, id, addressbookList);
-		selectedSrv = id;
 	} else {
 		fillList(data->db, 1, 0, addressbookList);
 		fillList(data->db, 2, 0, contactList);
-		selectedSrv = 0;
 	}
 }
 
@@ -2236,6 +2219,83 @@ static void newDialogSelectType(GtkWidget *widget, gpointer data){
 }
 
 /**
+ * syncMenuSel - Callback for sync menu
+ */
+static void syncMenuSel(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	int							sID;
+	GError		 				*error = NULL;
+	ContactCards_trans_t		*data = trans;
+	ContactCards_trans_t		*buff = NULL;
+	GThread						*thread;
+
+	sID = GPOINTER_TO_INT(data->element);
+
+	verboseCC("[%s] you selected %d\n", __func__, sID);
+
+	buff = g_new(ContactCards_trans_t, 1);
+	buff->db = data->db;
+	buff->element = GINT_TO_POINTER(sID);
+	buff->element2 = data->element2;
+	thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong with threads\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+	g_thread_unref(thread);
+
+}
+
+/**
+ * syncMenuItem - one item of the sync menu
+ */
+static GtkWidget *syncMenuItem(sqlite3 *ptr, int sID, GtkWidget *statusbar){
+	printfunc(__func__);
+
+	GtkWidget				*item;
+	char					*desc = NULL;
+	ContactCards_trans_t	*trans = NULL;
+
+	desc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", sID, "", "", "", "", "", 0);
+	item = gtk_menu_item_new_with_label(desc);
+	g_free(desc);
+
+	trans = g_new(ContactCards_trans_t, 1);
+	trans->db = ptr;
+	trans->element = GINT_TO_POINTER(sID);
+	trans->element2 = statusbar;
+
+	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(syncMenuSel), trans);
+	gtk_widget_show_all(item);
+
+	return item;
+}
+/**
+ * syncMenuFill - fills the menu with items
+ */
+static void syncMenuFill(GtkWidget *menu, sqlite3 *ptr, GtkWidget *statusbar){
+	printfunc(__func__);
+
+	GSList		*list;
+	GtkWidget	*item;
+
+	list = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+	while(list){
+		GSList				*next = list->next;
+		int					sID = GPOINTER_TO_INT(list->data);
+		if(sID == 0){
+			list = next;
+			continue;
+		}
+		item = syncMenuItem(ptr, sID, statusbar);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+		list = next;
+	}
+	g_slist_free(list);
+}
+
+/**
  * newDialog - dialog to add a new server
  */
 static void newDialog(GtkWidget *do_widget, gpointer trans){
@@ -2275,6 +2335,7 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit, *editContact;
 	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkWidget			*emptyCard, *noContact;
+	GtkWidget			*syncMenu;
 	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
@@ -2316,7 +2377,9 @@ void guiInit(sqlite3 *ptr){
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (exportItem), "document-save");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
-	syncItem = gtk_tool_button_new(NULL, _("Refresh"));
+	syncItem = gtk_menu_tool_button_new(NULL, _("Refresh"));
+	syncMenu = gtk_menu_new();
+	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(syncItem), syncMenu);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(syncItem), _("Refresh"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), syncItem, -1);
@@ -2337,6 +2400,9 @@ void guiInit(sqlite3 *ptr){
 
 	/*		Statusbar				*/
 	mainStatusbar = gtk_statusbar_new();
+
+	/*	Sync Menu					*/
+	syncMenuFill(syncMenu, ptr, mainStatusbar);
 
 	/*		mainContent				*/
 	mainContent = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
