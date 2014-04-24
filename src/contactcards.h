@@ -43,11 +43,8 @@
 #endif	/*	settings_H	*/
 
 /*	GLOBALS		*/
-GtkWidget				*addressbookList, *contactList;
 GtkListStore			*comboList;
 GMutex 					mutex;
-GtkWidget				*mainWindow;
-int						selectedSrv;
 
 #define	printfunc(X)	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", X);
 

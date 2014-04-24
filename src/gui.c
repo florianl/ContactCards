@@ -13,6 +13,10 @@
 
 #include "contactcards.h"
 
+GtkWidget				*addressbookList, *contactList;
+GtkWidget				*mainWindow;
+int						selectedSrv;
+
 /**
  * guiRun - run the basic GUI
  */
