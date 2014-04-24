@@ -1,7 +1,7 @@
-AC_INIT([ContactCards], [0.08], [https://github.com/florianl/ContactCards/issues])
-AC_CONFIG_SRCDIR([src/ContactCards.c])
+AC_INIT([contactcards], [0.08], [https://github.com/florianl/ContactCards/issues])
+AC_CONFIG_SRCDIR([src/contactcards.c])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AM_SILENT_RULES([yes])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CC_C99
 
 # Checks for programs.
@@ -9,7 +9,7 @@ AC_PROG_CC([gcc])
 AM_PROG_CC_C_O
 
 IT_PROG_INTLTOOL([0.40])
-GETTEXT_PACKAGE=ContactCards
+GETTEXT_PACKAGE=contactcards
 AC_SUBST([GETTEXT_PACKAGE])
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.18.1])

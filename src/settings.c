@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "ContactCards.h"
+#include "contactcards.h"
 
 static char			*alternate_config = NULL;
 static char			*version = NULL;

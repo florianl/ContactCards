@@ -11,7 +11,7 @@
  * GNU General Public License for more details.
  */
 
-#include "ContactCards.h"
+#include "contactcards.h"
 
 /**
  * main - do I need to say more?
