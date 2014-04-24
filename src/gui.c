@@ -264,7 +264,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	GtkTreeModel		*model;
 	GtkWidget			*prefFrame;
 	int					selID;
-	GSList				*addressbookList;
+	GSList				*abList;
 	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
@@ -324,7 +324,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
-		addressbookList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
+		abList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
 
 		/* Flush the list box before adding new items	*/
 		children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
@@ -339,22 +339,22 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			buffers->aBooks = g_slist_alloc();
 		}
 
-		while(addressbookList){
-			GSList				*next = addressbookList->next;
+		while(abList){
+			GSList				*next = abList->next;
 			GtkWidget			*row;
 
-			if(GPOINTER_TO_INT(addressbookList->data) == 0){
-				addressbookList = next;
+			if(GPOINTER_TO_INT(abList->data) == 0){
+				abList = next;
 				continue;
 			}
 
-			row = buildRow(data->db, GPOINTER_TO_INT(addressbookList->data), buffers->aBooks);
+			row = buildRow(data->db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
 			gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
-			addressbookList = next;
+			abList = next;
 		}
 	}
 
-	g_slist_free(addressbookList);
+	g_slist_free(abList);
 	free(frameTitle);
 	free(user);
 	free(passwd);
