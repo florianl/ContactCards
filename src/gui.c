@@ -1294,93 +1294,6 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 }
 
 /**
- * comboChanged - display the new stuff which is selected by the combo
- */
-static void comboChanged(GtkComboBox *combo, gpointer trans){
-	printfunc(__func__);
-
-	GtkTreeIter			iter;
-	GtkTreeModel		*model;
-	int					id = 0;
-	int 				counter = 0;
-	ContactCards_trans_t		*data = trans;
-
-	if( gtk_combo_box_get_active_iter(combo, &iter)){
-		model = gtk_combo_box_get_model(combo);
-		gtk_tree_model_get( model, &iter, 1, &id, -1);
-	}
-
-	counter = countElements(data->db, "cardServer", 1, "serverID", id, "", "", "", "");
-
-	if(counter == 1) {
-		fillList(data->db, 1, id, addressbookList);
-	} else {
-		fillList(data->db, 1, 0, addressbookList);
-		fillList(data->db, 2, 0, contactList);
-	}
-}
-
-/**
- * comboAppend - append a new item to a combo
- */
-void comboAppend(GtkListStore *store, gchar *text, guint id) {
-	printfunc(__func__);
-
-	GtkTreeIter 		iter;
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, TEXT_COLUMN, text, ID_COLUMN, id, -1);
-}
-
-/**
- * comboFlush - remove all items from a combo
- */
-void comboFlush(GtkListStore *store){
-	printfunc(__func__);
-
-	GtkTreeIter			iter;
-
-	gtk_list_store_clear(store);
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, TEXT_COLUMN, "All", ID_COLUMN, 0, -1);
-
-}
-
-/**
- * comboInit - create a new combo
- */
-GtkWidget *comboInit(sqlite3 *ptr){
-	printfunc(__func__);
-
-	GtkWidget			*combo;
-	GtkCellLayout		*layout;
-	GtkCellRenderer		*renderer;
-	ContactCards_trans_t		*trans = NULL;
-
-	comboList = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_UINT);
-
-	fillCombo(ptr, comboList);
-
-	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(comboList));
-
-	layout = GTK_CELL_LAYOUT(combo);
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(layout, renderer, FALSE);
-	gtk_cell_layout_set_attributes(layout, renderer, "text", 0, NULL);
-
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
-
-	g_object_unref(comboList);
-
-	trans = g_new(ContactCards_trans_t, 1);
-	trans->db = ptr;
-
-	g_signal_connect(combo, "changed", G_CALLBACK(comboChanged), trans);
-
-	return combo;
-}
-
-/**
  * dialogRequestGrant - ask the user for a grant in a dialog
  * 
  * This is required for OAuth
@@ -1449,12 +1362,11 @@ void guiInit(sqlite3 *ptr){
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;
 	GtkWidget			*contactBox, *contactWindow, *scroll;
-	GtkWidget			*serverCombo;
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit, *editContact;
 	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkWidget			*emptyCard, *noContact;
 	GtkWidget			*syncMenu;
-	GtkToolItem			*comboItem, *prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
+	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
@@ -1501,11 +1413,6 @@ void guiInit(sqlite3 *ptr){
 	gtk_widget_set_tooltip_text(GTK_WIDGET(syncItem), _("Refresh"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), syncItem, -1);
-
-	serverCombo = comboInit(ptr);
-	comboItem = gtk_tool_item_new();
-	gtk_container_add(GTK_CONTAINER(comboItem), serverCombo);
-	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), comboItem, -1);
 
 	sep = gtk_separator_tool_item_new();
 	gtk_tool_item_set_expand(sep, TRUE);

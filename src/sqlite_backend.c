@@ -464,8 +464,6 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	free(davBase);
 
-	fillCombo(ptr, comboList);
-
 	return;
 }
 
@@ -516,7 +514,6 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
-	fillCombo(ptr, comboList);
 }
 
 /**
