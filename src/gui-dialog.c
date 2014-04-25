@@ -429,7 +429,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	dbRemoveItem(data->db, "certs", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(data->db, buffers->srvID, 0);
 	fillList(data->db, 3, 0, buffers->srvPrefList);
-	fillList(data->db, 1, 0, addressbookList);
+	fillList(data->db, 1, 0, guiBase.addressbookList);
 	syncMenuUpdate(data->db, buffers->statusbar, buffers->syncMenu);
 
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), "", -1);

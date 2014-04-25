@@ -19,8 +19,8 @@
 void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
-	fillList(ptr, 1, 0, addressbookList);
-	fillList(ptr, 2, 0, contactList);
+	fillList(ptr, 1, 0, guiBase.addressbookList);
+	fillList(ptr, 2, 0, guiBase.contactList);
 	gtk_main();
 }
 
@@ -85,7 +85,7 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
-		fillList(((ContactCards_trans_t *) trans)->db, 2, selID, contactList);
+		fillList(((ContactCards_trans_t *) trans)->db, 2, selID, guiBase.contactList);
 		g_free(selText);
 	}
 }
@@ -155,7 +155,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		serverDelContact(data->db, sess, srvID, selID);
 		serverDisconnect(sess, data->db, srvID);
 
-		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
 		gtk_list_store_remove(store, &iter);
 
 failure:
@@ -1155,7 +1155,7 @@ static void listSortorderAsc(void){
 
 	GtkListStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_ASCENDING);
 
@@ -1169,7 +1169,7 @@ static void listSortorderDesc(void){
 
 	GtkListStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(contactList)));
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_DESCENDING);
 
@@ -1310,7 +1310,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
 
 	grant = gtk_entry_buffer_new(NULL, -1);
 
-	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(mainWindow), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
+	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(guiBase.window), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
 
 	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
 
@@ -1382,9 +1382,9 @@ void guiInit(sqlite3 *ptr){
 
 	gtk_init(NULL, NULL);
 
-	mainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(mainWindow), "ContactCards");
-	gtk_window_set_default_size(GTK_WINDOW(mainWindow), 760,496);
+	guiBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(guiBase.window), "ContactCards");
+	gtk_window_set_default_size(GTK_WINDOW(guiBase.window), 760,496);
 
 	mainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
@@ -1409,6 +1409,7 @@ void guiInit(sqlite3 *ptr){
 
 	syncItem = gtk_menu_tool_button_new(NULL, _("Refresh"));
 	syncMenu = gtk_menu_new();
+	guiBase.syncMenu = syncMenu;
 	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(syncItem), syncMenu);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(syncItem), _("Refresh"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
@@ -1425,6 +1426,7 @@ void guiInit(sqlite3 *ptr){
 
 	/*		Statusbar				*/
 	mainStatusbar = gtk_statusbar_new();
+	guiBase.statusbar = mainStatusbar;
 
 	/*	Sync Menu					*/
 	syncMenuUpdate(ptr, mainStatusbar, syncMenu);
@@ -1436,9 +1438,9 @@ void guiInit(sqlite3 *ptr){
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 160, -1);
-	addressbookList = gtk_tree_view_new();
-	listInit(addressbookList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(addressbookList), FALSE);
+	guiBase.addressbookList = gtk_tree_view_new();
+	listInit(guiBase.addressbookList);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(guiBase.addressbookList), FALSE);
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1453,9 +1455,9 @@ void guiInit(sqlite3 *ptr){
 	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
 	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
-	contactList = gtk_tree_view_new();
-	listInit(contactList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(contactList), FALSE);
+	guiBase.contactList = gtk_tree_view_new();
+	listInit(guiBase.contactList);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(guiBase.contactList), FALSE);
 	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	
@@ -1476,12 +1478,12 @@ void guiInit(sqlite3 *ptr){
 	gtk_container_add(GTK_CONTAINER(contactButtons), editContact);
 	completion = gtk_entry_completion_new ();
 	gtk_entry_completion_set_popup_set_width(GTK_ENTRY_COMPLETION(completion), TRUE);
-	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(contactList))));
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(guiBase.contactList))));
 	gtk_entry_completion_set_text_column(completion, 0);
 	searchbar = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");
 	gtk_entry_set_completion(GTK_ENTRY(searchbar), GTK_ENTRY_COMPLETION(completion));
-	gtk_widget_set_vexpand(GTK_WIDGET(contactList), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(guiBase.contactList), TRUE);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactWindow);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), searchbar);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactButtons);
@@ -1510,7 +1512,7 @@ void guiInit(sqlite3 *ptr){
 	transBook = g_new(ContactCards_trans_t, 1);
 	transBook->db = ptr;
 	cleanUpList = g_slist_append(cleanUpList, transBook);
-	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
+	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.addressbookList));
 	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selBook), transBook);
 
@@ -1518,7 +1520,7 @@ void guiInit(sqlite3 *ptr){
 	transContact->db = ptr;
 	transContact->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
-	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
+	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
 
@@ -1534,41 +1536,47 @@ void guiInit(sqlite3 *ptr){
 	transDelContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transDelContact);
 	transDelContact->db = ptr;
-	transDelContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
+	transDelContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
 	g_signal_connect(G_OBJECT(delContact), "clicked", G_CALLBACK(contactDel), transDelContact);
 
 	transAddContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transAddContact);
 	transAddContact->db = ptr;
-	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
+	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.addressbookList));
 	transAddContact->element2 = scroll;
 	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactNew), transAddContact);
 
 	transEditContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transEditContact);
 	transEditContact->db = ptr;
-	transEditContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(contactList));
+	transEditContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
 	transEditContact->element2 = scroll;
 	g_signal_connect(G_OBJECT(editContact), "clicked", G_CALLBACK(contactEdit), transEditContact);
 
-	g_signal_connect(G_OBJECT(mainWindow), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
-	g_signal_connect(G_OBJECT(mainWindow), "destroy", G_CALLBACK(guiExit), cleanUpList);
+	g_signal_connect(G_OBJECT(guiBase.window), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
+	g_signal_connect(G_OBJECT(guiBase.window), "destroy", G_CALLBACK(guiExit), cleanUpList);
 	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), transNew);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), transSync);
 	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
 
+	/*	Build the base structure 	*/
+	guiBase.db 				= ptr;
+	guiBase.statusbar 		= mainStatusbar;
+	guiBase.syncMenu 		= syncMenu;
+	guiBase.contactView		= contactWindow;
+
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(addressbookWindow), addressbookList);
+	gtk_container_add(GTK_CONTAINER(addressbookWindow), guiBase.addressbookList);
 	gtk_container_add(GTK_CONTAINER(mainContent), addressbookWindow);
-	gtk_container_add(GTK_CONTAINER(contactWindow), contactList);
+	gtk_container_add(GTK_CONTAINER(contactWindow), guiBase.contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
 	gtk_container_add(GTK_CONTAINER(contactBox), scroll);
 	gtk_container_add(GTK_CONTAINER(mainContent), contactBox);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainContent, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainStatusbar, FALSE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(mainWindow), mainVBox);
-	gtk_widget_show_all(mainWindow);
+	gtk_container_add(GTK_CONTAINER(guiBase.window), mainVBox);
+	gtk_widget_show_all(guiBase.window);
 }

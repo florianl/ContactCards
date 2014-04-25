@@ -26,6 +26,19 @@
 #include <sqlite3.h>
 #endif	/*	SQLITE3_LIB_H	*/
 
+typedef struct ContactCardsGuiBase{
+	sqlite3		*db;
+	GtkWidget	*window;
+	GtkWidget	*statusbar;
+	GtkWidget	*syncMenu;
+	GtkWidget	*addressbookList;
+	GtkWidget	*contactList;
+	GtkWidget	*contactView;
+}
+ContactCardsGuiBase;
+
+ContactCardsGuiBase guiBase;
+
 /**
  * struct ContactCards_trans -generic struct for all kind of data
  */
@@ -41,11 +54,6 @@ enum {
 	ID_COLUMN,
 	N_COLUMNS
 };
-
-/*	Globals		*/
-GtkWidget				*addressbookList;
-GtkWidget				*contactList;
-GtkWidget				*mainWindow;
 
 extern void guiRun(sqlite3 *ptr);
 extern void guiInit(sqlite3 *ptr);
