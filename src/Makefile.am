@@ -5,6 +5,7 @@ bin_PROGRAMS = contactcards
 contactcards_SOURCES = 	contactcards.c \
 						cards.c \
 						gui.c \
+						gui-dialog.c \
 						neon_rx.c \
 						neon_tx.c \
 						settings.c \
