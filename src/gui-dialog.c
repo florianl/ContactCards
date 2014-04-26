@@ -71,7 +71,6 @@ static void newDialogApply(GtkWidget *widget, gpointer trans){
 	GtkWidget					*assistant, *box;
 	GtkWidget					*controller;
 	GtkEntryBuffer				*buf1, *buf2, *buf3, *buf4;
-	ContactCards_trans_t		*data = trans;
 
 	assistant = (GtkWidget*)widget;
 
@@ -94,24 +93,24 @@ static void newDialogApply(GtkWidget *widget, gpointer trans){
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 1);
 	buf3 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "descEntry");
 	buf4 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
-	newServer(data->db, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
-	syncMenuUpdate(data->db, data->element, data->element2);
+	newServer(appBase.db, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
+	syncMenuUpdate();
 	return;
 
 fruux:
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 2);
 	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
-	newServer(data->db, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
-	syncMenuUpdate(data->db, data->element, data->element2);
+	newServer(appBase.db, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
+	syncMenuUpdate();
 	return;
 
 google:
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 3);
 	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "oAuthEntry");
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "grantEntry");
-	newServerOAuth(data->db, "google", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), 1);
-	syncMenuUpdate(data->db, data->element, data->element2);
+	newServerOAuth(appBase.db, "google", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), 1);
+	syncMenuUpdate();
 	return;
 }
 
@@ -354,7 +353,7 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(assistant), "close", G_CALLBACK(newDialogClose), NULL);
 	g_signal_connect(G_OBJECT(assistant), "cancel", G_CALLBACK(newDialogClose), NULL);
-	g_signal_connect(G_OBJECT(assistant), "apply", G_CALLBACK(newDialogApply), trans);
+	g_signal_connect(G_OBJECT(assistant), "apply", G_CALLBACK(newDialogApply), NULL);
 }
 
 /**
@@ -363,21 +362,12 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
 static void syncMenuSel(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	int							sID;
 	GError		 				*error = NULL;
-	ContactCards_trans_t		*data = trans;
-	ContactCards_trans_t		*buff = NULL;
 	GThread						*thread;
 
-	sID = GPOINTER_TO_INT(data->element);
+	verboseCC("[%s] you selected %d\n", __func__, GPOINTER_TO_INT(trans));
 
-	verboseCC("[%s] you selected %d\n", __func__, sID);
-
-	buff = g_new(ContactCards_trans_t, 1);
-	buff->db = data->db;
-	buff->element = GINT_TO_POINTER(sID);
-	buff->element2 = data->element2;
-	thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+	thread = g_thread_try_new("syncingServer", syncOneServer, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
 		verboseCC("%s\n", error->message);
@@ -389,23 +379,17 @@ static void syncMenuSel(GtkWidget *widget, gpointer trans){
 /**
  * syncMenuItem - one item of the sync menu
  */
-static GtkWidget *syncMenuItem(sqlite3 *ptr, int sID, GtkWidget *statusbar){
+static GtkWidget *syncMenuItem(int sID){
 	printfunc(__func__);
 
 	GtkWidget				*item;
 	char					*desc = NULL;
-	ContactCards_trans_t	*trans = NULL;
 
-	desc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", sID, "", "", "", "", "", 0);
+	desc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", sID, "", "", "", "", "", 0);
 	item = gtk_menu_item_new_with_label(desc);
 	g_free(desc);
 
-	trans = g_new(ContactCards_trans_t, 1);
-	trans->db = ptr;
-	trans->element = GINT_TO_POINTER(sID);
-	trans->element2 = statusbar;
-
-	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(syncMenuSel), trans);
+	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(syncMenuSel), GINT_TO_POINTER(sID));
 	gtk_widget_show_all(item);
 
 	return item;
@@ -417,20 +401,17 @@ static GtkWidget *syncMenuItem(sqlite3 *ptr, int sID, GtkWidget *statusbar){
 void prefServerDelete(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
-	ContactCards_pref_t		*buffers;
+	ContactCards_pref_t		*buffers = trans;
 	GList					*children, *iter;
-
-	buffers = data->element3;
 
 	verboseCC("[%s] %d\n", __func__, buffers->srvID);
 
-	dbRemoveItem(data->db, "cardServer", 2, "", "", "serverID", buffers->srvID);
-	dbRemoveItem(data->db, "certs", 2, "", "", "serverID", buffers->srvID);
-	cleanUpRequest(data->db, buffers->srvID, 0);
-	fillList(data->db, 3, 0, buffers->srvPrefList);
-	fillList(data->db, 1, 0, guiBase.addressbookList);
-	syncMenuUpdate(data->db, buffers->statusbar, buffers->syncMenu);
+	dbRemoveItem(appBase.db, "cardServer", 2, "", "", "serverID", buffers->srvID);
+	dbRemoveItem(appBase.db, "certs", 2, "", "", "serverID", buffers->srvID);
+	cleanUpRequest(appBase.db, buffers->srvID, 0);
+	fillList(appBase.db, 3, 0, buffers->srvPrefList);
+	fillList(appBase.db, 1, 0, appBase.addressbookList);
+	syncMenuUpdate();
 
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), "", -1);
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), "", -1);
@@ -456,13 +437,10 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 void prefServerSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
-	ContactCards_pref_t		*buffers;
+	ContactCards_pref_t		*buffers = trans;
 
-	buffers = data->element3;
-
-	updateAddressbooks(data->db, buffers->aBooks);
-	updateServerDetails(data->db, buffers->srvID,
+	updateAddressbooks(appBase.db, buffers->aBooks);
+	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
 }
@@ -473,34 +451,27 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 void prefServerCheck(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
-	ContactCards_trans_t		*checkData = NULL;
-	ContactCards_pref_t			*buffers;
+	ContactCards_pref_t			*buffers = trans;
 	int							isOAuth = 0;
 	ne_session					*sess = NULL;
 
-	buffers = data->element3;
 	g_mutex_lock(&mutex);
 
-	isOAuth = getSingleInt(data->db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "");
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "");
 
 	if(isOAuth){
 		int		ret = 0;
-		ret = oAuthUpdate(data->db, buffers->srvID);
+		ret = oAuthUpdate(appBase.db, buffers->srvID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
 			return;
 		}
 	}
 
-	checkData = g_new(ContactCards_trans_t, 1);
-	checkData->db = data->db;
-	checkData->element = GINT_TO_POINTER(buffers->srvID);
+	sess = serverConnect(buffers->srvID);
+	syncInitial(appBase.db, sess, buffers->srvID);
+	serverDisconnect(sess, appBase.db, buffers->srvID);
 
-	sess = serverConnect(checkData);
-	syncInitial(data->db, sess, buffers->srvID);
-	serverDisconnect(sess, data->db, buffers->srvID);
-	g_free(checkData);
 	g_mutex_unlock(&mutex);
 	return;
 }
@@ -511,13 +482,10 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 void prefExportCert(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t	*data = trans;
-	ContactCards_pref_t		*buffers;
+	ContactCards_pref_t		*buffers = trans;
 	GtkWidget					*dirChooser;
 	int							result;
 	char						*path = NULL;
-
-	buffers = data->element2;
 
 	dirChooser = gtk_file_chooser_dialog_new(_("Export Certificate"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Export"), GTK_RESPONSE_ACCEPT, NULL);
 
@@ -527,7 +495,7 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 
 	if (result == GTK_RESPONSE_ACCEPT) {
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportCert(data->db, path, buffers->srvID);
+			exportCert(appBase.db, path, buffers->srvID);
 			g_free(path);
 	}
 	gtk_widget_destroy(dirChooser);
@@ -583,55 +551,53 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	GtkWidget			*prefFrame;
 	int					selID;
 	GSList				*abList;
-	ContactCards_trans_t		*data = trans;
-	ContactCards_pref_t		*buffers;
+	ContactCards_pref_t		*buffers = trans;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
 	char				*issued = NULL, *issuer = NULL, *url = NULL;
 	int					isOAuth;
 	gboolean			res = 0;
 
-	prefFrame = data->element;
-	buffers = data->element3;
+	prefFrame = buffers->prefFrame;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		GList *children, *iter2;
 
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
-		frameTitle = getSingleChar(data->db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
+		frameTitle = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
 		if (frameTitle == NULL) return;
 		gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), frameTitle, -1);
 
 		buffers->srvID = selID;
 
-		user = getSingleChar(data->db, "cardServer", "user", 1, "serverID", selID, "", "", "", "", "", 0);
+		user = getSingleChar(appBase.db, "cardServer", "user", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->userBuf), user, -1);
 
-		isOAuth = getSingleInt(data->db, "cardServer", "isOAuth", 1, "serverID", selID, "", "");
+		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", selID, "", "");
 		if(!isOAuth){
-			passwd = getSingleChar(data->db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
+			passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
 		} else {
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
 		}
 
-		url = getSingleChar(data->db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
+		url = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
 
 		gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 
-		if(countElements(data->db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
+		if(countElements(appBase.db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
 
-			issued = getSingleChar(data->db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
+			issued = getSingleChar(appBase.db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
 			if(issued == NULL) issued = "";
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
 
-			issuer = getSingleChar(data->db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
+			issuer = getSingleChar(appBase.db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
 			if(issuer == NULL) issuer = "";
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
 
-			res = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", selID, "", "");
+			res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "");
 			if(res == ContactCards_DIGEST_TRUSTED){
 				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
 			} else {
@@ -642,7 +608,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
-		abList = getListInt(data->db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
+		abList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
 
 		/* Flush the list box before adding new items	*/
 		children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
@@ -666,7 +632,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 				continue;
 			}
 
-			row = buildRow(data->db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
+			row = buildRow(appBase.db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
 			gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
 			abList = next;
 		}
@@ -720,7 +686,6 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkTreeSelection	*serverSel;
 	GSList				*aBooks = g_slist_alloc();
 
-	ContactCards_trans_t		*data = trans;
 	ContactCards_pref_t		*buffers = NULL;
 
 	desc = gtk_entry_buffer_new(NULL, -1);
@@ -748,7 +713,6 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_widget_set_size_request(prefList, 128, -1);
 
 	prefFrame = gtk_frame_new(_("Settings"));
-	data->element = prefFrame;
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -840,8 +804,9 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	gtk_container_add(GTK_CONTAINER(prefFrame), vbox);
 	gtk_container_add(GTK_CONTAINER(prefList), serverPrefList);
-	fillList(data->db, 3, 0 , serverPrefList);
+	fillList(appBase.db, 3, 0 , serverPrefList);
 
+	buffers->prefFrame = prefFrame;
 	buffers->descBuf = desc;
 	buffers->urlBuf = url;
 	buffers->userBuf = user;
@@ -852,20 +817,17 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->certSel = digSwitch;
 	buffers->listbox = ablist;
 	buffers->aBooks = aBooks;
-	buffers->statusbar = data->element;
-	buffers->syncMenu = data->element2;
-	data->element3 = buffers;
 
 	/*		Connect Signales		*/
 	serverSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(serverPrefList));
 	gtk_tree_selection_set_mode (serverSel, GTK_SELECTION_SINGLE);
-	g_signal_connect(serverSel, "changed", G_CALLBACK(prefServerSelect), data);
+	g_signal_connect(serverSel, "changed", G_CALLBACK(prefServerSelect), buffers);
 	g_signal_connect(G_OBJECT(prefWindow), "destroy", G_CALLBACK(prefExit), buffers);
 
-	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefServerDelete), data);
-	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefServerSave), data);
-	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), data);
-	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), data);
+	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefServerDelete), buffers);
+	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefServerSave), buffers);
+	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), buffers);
+	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), buffers);
 
 	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), buffers);
 
@@ -878,13 +840,13 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 /**
  * syncMenuFill - fills the menu with items
  */
-static void syncMenuFill(GtkWidget *menu, sqlite3 *ptr, GtkWidget *statusbar){
+static void syncMenuFill(void){
 	printfunc(__func__);
 
 	GSList		*list;
 	GtkWidget	*item;
 
-	list = getListInt(ptr, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+	list = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 	while(list){
 		GSList				*next = list->next;
 		int					sID = GPOINTER_TO_INT(list->data);
@@ -892,8 +854,8 @@ static void syncMenuFill(GtkWidget *menu, sqlite3 *ptr, GtkWidget *statusbar){
 			list = next;
 			continue;
 		}
-		item = syncMenuItem(ptr, sID, statusbar);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+		item = syncMenuItem(sID);
+		gtk_menu_shell_append(GTK_MENU_SHELL(appBase.syncMenu), item);
 		list = next;
 	}
 	g_slist_free(list);
@@ -902,12 +864,12 @@ static void syncMenuFill(GtkWidget *menu, sqlite3 *ptr, GtkWidget *statusbar){
 /**
  * syncMenuFlush - delete all items from menu
  */
-static void syncMenuFlush(GtkWidget *menu){
+static void syncMenuFlush(void){
 	printfunc(__func__);
 
 	GList			*children, *iter;
 
-	children = gtk_container_get_children(GTK_CONTAINER(menu));
+	children = gtk_container_get_children(GTK_CONTAINER(appBase.syncMenu));
 	for(iter = children; iter != NULL; iter = g_list_next(iter)) {
 			gtk_widget_destroy(GTK_WIDGET(iter->data));
 	}
@@ -917,9 +879,9 @@ static void syncMenuFlush(GtkWidget *menu){
 /**
  * syncMenuUpdate - updates the menu
  */
-void syncMenuUpdate(sqlite3 *ptr, GtkWidget *statusbar, GtkWidget *menu){
+void syncMenuUpdate(void){
 	printfunc(__func__);
 
-	syncMenuFlush(menu);
-	syncMenuFill(menu, ptr, statusbar);
+	syncMenuFlush();
+	syncMenuFill();
 }

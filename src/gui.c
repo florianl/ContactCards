@@ -19,8 +19,8 @@
 void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
-	fillList(ptr, 1, 0, guiBase.addressbookList);
-	fillList(ptr, 2, 0, guiBase.contactList);
+	fillList(ptr, 1, 0, appBase.addressbookList);
+	fillList(ptr, 2, 0, appBase.contactList);
 	gtk_main();
 }
 
@@ -85,7 +85,7 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
-		fillList(((ContactCards_trans_t *) trans)->db, 2, selID, guiBase.contactList);
+		fillList(appBase.db, 2, selID, appBase.contactList);
 		g_free(selText);
 	}
 }
@@ -120,7 +120,6 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	int					selID, addrID, srvID;
 	ne_session 			*sess = NULL;
 	ContactCards_trans_t		*data = trans;
-	ContactCards_trans_t		*delData = NULL;
 	gint 				resp;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data->element), &model, &iter)) {
@@ -135,31 +134,26 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		if (resp != GTK_RESPONSE_YES) return;
 
 		g_mutex_lock(&mutex);
-		addrID = getSingleInt(data->db, "contacts", "addressbookID", 1, "contactID", selID, "", "");
-		srvID = getSingleInt(data->db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "");
+		addrID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "");
+		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "");
 
-		delData = g_new(ContactCards_trans_t, 1);
-		delData->db = data->db;
-		delData->element = GINT_TO_POINTER(srvID);
-
-		isOAuth = getSingleInt(data->db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
 
 		if(isOAuth){
 			int 		ret = 0;
-			ret = oAuthUpdate(data->db, srvID);
+			ret = oAuthUpdate(appBase.db, srvID);
 			if(ret != OAUTH_UP2DATE)
 				goto failure;
 		}
 
-		sess = serverConnect(delData);
-		serverDelContact(data->db, sess, srvID, selID);
-		serverDisconnect(sess, data->db, srvID);
+		sess = serverConnect(srvID);
+		serverDelContact(appBase.db, sess, srvID, selID);
+		serverDisconnect(sess, appBase.db, srvID);
 
-		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
+		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
 		gtk_list_store_remove(store, &iter);
 
 failure:
-		g_free(delData);
 		g_mutex_unlock(&mutex);
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no contact selected."));
@@ -651,14 +645,14 @@ static void *pushingCard(void *trans){
 	g_mutex_lock(&mutex);
 
 	if(oldID){
-		dbCard = getSingleChar(data->db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
+		dbCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
 		vCard = mergeCards(value->list, dbCard);
 	} else {
 		vCard = buildCard(value->list);
 	}
 
-	if(pushCard(data->db, vCard, addrID, 1, oldID) == 1){
-		dbRemoveItem(data->db, "contacts", 2, "", "", "contactID", oldID);
+	if(pushCard(appBase.db, vCard, addrID, 1, oldID) == 1){
+		dbRemoveItem(appBase.db, "contacts", 2, "", "", "contactID", oldID);
 	} else {
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
 	}
@@ -1015,7 +1009,7 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
-	newCard = buildEditCard(((ContactCards_trans_t *)trans)->db, 0, abID);
+	newCard = buildEditCard(appBase.db, 0, abID);
 	cleanCard(((ContactCards_trans_t *)trans)->element2);
 	gtk_widget_show_all(newCard);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element2), newCard);
@@ -1039,7 +1033,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
-	editCard = buildEditCard(((ContactCards_trans_t *)trans)->db, selID, 0);
+	editCard = buildEditCard(appBase.db, selID, 0);
 	cleanCard(((ContactCards_trans_t *)trans)->element2);
 	gtk_widget_set_halign (editCard, GTK_ALIGN_FILL);
 	gtk_widget_set_valign (editCard, GTK_ALIGN_FILL);
@@ -1059,7 +1053,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 
 	gtk_tree_model_get(model, iter, ID_COLUMN, &selID,  -1);
 	verboseCC("[%s] %d\n",__func__, selID);
-	card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
+	card = buildNewCard(appBase.db, selID);
 	gtk_widget_show_all(card);
 	cleanCard(((ContactCards_trans_t *)trans)->element);
 	gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element), card);
@@ -1079,7 +1073,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
-		card = buildNewCard(((ContactCards_trans_t *)trans)->db, selID);
+		card = buildNewCard(appBase.db, selID);
 		gtk_widget_show_all(card);
 		cleanCard(((ContactCards_trans_t *)trans)->element);
 		gtk_container_add(GTK_CONTAINER(((ContactCards_trans_t *)trans)->element), card);
@@ -1155,7 +1149,7 @@ static void listSortorderAsc(void){
 
 	GtkListStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_ASCENDING);
 
@@ -1169,7 +1163,7 @@ static void listSortorderDesc(void){
 
 	GtkListStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(guiBase.contactList)));
+	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_DESCENDING);
 
@@ -1181,43 +1175,37 @@ static void listSortorderDesc(void){
 void *syncOneServer(void *trans){
 	printfunc(__func__);
 
-	int					serverID = 0;
+	int					serverID = GPOINTER_TO_INT(trans);
 	int					isOAuth = 0;
 	ne_session 			*sess = NULL;
-	ContactCards_trans_t		*data = trans;
-	GtkWidget			*statusBar;
 	char				*srv = NULL;
 	char				*msg = NULL;
 	int					ctxID;
 
 	g_mutex_lock(&mutex);
 
-	serverID = GPOINTER_TO_INT(data->element);
-	statusBar = data->element2;
-
-	srv = getSingleChar(data->db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+	srv = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
 	msg = g_strconcat(_("syncing "), srv, NULL);
-	ctxID = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusBar), "info");
-	gtk_statusbar_push(GTK_STATUSBAR(statusBar), ctxID, msg);
+	ctxID = gtk_statusbar_get_context_id(GTK_STATUSBAR(appBase.statusbar), "info");
+	gtk_statusbar_push(GTK_STATUSBAR(appBase.statusbar), ctxID, msg);
 
-	isOAuth = getSingleInt(data->db, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
 	if(isOAuth){
 		int 		ret = 0;
-		ret = oAuthUpdate(data->db, serverID);
+		ret = oAuthUpdate(appBase.db, serverID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
 			return NULL;
 		}
 	}
 
-	sess = serverConnect(data);
-	syncContacts(data->db, sess, serverID);
-	serverDisconnect(sess, data->db, serverID);
+	sess = serverConnect(serverID);
+	syncContacts(appBase.db, sess, serverID);
+	serverDisconnect(sess, appBase.db, serverID);
 
-	gtk_statusbar_pop(GTK_STATUSBAR(statusBar), ctxID);
+	gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 
-	g_free(data);
 	free(srv);
 	free(msg);
 	g_mutex_unlock(&mutex);
@@ -1231,7 +1219,6 @@ void *syncOneServer(void *trans){
 static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
 	GtkWidget					*dirChooser;
 	int							result;
 	char						*path = NULL;
@@ -1245,7 +1232,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	switch(result){
 		case GTK_RESPONSE_ACCEPT:
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportContacts(data->db, path);
+			exportContacts(appBase.db, path);
 			g_free(path);
 			break;
 		default:
@@ -1260,16 +1247,11 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 static void syncServer(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
 	GSList						*retList;
-	GtkWidget					*statusBar;
 	GError		 				*error = NULL;
-	ContactCards_trans_t		*buff = NULL;
 	GThread						*thread;
 
-	statusBar = data->element;
-
-	retList = getListInt(data->db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+	retList = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 
 	while(retList){
 		GSList				*next = retList->next;
@@ -1278,11 +1260,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		buff = g_new(ContactCards_trans_t, 1);
-		buff->db = data->db;
-		buff->element = GINT_TO_POINTER(serverID);
-		buff->element2 = statusBar;
-		thread = g_thread_try_new("syncingServer", syncOneServer, buff, &error);
+		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
 			verboseCC("%s\n", error->message);
@@ -1310,7 +1288,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
 
 	grant = gtk_entry_buffer_new(NULL, -1);
 
-	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(guiBase.window), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
+	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(appBase.window), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
 
 	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
 
@@ -1356,7 +1334,7 @@ void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
 /**
  * guiInit - build the basic GUI
  */
-void guiInit(sqlite3 *ptr){
+void guiInit(void){
 	printfunc(__func__);
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
@@ -1372,7 +1350,6 @@ void guiInit(sqlite3 *ptr){
 	GtkEntryCompletion	*completion;
 	ContactCards_trans_t		*transBook = NULL;
 	ContactCards_trans_t		*transContact = NULL;
-	ContactCards_trans_t		*transPref = NULL;
 	ContactCards_trans_t		*transNew = NULL;
 	ContactCards_trans_t		*transSync = NULL;
 	ContactCards_trans_t		*transDelContact = NULL;
@@ -1382,9 +1359,9 @@ void guiInit(sqlite3 *ptr){
 
 	gtk_init(NULL, NULL);
 
-	guiBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(guiBase.window), "ContactCards");
-	gtk_window_set_default_size(GTK_WINDOW(guiBase.window), 760,496);
+	appBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(appBase.window), "ContactCards");
+	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 760,496);
 
 	mainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
@@ -1409,7 +1386,7 @@ void guiInit(sqlite3 *ptr){
 
 	syncItem = gtk_menu_tool_button_new(NULL, _("Refresh"));
 	syncMenu = gtk_menu_new();
-	guiBase.syncMenu = syncMenu;
+	appBase.syncMenu = syncMenu;
 	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(syncItem), syncMenu);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(syncItem), _("Refresh"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (syncItem), "view-refresh");
@@ -1426,10 +1403,10 @@ void guiInit(sqlite3 *ptr){
 
 	/*		Statusbar				*/
 	mainStatusbar = gtk_statusbar_new();
-	guiBase.statusbar = mainStatusbar;
+	appBase.statusbar = mainStatusbar;
 
 	/*	Sync Menu					*/
-	syncMenuUpdate(ptr, mainStatusbar, syncMenu);
+	syncMenuUpdate();
 
 	/*		mainContent				*/
 	mainContent = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1438,9 +1415,9 @@ void guiInit(sqlite3 *ptr){
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 160, -1);
-	guiBase.addressbookList = gtk_tree_view_new();
-	listInit(guiBase.addressbookList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(guiBase.addressbookList), FALSE);
+	appBase.addressbookList = gtk_tree_view_new();
+	listInit(appBase.addressbookList);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(appBase.addressbookList), FALSE);
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1455,9 +1432,9 @@ void guiInit(sqlite3 *ptr){
 	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
 	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
-	guiBase.contactList = gtk_tree_view_new();
-	listInit(guiBase.contactList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(guiBase.contactList), FALSE);
+	appBase.contactList = gtk_tree_view_new();
+	listInit(appBase.contactList);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(appBase.contactList), FALSE);
 	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	
@@ -1478,49 +1455,42 @@ void guiInit(sqlite3 *ptr){
 	gtk_container_add(GTK_CONTAINER(contactButtons), editContact);
 	completion = gtk_entry_completion_new ();
 	gtk_entry_completion_set_popup_set_width(GTK_ENTRY_COMPLETION(completion), TRUE);
-	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(guiBase.contactList))));
+	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(appBase.contactList))));
 	gtk_entry_completion_set_text_column(completion, 0);
 	searchbar = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");
 	gtk_entry_set_completion(GTK_ENTRY(searchbar), GTK_ENTRY_COMPLETION(completion));
-	gtk_widget_set_vexpand(GTK_WIDGET(guiBase.contactList), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(appBase.contactList), TRUE);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactWindow);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), searchbar);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactButtons);
 
-	/*		preference dialog		*/
-	transPref = g_new(ContactCards_trans_t, 1);
-	transPref->db = ptr;
-	transPref->element = mainStatusbar;
-	transPref->element2 = syncMenu;
-	cleanUpList = g_slist_append(cleanUpList, transPref);
-
 	/*		new Server dialog		*/
 	transNew = g_new(ContactCards_trans_t, 1);
-	transNew->db = ptr;
+	transNew->db = appBase.db;
 	transNew->element = mainStatusbar;
 	transNew->element2 = syncMenu;
 	cleanUpList = g_slist_append(cleanUpList, transNew);
 
 	/*		sync Server 			*/
 	transSync = g_new(ContactCards_trans_t, 1);
-	transSync->db = ptr;
+	transSync->db = appBase.db;
 	transSync->element = mainStatusbar;
 	cleanUpList = g_slist_append(cleanUpList, transSync);
 
 	/*		Connect Signales		*/
 	transBook = g_new(ContactCards_trans_t, 1);
-	transBook->db = ptr;
+	transBook->db = appBase.db;
 	cleanUpList = g_slist_append(cleanUpList, transBook);
-	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.addressbookList));
+	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList));
 	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selBook), transBook);
 
 	transContact = g_new(ContactCards_trans_t, 1);
-	transContact->db = ptr;
+	transContact->db = appBase.db;
 	transContact->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transContact);
-	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
+	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), transContact);
 
@@ -1528,55 +1498,54 @@ void guiInit(sqlite3 *ptr){
 	g_signal_connect(G_OBJECT(descContact), "clicked", G_CALLBACK(listSortorderDesc), NULL);
 
 	transCompletion = g_new(ContactCards_trans_t, 1);
-	transCompletion->db = ptr;
+	transCompletion->db = appBase.db;
 	transCompletion->element = scroll;
 	cleanUpList = g_slist_append(cleanUpList, transCompletion);
 	g_signal_connect(G_OBJECT(completion), "match-selected", G_CALLBACK(completionContact), transCompletion);
 
 	transDelContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transDelContact);
-	transDelContact->db = ptr;
-	transDelContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
+	transDelContact->db = appBase.db;
+	transDelContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList));
 	g_signal_connect(G_OBJECT(delContact), "clicked", G_CALLBACK(contactDel), transDelContact);
 
 	transAddContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transAddContact);
-	transAddContact->db = ptr;
-	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.addressbookList));
+	transAddContact->db = appBase.db;
+	transAddContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList));
 	transAddContact->element2 = scroll;
 	g_signal_connect(G_OBJECT(addContact), "clicked", G_CALLBACK(contactNew), transAddContact);
 
 	transEditContact = g_new(ContactCards_trans_t, 1);
 	cleanUpList = g_slist_append(cleanUpList, transEditContact);
-	transEditContact->db = ptr;
-	transEditContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(guiBase.contactList));
+	transEditContact->db = appBase.db;
+	transEditContact->element = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList));
 	transEditContact->element2 = scroll;
 	g_signal_connect(G_OBJECT(editContact), "clicked", G_CALLBACK(contactEdit), transEditContact);
 
-	g_signal_connect(G_OBJECT(guiBase.window), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
-	g_signal_connect(G_OBJECT(guiBase.window), "destroy", G_CALLBACK(guiExit), cleanUpList);
-	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), transPref);
+	g_signal_connect(G_OBJECT(appBase.window), "key_press_event", G_CALLBACK(guiKeyHandler), cleanUpList);
+	g_signal_connect(G_OBJECT(appBase.window), "destroy", G_CALLBACK(guiExit), cleanUpList);
+	g_signal_connect(G_OBJECT(prefItem), "clicked", G_CALLBACK(prefWindow), NULL);
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), transNew);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), transSync);
-	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), transPref);
+	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), NULL);
 
 	/*	Build the base structure 	*/
-	guiBase.db 				= ptr;
-	guiBase.statusbar 		= mainStatusbar;
-	guiBase.syncMenu 		= syncMenu;
-	guiBase.contactView		= contactWindow;
+	appBase.statusbar 		= mainStatusbar;
+	appBase.syncMenu 		= syncMenu;
+	appBase.contactView		= contactWindow;
 
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(addressbookWindow), guiBase.addressbookList);
+	gtk_container_add(GTK_CONTAINER(addressbookWindow), appBase.addressbookList);
 	gtk_container_add(GTK_CONTAINER(mainContent), addressbookWindow);
-	gtk_container_add(GTK_CONTAINER(contactWindow), guiBase.contactList);
+	gtk_container_add(GTK_CONTAINER(contactWindow), appBase.contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
 	gtk_container_add(GTK_CONTAINER(contactBox), scroll);
 	gtk_container_add(GTK_CONTAINER(mainContent), contactBox);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainContent, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainStatusbar, FALSE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(guiBase.window), mainVBox);
-	gtk_widget_show_all(guiBase.window);
+	gtk_container_add(GTK_CONTAINER(appBase.window), mainVBox);
+	gtk_widget_show_all(appBase.window);
 }

@@ -37,7 +37,7 @@ typedef struct ContactCardsGuiBase{
 }
 ContactCardsGuiBase;
 
-ContactCardsGuiBase guiBase;
+ContactCardsGuiBase appBase;
 
 /**
  * struct ContactCards_trans -generic struct for all kind of data
@@ -46,7 +46,6 @@ typedef struct ContactCards_trans {
 	sqlite3				*db;
 	void				*element;
 	void				*element2;
-	void				*element3;
 } ContactCards_trans_t;
 
 enum {
@@ -56,7 +55,7 @@ enum {
 };
 
 extern void guiRun(sqlite3 *ptr);
-extern void guiInit(sqlite3 *ptr);
+extern void guiInit(void);
 
 extern void listAppend(GtkWidget *list, gchar *text, guint id);
 extern void comboAppend(GtkListStore *store, gchar *text, guint id);
@@ -70,12 +69,13 @@ extern void *syncOneServer(void *trans);
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);
 extern void prefWindow(GtkWidget *widget, gpointer trans);
-extern void syncMenuUpdate(sqlite3 *ptr, GtkWidget *statusbar, GtkWidget *menu);
+extern void syncMenuUpdate();
 
 /**
  * struct ContactCards_pref	- structure for handling the preference dialog
  */
 typedef struct ContactCards_pref {
+	GtkWidget			*prefFrame;
 	GtkEntryBuffer		*descBuf;
 	GtkEntryBuffer		*urlBuf;
 	GtkEntryBuffer		*userBuf;
@@ -85,8 +85,6 @@ typedef struct ContactCards_pref {
 	GtkWidget			*srvPrefList;
 	GtkWidget			*certSel;
 	GtkWidget			*listbox;
-	GtkWidget			*statusbar;
-	GtkWidget			*syncMenu;
 	GSList				*aBooks;
 	int					srvID;
 } ContactCards_pref_t;

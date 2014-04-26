@@ -44,8 +44,9 @@ int main(int argc, char **argv){
 	}
 
 	dbCreate(db_handler);
+	appBase.db = db_handler;
 
-	guiInit(db_handler);
+	guiInit();
 	g_mutex_init(&mutex);
 
 

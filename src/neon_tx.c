@@ -48,7 +48,6 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
 	char						*digest = calloc(1, NE_SSL_DIGESTLEN);
 	int							trust = ContactCards_DIGEST_UNTRUSTED;
 	int							exists = 0;
@@ -58,9 +57,9 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	char						*issued = NULL;
 	char						*issuer = NULL;
 
-	serverID = GPOINTER_TO_INT(data->element);
+	serverID = GPOINTER_TO_INT(trans);
 
-	exists = countElements(data->db, "certs", 1, "serverID", serverID, "", "", "", "");
+	exists = countElements(appBase.db, "certs", 1, "serverID", serverID, "", "", "", "");
 
 	if(exists == 0){
 		goto newCert;
@@ -84,12 +83,12 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	if (failures & NE_SSL_REVOKED)
 		verboseCC("[%s] certificate has been revoked\n", __func__);
 
-	trust = getSingleInt(data->db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
+	trust = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
 
 	switch(trust){
 		case ContactCards_DIGEST_TRUSTED:
 			ne_ssl_cert_digest(cert, digest);
-			dbDigest = getSingleChar(data->db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+			dbDigest = getSingleChar(appBase.db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
 			if(dbDigest == NULL){
 				goto newCert;
 			}
@@ -112,7 +111,7 @@ newCert:
 	trust = ContactCards_DIGEST_NEW;
 	issued = (char *) ne_ssl_cert_identity(cert);
 	issuer = ne_ssl_readable_dname(ne_ssl_cert_issuer(cert));
-	setServerCert(data->db, serverID, exists, trust, newCer, digest, issued, issuer);
+	setServerCert(appBase.db, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
 	free(dbDigest);
@@ -123,18 +122,14 @@ fastExit:
 /**
  * serverConnect - connect to a server
  */
-ne_session *serverConnect(void *trans){
+ne_session *serverConnect(int serverID){
 	printfunc(__func__);
 
 	char				*davServer = NULL;
 	ne_uri				uri;
 	ne_session			*sess = NULL;
-	ContactCards_trans_t		*data = trans;
-	int							serverID;
 
-	serverID = GPOINTER_TO_INT(data->element);
-
-	davServer = getSingleChar(data->db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
+	davServer = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
 	if(davServer== NULL) return NULL;
 
@@ -151,7 +146,7 @@ ne_session *serverConnect(void *trans){
 
 	sess = ne_session_create(uri.scheme, uri.host, uri.port);
 
-	ne_ssl_set_verify(sess, verifyCert, data);
+	ne_ssl_set_verify(sess, verifyCert, GINT_TO_POINTER(serverID));
 
 	free(davServer);
 
@@ -903,7 +898,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 
 	newID = newContact(ptr, addrBookID, card);
 
-	sess = serverConnect(trans);
+	sess = serverConnect(srvID);
 
 	if(existing){
 		stack = serverRequest(DAV_REQ_PUT_CONTACT, srvID, newID, sess, ptr);

@@ -849,7 +849,7 @@ void updateAddressbooks(sqlite3 *ptr, GSList *list){
 			/* Set the bit		*/
 			flags |= (1<<DAV_ADDRBOOK_DONT_SYNC);
 		}
-		verboseCC("Updating %d", item->aBookID);
+		verboseCC("Updating %d\n", item->aBookID);
 
 		sql_query = sqlite3_mprintf("UPDATE addressbooks SET syncMethod = '%d' WHERE addressbookID = '%d';", flags, item->aBookID);
 		doSimpleRequest(ptr, sql_query, __func__);
