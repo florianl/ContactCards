@@ -501,12 +501,11 @@ int responseOAuthHandle(void *trans, const char *block, size_t len){
 	gchar			**tokens = NULL;
 	gchar			**ptr = NULL;
 	int				items = 0;
-	sqlite3 		*db;
 	int 			serverID;
-	ContactCards_trans_t	*data = trans;
 
-	db = data->db;
-	serverID = GPOINTER_TO_INT(data->element);
+	serverID = GPOINTER_TO_INT(trans);
+
+	verboseCC("[%s] %d\n", __func__, serverID);
 
 	tokens = g_strsplit(block, "\n", -1);
 	ptr = tokens;
@@ -517,7 +516,7 @@ int responseOAuthHandle(void *trans, const char *block, size_t len){
 			items++;
 			continue;
 		}
-		responseElementOAuthHandle(db, serverID, *ptr);
+		responseElementOAuthHandle(appBase.db, serverID, *ptr);
 		++ptr;
 	}
 	g_strfreev (tokens);

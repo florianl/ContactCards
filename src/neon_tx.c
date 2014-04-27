@@ -21,7 +21,6 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 
 	credits_t			key;
 	int					id;
-	ContactCards_trans_t		*data = trans;
 
     memset(&key, 0, sizeof(key));
 
@@ -30,9 +29,9 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 		return 5;
 	}
 
-	id = GPOINTER_TO_INT(data->element);
+	id = GPOINTER_TO_INT(trans);
 
-	readCardServerCredits(id, &key, data->db);
+	readCardServerCredits(id, &key, appBase.db);
 
 	if(key.user == NULL) return 5;
 
@@ -291,7 +290,6 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	char				*addrbookPath = NULL;
 	gchar				*ContactCardsIdent = NULL;
 	ne_uri				uri;
-	ContactCards_trans_t		*trans = NULL;
 	int					ret = 0;
 	int 				count = 0;
 	char				buf[BUFFERSIZE];
@@ -320,9 +318,6 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
 
 sendAgain:
-	trans = g_new(ContactCards_trans_t, 1);
-	trans->db = ptr;
-	trans->element = GINT_TO_POINTER(serverID);
 
 	ne_buffer_clear(req_buffer);
 	switch(method){
@@ -493,7 +488,7 @@ sendAgain:
 							"client_id=", clientID, "&",
 							"client_secret=", clientSec, "&",
 							"grant_type=authorization_code", NULL);
-			ne_add_response_body_reader(req, ne_accept_2xx, responseOAuthHandle, trans);
+			ne_add_response_body_reader(req, ne_accept_2xx, responseOAuthHandle, GINT_TO_POINTER(serverID));
 			ne_add_request_header(req, "Content-Type", "application/x-www-form-urlencoded");
 			}
 			break;
@@ -510,7 +505,7 @@ sendAgain:
 							"client_id=", clientID, "&",
 							"client_secret=", clientSec, "&",
 							"grant_type=refresh_token", NULL);
-			ne_add_response_body_reader(req, ne_accept_2xx, responseOAuthHandle, trans);
+			ne_add_response_body_reader(req, ne_accept_2xx, responseOAuthHandle,  GINT_TO_POINTER(serverID));
 			ne_add_request_header(req, "Content-Type", "application/x-www-form-urlencoded");
 			}
 			break;
@@ -532,7 +527,7 @@ sendAgain:
 		verboseCC("[%s] adding:Authorization %s\n", __func__, authToken);
 		ne_add_request_header(req, "Authorization", authToken);
 	} else {
-		ne_set_server_auth(sess, getUserAuth, trans);
+		ne_set_server_auth(sess, getUserAuth, GINT_TO_POINTER(serverID));
 	}
 
 	if(davCookie != NULL){
@@ -671,7 +666,6 @@ failedRequest:
 	ne_request_destroy(req);
 	ne_buffer_destroy(req_buffer);
 	ne_xml_destroy(pXML);
-	g_free(trans);
 	free(davPath);
 	free(addrbookPath);
 	free(srvUrl);
@@ -878,7 +872,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	int						isOAuth = 0;
 	int						newID = 0;
 	int						ret = 0;
-	ContactCards_trans_t	*trans = NULL;
 	ContactCards_stack_t	*stack;
 
 	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
@@ -891,10 +884,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 			return -1;
 		}
 	}
-
-	trans = g_new(ContactCards_trans_t, 1);
-	trans->db = ptr;
-	trans->element = GINT_TO_POINTER(srvID);
 
 	newID = newContact(ptr, addrBookID, card);
 
@@ -928,8 +917,6 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	}
 
 	serverDisconnect(sess, ptr, srvID);
-
-	g_free(trans);
 
 	if(ret == -1)
 		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", newID);

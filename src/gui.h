@@ -39,15 +39,6 @@ ContactCardsGuiBase;
 
 ContactCardsGuiBase appBase;
 
-/**
- * struct ContactCards_trans -generic struct for all kind of data
- */
-typedef struct ContactCards_trans {
-	sqlite3				*db;
-	void				*element;
-	void				*element2;
-} ContactCards_trans_t;
-
 enum {
 	TEXT_COLUMN = 0,
 	ID_COLUMN,

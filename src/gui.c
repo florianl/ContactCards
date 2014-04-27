@@ -634,8 +634,7 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 static void *pushingCard(void *trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*data = trans;
-	ContactCards_add_t			*value = data->element;
+	ContactCards_add_t			*value = trans;
 	char						*vCard = NULL;
 	char						*dbCard = NULL;
 	int							oldID = value->editID;
@@ -671,17 +670,12 @@ static void *pushingCard(void *trans){
 static void contactEditSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	ContactCards_trans_t		*buff = NULL;
 	GError						*error = NULL;
 	GThread						*thread;
 
 	cleanCard(((ContactCards_add_t *)trans)->grid);
 
-	buff = g_new(ContactCards_trans_t, 1);
-	buff->db = ((ContactCards_add_t *)trans)->db;
-	buff->element = (ContactCards_add_t *)trans;
-
-	thread = g_thread_try_new("pushing vCard", pushingCard, buff, &error);
+	thread = g_thread_try_new("pushing vCard", pushingCard, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
 		verboseCC("%s\n", error->message);
