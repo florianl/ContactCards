@@ -464,6 +464,8 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 	while(ptr[i] != NULL){
 		char		*item = NULL;
 		char		*value = NULL;
+
+		tokenType = 0;
 		g_strstrip(ptr[i]);
 		item = g_shell_unquote(ptr[i], NULL);
 		if(g_strcmp0(item, "error") == 0){
@@ -483,10 +485,12 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
 		}
 		g_free(item);
 		i++;
-		g_strstrip(ptr[i]);
-		value = g_shell_unquote(ptr[i], NULL);
-		updateOAuthCredentials(db, serverID, tokenType, value);
-		g_free(value);
+		if(tokenType != 0){
+			g_strstrip(ptr[i]);
+			value = g_shell_unquote(ptr[i], NULL);
+			updateOAuthCredentials(db, serverID, tokenType, value);
+			g_free(value);
+		}
 		i++;
 	}
 	g_strfreev(ptr);
