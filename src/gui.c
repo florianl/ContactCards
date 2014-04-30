@@ -1188,6 +1188,7 @@ void *syncOneServer(void *trans){
 		int 		ret = 0;
 		ret = oAuthUpdate(appBase.db, serverID);
 		if(ret != OAUTH_UP2DATE){
+			gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 			g_mutex_unlock(&mutex);
 			return NULL;
 		}
