@@ -1203,6 +1203,8 @@ void *syncOneServer(void *trans){
 	free(msg);
 	g_mutex_unlock(&mutex);
 
+	fillList(appBase.db, 1, 0, appBase.addressbookList);
+
 	return NULL;
 }
 
@@ -1245,6 +1247,12 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 	GThread						*thread;
 
 	retList = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+
+	if(g_slist_length(retList) == 1){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book to sync."));
+		g_slist_free(retList);
+		return;
+	}
 
 	while(retList){
 		GSList				*next = retList->next;
