@@ -42,6 +42,23 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 }
 
 /**
+ * validateUrl -checks if url is valid
+ */
+gboolean validateUrl(char *url){
+	printfunc(__func__);
+
+	ne_sock_addr		*addr = ne_addr_resolve(url, 0);
+
+	if (ne_addr_result(addr)){
+		ne_addr_destroy(addr);
+		return FALSE;
+	}
+
+	ne_addr_destroy(addr);
+	return TRUE;
+}
+
+/**
  * verifyCert - verify a certificate of a server
  */
 static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert){

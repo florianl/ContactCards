@@ -34,6 +34,10 @@ static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
 		case 1:
 			buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "descEntry");
 			buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
+			if(validateUrl((char *) gtk_entry_buffer_get_text(buf2)) == FALSE){
+				gtk_assistant_set_page_complete(GTK_ASSISTANT(assistant), box, FALSE);
+				return;
+			}
 			break;
 		case 2:
 			buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
