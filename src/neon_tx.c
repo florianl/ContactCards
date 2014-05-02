@@ -47,14 +47,28 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 gboolean validateUrl(char *url){
 	printfunc(__func__);
 
-	ne_sock_addr		*addr = ne_addr_resolve(url, 0);
+	ne_uri				uri;
+	ne_sock_addr		*addr;
 
-	if (ne_addr_result(addr)){
-		ne_addr_destroy(addr);
+	if(ne_uri_parse(url, &uri) != 0)
+		return FALSE;
+
+	if(uri.host == NULL){
+		ne_uri_free(&uri);
 		return FALSE;
 	}
 
+	addr = ne_addr_resolve(uri.host, 0);
+
+	if (ne_addr_result(addr)){
+		ne_addr_destroy(addr);
+		ne_uri_free(&uri);
+		return FALSE;
+	}
+
+	ne_uri_free(&uri);
 	ne_addr_destroy(addr);
+
 	return TRUE;
 }
 

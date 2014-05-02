@@ -1004,8 +1004,6 @@ void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	doSimpleRequest(ptr, sql_query, __func__);
 	free(old);
 	free(uri);
-	ne_uri_free(&newUri);
-	ne_uri_free(&oldUri);
 }
 
 /**
