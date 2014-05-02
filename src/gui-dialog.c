@@ -400,6 +400,45 @@ static GtkWidget *syncMenuItem(int sID){
 }
 
 /**
+ * buildRow - creates a row for the list of address books
+ */
+static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
+	printfunc(__func__);
+
+	GtkWidget		*row, *box, *check, *label;
+	char			*abName = NULL;
+	int				active = 0;
+	ContactCards_aBooks_t		*element;
+
+	element = g_new(ContactCards_aBooks_t, 1);
+
+	row = gtk_list_box_row_new ();
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+	check = gtk_check_button_new();
+	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "");
+
+	if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
+	} else {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
+	}
+	abName = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", aID, "", "", "", "", "", 0);
+	label = gtk_label_new(abName);
+	g_free(abName);
+
+	element->aBookID = aID;
+	element->check = check;
+	list = g_slist_append(list, element);
+
+	gtk_container_add(GTK_CONTAINER (box), check);
+	gtk_container_add(GTK_CONTAINER (box), label);
+	gtk_container_add(GTK_CONTAINER (row), box);
+	gtk_widget_show_all(row);
+
+	return row;
+}
+
+/**
  * prefServerDelete - delete a server in the preferences dialog
  */
 void prefServerDelete(GtkWidget *widget, gpointer trans){
@@ -458,6 +497,8 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 	ContactCards_pref_t			*buffers = trans;
 	int							isOAuth = 0;
 	ne_session					*sess = NULL;
+	GList						*children, *iter;
+	GSList						*abList;
 
 	g_mutex_lock(&mutex);
 
@@ -477,6 +518,36 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 	serverDisconnect(sess, appBase.db, buffers->srvID);
 
 	g_mutex_unlock(&mutex);
+
+	/* Flush the list box before adding new items	*/
+	children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
+	for(iter = children; iter != NULL; iter = g_list_next(iter)) {
+		gtk_widget_destroy(GTK_WIDGET(iter->data));
+	}
+	g_list_free(children);
+
+	if (g_slist_length(buffers->aBooks) > 1){
+		/* Yes, you're right. It's still really ugly	*/
+		g_slist_free_full(buffers->aBooks, g_free);
+		buffers->aBooks = g_slist_alloc();
+	}
+
+	abList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", buffers->srvID, "", "", "", "");
+
+	while(abList){
+		GSList				*next = abList->next;
+		GtkWidget			*row;
+
+		if(GPOINTER_TO_INT(abList->data) == 0){
+			abList = next;
+			continue;
+		}
+
+		row = buildRow(appBase.db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
+		gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
+		abList = next;
+	}
+
 	return;
 }
 
@@ -503,45 +574,6 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 			g_free(path);
 	}
 	gtk_widget_destroy(dirChooser);
-}
-
-/**
- * buildRow - creates a row for the list of address books
- */
-static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
-	printfunc(__func__);
-
-	GtkWidget		*row, *box, *check, *label;
-	char			*abName = NULL;
-	int				active = 0;
-	ContactCards_aBooks_t		*element;
-
-	element = g_new(ContactCards_aBooks_t, 1);
-
-	row = gtk_list_box_row_new ();
-	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
-	check = gtk_check_button_new();
-	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "");
-
-	if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
-	} else {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), TRUE);
-	}
-	abName = getSingleChar(ptr, "addressbooks", "displayname", 1, "addressbookID", aID, "", "", "", "", "", 0);
-	label = gtk_label_new(abName);
-	g_free(abName);
-
-	element->aBookID = aID;
-	element->check = check;
-	list = g_slist_append(list, element);
-
-	gtk_container_add(GTK_CONTAINER (box), check);
-	gtk_container_add(GTK_CONTAINER (box), label);
-	gtk_container_add(GTK_CONTAINER (row), box);
-	gtk_widget_show_all(row);
-
-	return row;
 }
 
 /**
