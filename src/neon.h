@@ -173,6 +173,7 @@ typedef struct credits{
 } credits_t;
 
 extern gboolean validateUrl(char *url);
+extern int serverConnectionTest(int serverID);
 extern ne_session *serverConnect(int serverID);
 extern ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr);
 extern void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID);

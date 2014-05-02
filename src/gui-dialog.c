@@ -415,7 +415,7 @@ static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
 	row = gtk_list_box_row_new ();
 	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 	check = gtk_check_button_new();
-	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "");
+	active = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", aID, "", "", "", "");
 
 	if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
@@ -502,7 +502,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 
 	g_mutex_lock(&mutex);
 
-	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "");
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "", "", "");
 
 	if(isOAuth){
 		int		ret = 0;
@@ -610,7 +610,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		user = getSingleChar(appBase.db, "cardServer", "user", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->userBuf), user, -1);
 
-		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", selID, "", "");
+		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", selID, "", "", "", "");
 		if(!isOAuth){
 			passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
@@ -633,7 +633,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			if(issuer == NULL) issuer = "";
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
 
-			res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "");
+			res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "", "", "");
 			if(res == ContactCards_DIGEST_TRUSTED){
 				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
 			} else {

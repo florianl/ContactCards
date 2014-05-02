@@ -99,7 +99,7 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 	if (failures & NE_SSL_REVOKED)
 		verboseCC("[%s] certificate has been revoked\n", __func__);
 
-	trust = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", serverID, "", "");
+	trust = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", serverID, "", "", "", "");
 
 	switch(trust){
 		case ContactCards_DIGEST_TRUSTED:
@@ -133,6 +133,61 @@ fastExit:
 	free(dbDigest);
 
 	return trust;
+}
+
+/**
+ * serverConnectionTest - tests the connection to a server
+ */
+int serverConnectionTest(int serverID){
+	printfunc(__func__);
+
+	char				*davServer = NULL;
+	ne_uri				uri;
+	ne_session			*sess = NULL;
+	int					caps = 0;
+	int					ret = NE_FAILED;
+	int					failed = 0;
+
+	davServer = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
+
+	if(davServer== NULL) return ret;
+
+	ne_uri_parse(davServer, &uri);
+	free(davServer);
+	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
+
+	 if (ne_sock_init() != 0){
+		verboseCC("[%s] failed to init socket library \n", __func__);
+		return ret;
+	}
+
+tryAgain:
+	sess = ne_session_create(uri.scheme, uri.host, uri.port);
+
+	ne_ssl_set_verify(sess, verifyCert, GINT_TO_POINTER(serverID));
+
+	ret = ne_options2(sess, uri.path, &caps);
+
+	switch(ret){
+		case NE_OK:
+			verboseCC("[%s] caps: %d\n", __func__, caps);
+			break;
+		case NE_ERROR:
+			if(failed++ > 2){
+				serverDisconnect(sess, appBase.db, serverID);
+				return ret;
+			}
+			serverDisconnect(sess, appBase.db, serverID);
+			goto tryAgain;
+			break;
+		default:
+			verboseCC("[%s] ret: %d\tcaps: %d\n", __func__, ret, caps);
+			verboseCC("[%s] %s\n", __func__, ne_get_error(sess));
+	}
+
+	serverDisconnect(sess, appBase.db, serverID);
+
+	return ret;
 }
 
 /**
@@ -332,7 +387,7 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 
 	verboseCC("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
 
-	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 
 sendAgain:
 
@@ -476,7 +531,7 @@ sendAgain:
 			{
 			char			*vCard = NULL;
 			int				abID = 0;
-			abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", itemID, "", "");
+			abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", itemID, "", "", "", "");
 			if(abID == 0) goto failedRequest;
 			davPath = getSingleChar(ptr, "addressbooks", "postURI", 1, "addressbookID", abID, "", "", "", "", "", 0);
 			if(davPath == NULL) goto failedRequest;
@@ -701,7 +756,7 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 
 	int			isOAuth = 0;
 
-	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 
 	if(isOAuth){
 		setSingleChar(ptr, "cardServer", "oAuthAccessToken", NULL, "serverID", serverID);
@@ -725,7 +780,7 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 	int					ret = 0;
 
 	oAuthGrant = getSingleChar(ptr, "cardServer", "oAuthAccessGrant", 1, "serverID", serverID, "", "", "", "", "", 0);
-	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "");
+	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "", "", "");
 	verboseCC("[%s] connecting to a oAuth-Server\n", __func__);
 	if(strlen(oAuthGrant) == 1){
 		ret = OAUTH_GRANT_FAILURE;
@@ -891,8 +946,8 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	int						ret = 0;
 	ContactCards_stack_t	*stack;
 
-	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "");
-	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+	srvID = getSingleInt(ptr, "addressbooks", "cardServer", 1, "addressbookID", addrBookID, "", "", "", "");
+	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 	if(isOAuth){
 		int 		ret = 0;
 		ret = oAuthUpdate(ptr, srvID);

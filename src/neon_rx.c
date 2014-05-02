@@ -316,7 +316,7 @@ void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
 	int			synMethod = 0;
 	int			synDB = 0;
 
-	synDB = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
+	synDB = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
 	if(synDB == -1) return;
 
 	if(elementCheck(branch, DAV_ELE_ADDRBOOK_MULTIGET) == TRUE){

@@ -282,11 +282,13 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
  *	@value1			value for row 1
  *	@row2			row 2 to select
  *	@value2			value for row 2
+ *	@row3			row 3 to select
+ *	@value3			value for row 3
  *
  *	This functions returns a single int if there is no error on the
  *	request to the database
  */
-int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2){
+int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
 	printfunc(__func__);
 
 	sqlite3_stmt 		*vm;
@@ -304,6 +306,12 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 			break;
 		case 2:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, value2);
+			break;
+		case 23:
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, value2, row3, value3);
+			break;
+		case 123:
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
@@ -457,8 +465,10 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
-	serverID = getSingleInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser);
+	serverID = getSingleInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser, "", "");
 	setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
+
+	serverConnectionTest(serverID);
 
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 
@@ -476,6 +486,7 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	ne_uri				uri;
 	char		 		*sql_query;
 	GSList				*retList;
+	int					serverID;
 
 	g_strstrip(desc);
 	g_strstrip(user);
@@ -484,6 +495,10 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 
 	ne_uri_parse(url, &uri);
 
+	if(uri.host == NULL){
+		verboseCC("[%s] ne_uri_parse didn't find host in %s", __func__, url);
+		return;
+	}
 	retList = getListInt(ptr, "cardServer", "serverID", 23, "", 0, "user", user, "authority", uri.host);
 
 	if(g_slist_length(retList) != 1){
@@ -513,6 +528,10 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", desc, user, passwd, url, uri.host);
 
 	doSimpleRequest(ptr, sql_query, __func__);
+
+	serverID = getSingleInt(ptr, "cardServer", "serverID", 23, "", 0, "user", user, "srvUrl", url);
+	serverConnectionTest(serverID);
+	ne_uri_free(&uri);
 
 }
 
@@ -721,7 +740,7 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
-	contactID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", href);
+	contactID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", href, "", "");
 
 	if(contactID == -1) return;
 
@@ -838,7 +857,7 @@ void updateAddressbooks(sqlite3 *ptr, GSList *list){
 			goto stepForward;
 		}
 		item = (ContactCards_aBooks_t *)list->data;
-		flags = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", item->aBookID, "", "");
+		flags = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", item->aBookID, "", "", "", "");
 		if(flags == -1)
 			goto stepForward;
 		check = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item->check));
@@ -985,6 +1004,8 @@ void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	doSimpleRequest(ptr, sql_query, __func__);
 	free(old);
 	free(uri);
+	ne_uri_free(&newUri);
+	ne_uri_free(&oldUri);
 }
 
 /**
@@ -1038,7 +1059,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				/*
 				 * get the latest content of each address book
 				 */
-				syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "");
+				syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
 				if(syncType == -1) return;
 				if(syncType & (1<<DAV_ADDRBOOK_DONT_SYNC)){
 					goto nextBoook;

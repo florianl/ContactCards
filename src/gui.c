@@ -133,10 +133,10 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		if (resp != GTK_RESPONSE_YES) return;
 
 		g_mutex_lock(&mutex);
-		addrID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "");
-		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "");
+		addrID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
+		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "", "", "");
 
-		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "");
+		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
 		if(isOAuth){
 			int 		ret = 0;
@@ -750,7 +750,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	transNew->list = items;
 	transNew->editID = selID;
 	if(!abID)
-		abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", selID, "", "");
+		abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
 	transNew->aID = abID;
 
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
@@ -1182,7 +1182,7 @@ void *syncOneServer(void *trans){
 	ctxID = gtk_statusbar_get_context_id(GTK_STATUSBAR(appBase.statusbar), "info");
 	gtk_statusbar_push(GTK_STATUSBAR(appBase.statusbar), ctxID, msg);
 
-	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", serverID, "", "");
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 
 	if(isOAuth){
 		int 		ret = 0;
