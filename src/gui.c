@@ -1190,6 +1190,8 @@ void *syncOneServer(void *trans){
 		if(ret != OAUTH_UP2DATE){
 			gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 			g_mutex_unlock(&mutex);
+			free(srv);
+			free(msg);
 			return NULL;
 		}
 	}

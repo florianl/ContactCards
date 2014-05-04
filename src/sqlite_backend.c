@@ -478,9 +478,9 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
-	g_mutex_unlock(&mutex);
 
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
+	g_mutex_unlock(&mutex);
 
 	free(davBase);
 

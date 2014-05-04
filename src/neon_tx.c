@@ -869,8 +869,6 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 		return;
 	}
 
-	g_mutex_lock(&mutex);
-
 	sess = ne_session_create("https", uri.host, 443);
 	ne_ssl_trust_default_ca(sess);
 
@@ -891,7 +889,6 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 
 	ne_close_connection(sess);
 	ne_session_destroy(sess);
-	g_mutex_unlock(&mutex);
 
 }
 
