@@ -1276,66 +1276,6 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 }
 
 /**
- * dialogRequestGrant - ask the user for a grant in a dialog
- * 
- * This is required for OAuth
- */
-void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity){
-	printfunc(__func__);
-
-	GtkWidget			*dialog, *area, *box, *label;
-	GtkWidget			*input, *button;
-	GtkEntryBuffer		*grant;
-	char				*newGrant = NULL;
-	int					result;
-	char				*uri = NULL;
-
-	grant = gtk_entry_buffer_new(NULL, -1);
-
-	dialog = gtk_dialog_new_with_buttons("Request for Grant", GTK_WINDOW(appBase.window), GTK_DIALOG_DESTROY_WITH_PARENT, _("_Save"), GTK_RESPONSE_ACCEPT, _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
-
-	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
-
-	area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	button = gtk_link_button_new_with_label(uri, _("Request Grant"));
-	gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 2);
-	label = gtk_label_new(_("Access Grant"));
-	gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 2);
-	input = gtk_entry_new_with_buffer(grant);
-	gtk_box_pack_start(GTK_BOX(box), input, FALSE, FALSE, 2);
-
-	gtk_box_pack_start(GTK_BOX(area), box, FALSE, FALSE, 2);
-
-	g_signal_connect(G_OBJECT(dialog), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
-
-	gtk_widget_show_all(dialog);
-	result = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	switch(result){
-		case GTK_RESPONSE_ACCEPT:
-			newGrant = g_strdup(gtk_entry_buffer_get_text(grant));
-			g_strdelimit(newGrant, ",", '\n');
-			g_strstrip(newGrant);
-			if(strlen(newGrant) < 5){
-				dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", serverID);
-				break;
-			}
-			setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
-			g_free(newGrant);
-			oAuthAccess(ptr, serverID, entity, DAV_REQ_GET_TOKEN);
-			break;
-		default:
-			dbRemoveItem(ptr, "cardServer", 2, "", "", "serverID", serverID);
-			break;
-	}
-	g_free(uri);
-	g_free(newGrant);
-	gtk_widget_destroy(dialog);
-
-}
-
-/**
  * guiInit - build the basic GUI
  */
 void guiInit(void){

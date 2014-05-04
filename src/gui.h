@@ -51,10 +51,10 @@ extern void guiInit(void);
 extern void listAppend(GtkWidget *list, gchar *text, guint id);
 extern void comboAppend(GtkListStore *store, gchar *text, guint id);
 extern void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data);
+extern void feedbackDialog(int type, char *msg);
 extern void listInit(GtkWidget *list);
 extern void listFlush(GtkWidget *list);
 extern void comboFlush(GtkListStore *store);
-extern void dialogRequestGrant(sqlite3 *ptr, int serverID, int entity);
 extern void *syncOneServer(void *trans);
 
 /*		gui-dialog.c	*/

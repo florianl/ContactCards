@@ -801,8 +801,8 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 	oAuthEntity = getSingleInt(ptr, "cardServer", "oAuthType", 1, "serverID", serverID, "", "", "", "");
 	verboseCC("[%s] connecting to a oAuth-Server\n", __func__);
 	if(strlen(oAuthGrant) == 1){
-		ret = OAUTH_GRANT_FAILURE;
-		dialogRequestGrant(ptr, serverID, oAuthEntity);
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Grant for oAuth is missing"));
+		return OAUTH_GRANT_FAILURE;
 	} else {
 		verboseCC("[%s] there is already a grant\n", __func__);
 	}
