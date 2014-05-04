@@ -468,7 +468,9 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	serverID = getSingleInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser, "", "");
 	setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
 
+	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
+	g_mutex_unlock(&mutex);
 
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 
@@ -530,7 +532,9 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	doSimpleRequest(ptr, sql_query, __func__);
 
 	serverID = getSingleInt(ptr, "cardServer", "serverID", 23, "", 0, "user", user, "srvUrl", url);
+	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
+	g_mutex_unlock(&mutex);
 	ne_uri_free(&uri);
 
 }
