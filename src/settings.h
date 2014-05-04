@@ -24,6 +24,7 @@ typedef struct ContactCards_app {
 	gboolean	verbose;
 } ContactCards_app_t;
 
+extern void debugCC(gchar const *format, ...);
 extern void verboseCC(gchar const *format, ...);
 extern void checkAndSetConfig(ContactCards_app_t *app);
 extern ContactCards_app_t *parseCmdLine(int *argc, char **argv[]);

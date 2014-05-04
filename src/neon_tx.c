@@ -216,6 +216,8 @@ ne_session *serverConnect(int serverID){
 
 	davServer = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
 
+	debugCC("[%s] connecting to serverID: %d\n", __func__, serverID);
+
 	if(davServer== NULL) return NULL;
 
 	ne_uri_parse(davServer, &uri);
@@ -399,7 +401,7 @@ ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_ses
 	davPath = g_strndup(uri.path, strlen(uri.path));
 	ne_uri_free(&uri);
 
-	verboseCC("[%s] connecting to %s with %d\n", __func__, srvUrl, method);
+	verboseCC("[%s] requesting %s with %d\n", __func__, srvUrl, method);
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 
@@ -769,6 +771,8 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	printfunc(__func__);
 
 	int			isOAuth = 0;
+
+	debugCC("[%s] disconnecting from serverID: %d\n", __func__, serverID);
 
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 

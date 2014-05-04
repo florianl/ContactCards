@@ -35,6 +35,8 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 		return;
 	}
 
+	debugCC("[%s] %s\n", __func__, sql_query);
+
 	ret = sqlite3_step(vm);
 
 	if (ret != SQLITE_DONE){
@@ -261,6 +263,8 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 		return list;
 	}
 
+	debugCC("[%s] %s\n", __func__, sql_query);
+
 	while(sqlite3_step(vm) != SQLITE_DONE){
 		list = g_slist_append(list,  GINT_TO_POINTER(sqlite3_column_int(vm, 0)));
 	}
@@ -323,6 +327,8 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return count;
 	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		if(sqlite3_column_text(vm, 0) == NULL){
@@ -397,6 +403,8 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return NULL;
 	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		if(sqlite3_column_text(vm, 0) == NULL){
@@ -665,6 +673,8 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		key->user	= g_strdup((char *) sqlite3_column_text(vm, 0));

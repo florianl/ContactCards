@@ -86,6 +86,13 @@ void verboseCC(gchar const *format, ...){
 	va_end(args);
 }
 
+void debugCC(gchar const *format, ...){
+	va_list args;
+	va_start(args, format);
+	g_logv("ContactCards", G_LOG_LEVEL_DEBUG, format, args);
+	va_end(args);
+}
+
 static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *msg, gpointer data){
 	printf("[%s] %s", domain, msg);
 }
