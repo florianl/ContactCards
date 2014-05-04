@@ -39,10 +39,18 @@ ContactCardsGuiBase;
 
 ContactCardsGuiBase appBase;
 
+/*	Adress Book Tree	*/
 enum {
-	TEXT_COLUMN = 0,
-	ID_COLUMN,
-	N_COLUMNS
+	DESC_COL = 0,
+	ID_COL,
+	TYP_COL,
+	TOTAL_COLS
+};
+
+/*	Contacts Tree	*/
+enum {
+	TEXT_COLUMN,
+	ID_COLUMN
 };
 
 extern void guiRun(sqlite3 *ptr);

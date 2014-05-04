@@ -77,17 +77,16 @@ static void dialogAbout(void){
 static void selBook(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
-	GtkTreeIter			iter;
-	GtkTreeModel		*model;
-	char				*selText;
-	int					selID;
+	GtkTreeModel			*model;
+	GtkTreeIter				iter;
+	int						selID;
+	int						selTyp;
 
-	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
-		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &selText, ID_COLUMN, &selID,  -1);
-		verboseCC("[%s] %d\n",__func__, selID);
-		fillList(appBase.db, 2, selID, appBase.contactList);
-		g_free(selText);
+	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
+		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
+		verboseCC("[%s] Typ: %d\tID:%d\n", __func__, selTyp, selID);
 	}
+
 }
 
 /**
@@ -1123,7 +1122,7 @@ void listInit(GtkWidget *list){
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", TEXT_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_UINT);
+	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_UINT);
 
 	sortable = GTK_TREE_SORTABLE(store);
 
@@ -1211,6 +1210,104 @@ void *syncOneServer(void *trans){
 	return NULL;
 }
 
+/**
+ * addressbookTreeUpdate - updates the address books view
+ */
+
+void addressbookTreeUpdate(void){
+	printfunc(__func__);
+
+	GtkTreeStore	*store;
+	GSList			*servers, *addressBooks;
+	GtkTreeIter		toplevel, child;
+
+	/* Flush the tree	*/
+	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.addressbookList)));
+	gtk_tree_store_clear(store);
+
+	/* Insert new elements	*/
+	servers = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+	while(servers){
+		GSList				*next = servers->next;
+		int					serverID = GPOINTER_TO_INT(servers->data);
+		char				*serverDesc = NULL;
+		if(serverID == 0){
+			servers = next;
+			continue;
+		}
+
+		serverDesc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+		gtk_tree_store_append(store, &toplevel, NULL);
+		gtk_tree_store_set(store, &toplevel, DESC_COL, serverDesc, ID_COL, serverID, TYP_COL, 0,  -1);
+
+		addressBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "", "", "");
+		while(addressBooks){
+			GSList				*next2 =  addressBooks->next;
+			int					addressbookID = GPOINTER_TO_INT(addressBooks->data);
+			char				*displayname = NULL;
+			int					active = 0;
+			if(addressbookID == 0){
+				addressBooks = next2;
+				continue;
+			}
+			active = getSingleInt(appBase.db, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
+			if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+				/* Don't display address books which are not synced	*/
+				addressBooks = next2;
+				continue;
+			}
+			displayname = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
+			gtk_tree_store_append(store, &child, &toplevel);
+			gtk_tree_store_set(store, &child, DESC_COL, displayname, ID_COL, addressbookID, TYP_COL, 1,  -1);
+
+			g_free(displayname);
+			addressBooks = next2;
+		}
+		g_slist_free(addressBooks);
+		g_free(serverDesc);
+		servers = next;
+	}
+	g_slist_free(servers);
+}
+
+/**
+ * addressbookModelCreate - create the model for the address books view
+ */
+static GtkTreeModel *addressbookModelCreate(void){
+	printfunc(__func__);
+
+	GtkTreeStore  *treestore;
+
+	treestore = gtk_tree_store_new(TOTAL_COLS, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT);
+
+	return GTK_TREE_MODEL(treestore);
+}
+/**
+ * addressbookTreeCreate - creates the model and view for the adress books
+ */
+static GtkWidget *addressbookTreeCreate(void){
+	printfunc(__func__);
+
+	GtkWidget				*view;
+	GtkTreeViewColumn		*column;
+	GtkTreeModel			*model;
+	GtkCellRenderer			*renderer;
+
+	view = gtk_tree_view_new();
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+
+	model = addressbookModelCreate();
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+	g_object_unref(model);
+
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_SINGLE);
+
+	return view;
+}
 /**
  * dialogExportContacts - dialog to export vCards
  */
@@ -1351,9 +1448,8 @@ void guiInit(void){
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 160, -1);
-	appBase.addressbookList = gtk_tree_view_new();
-	listInit(appBase.addressbookList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(appBase.addressbookList), FALSE);
+	appBase.addressbookList = addressbookTreeCreate();
+	addressbookTreeUpdate();
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
