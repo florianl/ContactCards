@@ -64,6 +64,7 @@ extern void listInit(GtkWidget *list);
 extern void listFlush(GtkWidget *list);
 extern void comboFlush(GtkListStore *store);
 extern void *syncOneServer(void *trans);
+extern void addressbookTreeUpdate(void);
 
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);

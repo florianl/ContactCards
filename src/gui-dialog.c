@@ -452,8 +452,8 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 	dbRemoveItem(appBase.db, "cardServer", 2, "", "", "serverID", buffers->srvID);
 	dbRemoveItem(appBase.db, "certs", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(appBase.db, buffers->srvID, 0);
-	fillList(appBase.db, 3, 0, buffers->srvPrefList);
-	fillList(appBase.db, 1, 0, appBase.addressbookList);
+	fillList(appBase.db, 3, 0, 0, buffers->srvPrefList);
+	addressbookTreeUpdate();
 	syncMenuUpdate();
 
 	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), "", -1);
@@ -486,6 +486,7 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
+	addressbookTreeUpdate();
 }
 
 /**
@@ -840,7 +841,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	gtk_container_add(GTK_CONTAINER(prefFrame), vbox);
 	gtk_container_add(GTK_CONTAINER(prefList), serverPrefList);
-	fillList(appBase.db, 3, 0 , serverPrefList);
+	fillList(appBase.db, 3, 0, 0, serverPrefList);
 
 	buffers->prefFrame = prefFrame;
 	buffers->descBuf = desc;

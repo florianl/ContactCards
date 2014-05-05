@@ -16,7 +16,7 @@
 /**
  * fillList - fill a list
  */
-void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
+void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list){
 	printfunc(__func__);
 
 	sqlite3_stmt	 	*vm;
@@ -27,16 +27,49 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 	listFlush(list);
 
 	switch(type){
-		case 1:		// addressbooklist
-			if(from == 0){
-				sql_query = sqlite3_mprintf("SELECT addressbookID, displayname FROM addressbooks;");
-			} else {
-				sql_query = sqlite3_mprintf("SELECT addressbookID, displayname FROM addressbooks WHERE cardServer = '%d';", from);
-			}
-			break;
 		case 2:		// contactlist
-			if(from == 0){
+			if(from == 0 && id == 0){
 				sql_query = sqlite3_mprintf("SELECT contactID, displayname FROM contacts;");
+			} else if(from == 0 && id != 0){
+				GSList				*addressBooks;
+				char				*query = NULL,
+									*tmp = NULL,
+									*tmp2 = NULL;
+				int					first = 0;
+
+				query = g_strndup("SELECT contactID, displayname FROM contacts WHERE", strlen("SELECT contactID, displayname FROM contacts WHERE"));
+
+				addressBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", id, "", "", "", "");
+				while(addressBooks){
+					GSList				*next =  addressBooks->next;
+					int					addressbookID = GPOINTER_TO_INT(addressBooks->data);
+					int					active = 0;
+					if(addressbookID == 0){
+						addressBooks = next;
+						continue;
+					}
+					active = getSingleInt(appBase.db, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
+					if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+						/* Ignore address books which are not synced	*/
+						addressBooks = next;
+						continue;
+					}
+					tmp = g_strndup(query, strlen(query));
+					if(first == 0){
+						tmp2 = g_strdup_printf (" addressbookID = '%d'", addressbookID);
+						first = 1;
+					} else {
+						tmp2 = g_strdup_printf (" OR addressbookID = '%d'", addressbookID);
+					}
+					query = g_strconcat(tmp, tmp2, NULL);
+					addressBooks = next;
+				}
+
+				sql_query = sqlite3_mprintf("%s;", query);
+				g_slist_free(addressBooks);
+				g_free(tmp);
+				g_free(tmp2);
+				g_free(query);
 			} else {
 				sql_query = sqlite3_mprintf("SELECT contactID, displayname FROM contacts WHERE addressbookID = '%d';", from);
 			}
@@ -55,6 +88,8 @@ void fillList(sqlite3 *ptr, int type, int from, GtkWidget *list){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		return;
 	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE){
 		if(type == 1){

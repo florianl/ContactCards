@@ -19,8 +19,8 @@
 void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
-	fillList(ptr, 1, 0, appBase.addressbookList);
-	fillList(ptr, 2, 0, appBase.contactList);
+	addressbookTreeUpdate();
+	fillList(ptr, 2, 0, 0, appBase.contactList);
 	gtk_main();
 }
 
@@ -85,6 +85,19 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
 		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
 		verboseCC("[%s] Typ: %d\tID:%d\n", __func__, selTyp, selID);
+		switch(selTyp){
+			case 0:		/* Whole Server selected	*/
+				if(selID == 0){
+					fillList(appBase.db, 2, 0, 0, appBase.contactList);
+				} else {
+					verboseCC("[%s] whole server\n", __func__);
+					fillList(appBase.db, 2, 0, selID, appBase.contactList);
+				}
+				break;
+			case 1:		/* Just one address book selected	*/
+				fillList(appBase.db, 2, selID, 0, appBase.contactList);
+				break;
+		}
 	}
 
 }
@@ -1205,7 +1218,7 @@ void *syncOneServer(void *trans){
 	free(msg);
 	g_mutex_unlock(&mutex);
 
-	fillList(appBase.db, 1, 0, appBase.addressbookList);
+	addressbookTreeUpdate();
 
 	return NULL;
 }
@@ -1227,6 +1240,8 @@ void addressbookTreeUpdate(void){
 
 	/* Insert new elements	*/
 	servers = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+	gtk_tree_store_append(store, &toplevel, NULL);
+	gtk_tree_store_set(store, &toplevel, DESC_COL, _("All"), ID_COL, 0, TYP_COL, 0,  -1);
 	while(servers){
 		GSList				*next = servers->next;
 		int					serverID = GPOINTER_TO_INT(servers->data);
@@ -1449,7 +1464,6 @@ void guiInit(void){
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 160, -1);
 	appBase.addressbookList = addressbookTreeCreate();
-	addressbookTreeUpdate();
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
