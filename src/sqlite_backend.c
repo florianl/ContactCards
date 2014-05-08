@@ -70,6 +70,7 @@ void dbCreate(sqlite3 *ptr){
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS contacts( \
 	contactID INTEGER PRIMARY KEY AUTOINCREMENT,\
 	addressbookID INTEGER, \
+	flags INTEGER default 0, \
 	etag TEXT, \
 	href TEXT, \
 	vCard TEXT, \
@@ -79,6 +80,7 @@ void dbCreate(sqlite3 *ptr){
 
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS oAuthServer( \
 	oAuthID INTEGER PRIMARY KEY AUTOINCREMENT,\
+	flags INTEGER default 0, \
 	desc TEXT, \
 	clientID TEXT, \
 	clientSecret TEXT, \
@@ -94,6 +96,7 @@ void dbCreate(sqlite3 *ptr){
 
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS cardServer( \
 	serverID INTEGER PRIMARY KEY AUTOINCREMENT,\
+	flags INTEGER default 0, \
 	desc TEXT,\
 	user TEXT, \
 	passwd TEXT, \
@@ -110,6 +113,7 @@ void dbCreate(sqlite3 *ptr){
 
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS addressbooks( \
 	addressbookID INTEGER PRIMARY KEY AUTOINCREMENT,\
+	flags INTEGER default 0, \
 	cardServer INTEGER, \
 	displayname TEXT, \
 	path TEXT, \
