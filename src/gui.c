@@ -1503,6 +1503,7 @@ void guiInit(void){
 	gtk_entry_completion_set_popup_set_width(GTK_ENTRY_COMPLETION(completion), TRUE);
 	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(appBase.contactList))));
 	gtk_entry_completion_set_text_column(completion, 0);
+	gtk_entry_completion_set_minimum_key_length(completion, 3);
 	searchbar = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");
 	gtk_entry_set_completion(GTK_ENTRY(searchbar), GTK_ENTRY_COMPLETION(completion));
