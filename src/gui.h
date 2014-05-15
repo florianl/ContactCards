@@ -49,6 +49,14 @@ enum {
 
 /*	Contacts Tree	*/
 enum {
+	FN_COLUMN = 0,
+	FIRST_COLUMN,
+	LAST_COLUMN,
+	SELECTION_COLUMN,
+	TOTAL_COLUMNS
+};
+
+enum {
 	TEXT_COLUMN,
 	ID_COLUMN
 };
@@ -65,6 +73,8 @@ extern void listFlush(GtkWidget *list);
 extern void comboFlush(GtkListStore *store);
 extern void *syncOneServer(void *trans);
 extern void addressbookTreeUpdate(void);
+extern void contactsTreeUpdate(int type, int id);
+extern void contactsTreeAppend(char *card, int id);
 
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);

@@ -20,7 +20,7 @@ void guiRun(sqlite3 *ptr){
 	printfunc(__func__);
 
 	addressbookTreeUpdate();
-	fillList(ptr, 2, 0, 0, appBase.contactList);
+	contactsTreeUpdate(0,0);
 	gtk_main();
 }
 
@@ -88,14 +88,14 @@ static void selBook(GtkWidget *widget, gpointer trans){
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
-					fillList(appBase.db, 2, 0, 0, appBase.contactList);
+					contactsTreeUpdate(0, 0);
 				} else {
 					verboseCC("[%s] whole server\n", __func__);
-					fillList(appBase.db, 2, 0, selID, appBase.contactList);
+					contactsTreeUpdate(0, selID);
 				}
 				break;
 			case 1:		/* Just one address book selected	*/
-				fillList(appBase.db, 2, selID, 0, appBase.contactList);
+				contactsTreeUpdate(1, selID);
 				break;
 		}
 	}
@@ -1076,7 +1076,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 	int					selID;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
 		card = buildNewCard(appBase.db, selID);
 		gtk_widget_show_all(card);
@@ -1152,11 +1152,11 @@ void listInit(GtkWidget *list){
 static void listSortorderAsc(void){
 	printfunc(__func__);
 
-	GtkListStore		*store;
+	GtkTreeStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
+	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), LAST_COLUMN, GTK_SORT_ASCENDING);
 
 }
 
@@ -1166,11 +1166,11 @@ static void listSortorderAsc(void){
 static void listSortorderDesc(void){
 	printfunc(__func__);
 
-	GtkListStore		*store;
+	GtkTreeStore		*store;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
+	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 
-	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), 0, GTK_SORT_DESCENDING);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), LAST_COLUMN, GTK_SORT_DESCENDING);
 
 }
 
@@ -1297,6 +1297,7 @@ static GtkTreeModel *addressbookModelCreate(void){
 
 	return GTK_TREE_MODEL(treestore);
 }
+
 /**
  * addressbookTreeCreate - creates the model and view for the adress books
  */
@@ -1323,6 +1324,140 @@ static GtkWidget *addressbookTreeCreate(void){
 
 	return view;
 }
+
+/**
+ * contactsTreeAppend - append a new item to a contacts list view
+ */
+void contactsTreeAppend(char *card, int id){
+	printfunc(__func__);
+
+	GtkTreeStore		*store;
+	GtkTreeIter 		iter;
+	char				*fn = NULL,
+						*n = NULL,
+						*first  = NULL,
+						*last = NULL;
+	char				**nPtr = NULL;
+
+	fn = getSingleCardAttribut(CARDTYPE_FN, card);
+	if(strlen(g_strstrip(fn)) == 0)
+		fn = g_strndup("(no name)", sizeof("(no name)"));
+
+	n = getSingleCardAttribut(CARDTYPE_N, card);
+
+	nPtr = g_strsplit(n, ";", 5);
+	last = g_strndup(g_strstrip(nPtr[0]), sizeof(g_strstrip(nPtr[0])));
+	first = g_strndup(g_strstrip(nPtr[1]), sizeof(g_strstrip(nPtr[1])));
+	g_strfreev(nPtr);
+
+	debugCC("[%s] first: %s\tlast: %s\n", __func__, first, last);
+
+	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
+
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, FN_COLUMN, fn, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, -1);
+
+	g_free(fn);
+	g_free(n);
+	g_free(first);
+	g_free(last);
+}
+
+/**
+ * contactsTreeUpdate - updates the contacts list view
+ */
+void contactsTreeUpdate(int type, int id){
+	printfunc(__func__);
+
+	GtkTreeStore	*store;
+	GSList			*contacts = NULL;
+
+	/* Flush the tree	*/
+	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
+	gtk_tree_store_clear(store);
+
+	/* Insert new elements	*/
+	switch(type){
+		case 0:		/*	server selected	*/
+			if(id == 0){
+				contacts = getListInt(appBase.db, "contacts", "contactID", 0, "", 0, "", "", "", "");
+				break;
+			} else {
+				GSList			*addressBooks;
+				addressBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", id, "", "", "", "");
+				while(addressBooks){
+					GSList				*next =  addressBooks->next;
+					int					addressbookID = GPOINTER_TO_INT(addressBooks->data);
+					int					active = 0;
+					if(addressbookID == 0){
+						addressBooks = next;
+						continue;
+					}
+					active = getSingleInt(appBase.db, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
+					if(active & (1<<DAV_ADDRBOOK_DONT_SYNC)){
+						/* Ignore address books which are not synced	*/
+						addressBooks = next;
+						continue;
+					}
+					contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addressbookID, "", "", "", "");
+					contactsTreeFill(contacts);
+					g_slist_free(contacts);
+					addressBooks = next;
+				}
+				g_slist_free(addressBooks);
+				return;
+			}
+			break;
+		case 1:		/*	address book selected	*/
+			contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", id, "", "", "", "");
+			break;
+		default:
+			break;
+	}
+	contactsTreeFill(contacts);
+	g_slist_free(contacts);
+}
+
+/**
+ * contactsModelCreate - create the model for the contacts list view
+ */
+static GtkTreeModel *contactsModelCreate(void){
+	printfunc(__func__);
+
+	GtkTreeStore  *treestore;
+
+	treestore = gtk_tree_store_new(TOTAL_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT);
+
+	return GTK_TREE_MODEL(treestore);
+}
+
+/**
+ * contactsTreeCreate - creates the model and view for the contacts list
+ */
+static GtkWidget *contactsTreeCreate(void){
+	printfunc(__func__);
+
+	GtkWidget				*view;
+	GtkTreeViewColumn		*column;
+	GtkTreeModel			*model;
+	GtkCellRenderer			*renderer;
+
+	view = gtk_tree_view_new();
+
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+
+	model = contactsModelCreate();
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+	g_object_unref(model);
+
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_SINGLE);
+
+	return view;
+}
+
 /**
  * dialogExportContacts - dialog to export vCards
  */
@@ -1478,8 +1613,7 @@ void guiInit(void){
 	noContact = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(emptyCard), noContact);
 	gtk_container_add(GTK_CONTAINER(scroll), emptyCard);
-	appBase.contactList = gtk_tree_view_new();
-	listInit(appBase.contactList);
+	appBase.contactList = contactsTreeCreate();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(appBase.contactList), FALSE);
 	contactsEdit =gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	contactButtons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -1502,7 +1636,7 @@ void guiInit(void){
 	completion = gtk_entry_completion_new ();
 	gtk_entry_completion_set_popup_set_width(GTK_ENTRY_COMPLETION(completion), TRUE);
 	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(appBase.contactList))));
-	gtk_entry_completion_set_text_column(completion, 0);
+	gtk_entry_completion_set_text_column(completion, FN_COLUMN);
 	gtk_entry_completion_set_minimum_key_length(completion, 3);
 	searchbar = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");

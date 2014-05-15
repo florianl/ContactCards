@@ -60,5 +60,6 @@ extern void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken);
 extern void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list);
 extern void exportContacts(sqlite3 *ptr, char *base);
 extern void exportCert(sqlite3 *ptr, char *base, int serverID);
+extern void contactsTreeFill(GSList *contacts);
 
 #endif	/*	sqlite_H	*/

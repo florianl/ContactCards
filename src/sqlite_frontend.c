@@ -13,6 +13,24 @@
 
 #include "contactcards.h"
 
+void contactsTreeFill(GSList *contacts){
+	printfunc(__func__);
+
+	while(contacts){
+		GSList				*next =  contacts->next;
+		int					id = GPOINTER_TO_INT(contacts->data);
+		char				*card = NULL;
+		if(id == 0){
+			contacts = next;
+			continue;
+		}
+		card = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", id, "", "", "", "", "", 0);
+		contactsTreeAppend(card, id);
+		g_free(card);
+		contacts = next;
+	}
+}
+
 /**
  * fillList - fill a list
  */
