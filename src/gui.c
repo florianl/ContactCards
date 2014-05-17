@@ -135,7 +135,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		int				isOAuth = 0;
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
 
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
@@ -170,6 +170,16 @@ failure:
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no contact selected."));
 	}
 }
+
+/**
+ * contactDelcb - Callback for contactDel()
+ */
+static void contactDelcb(GtkMenuItem *menuitem, gpointer     user_data){
+	printfunc(__func__);
+
+	contactDel(NULL, NULL);
+}
+
 /**
  * contactEditPostalItem - Add a postal address to edit a vCard
  */
@@ -1031,7 +1041,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 	int					selID;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected to edit."));
@@ -1046,6 +1056,16 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), editCard);
 
 }
+
+/**
+ * contactEditdb - Callback for contactEdit()
+ */
+static void contactEditcb(GtkMenuItem *menuitem, gpointer     user_data){
+	printfunc(__func__);
+
+	contactEdit(NULL, NULL);
+}
+
 
 /**
  * completionContact - select a vCard from the searchbar
@@ -1224,9 +1244,52 @@ void *syncOneServer(void *trans){
 }
 
 /**
+ * addressbookTreeContextMenu - a simple context menu for the address books view
+ */
+void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID;
+	int					typ;
+
+	/*	right mouse button	*/
+	if(event->button.button != 3)
+		return;
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
+		GtkWidget			*menu,
+							*menuItem;
+		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
+		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
+
+		if(typ == 0 && selID == 0){
+			verboseCC("[%s] generic item selected\n", __func__);
+			return;
+		}
+
+		menu = gtk_menu_new();
+
+		switch(typ){
+			case 0:		/*	server	*/
+				verboseCC("[%s] Server %d selected\n", __func__, selID);
+				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
+				break;
+			case 1:		/* address book	*/
+				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
+				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
+				break;
+		}
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+		gtk_widget_show_all(menu);
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
+	}
+}
+
+/**
  * addressbookTreeUpdate - updates the address books view
  */
-
 void addressbookTreeUpdate(void){
 	printfunc(__func__);
 
@@ -1323,6 +1386,40 @@ static GtkWidget *addressbookTreeCreate(void){
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_SINGLE);
 
 	return view;
+}
+
+/**
+ * contactsTreeContextMenu - a simple context menu for the list view
+ */
+void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID;
+
+	/*	right mouse button	*/
+	if(event->button.button != 3)
+		return;
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
+		GtkWidget		*menu,
+						*delItem,
+						*editItem;
+
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
+		verboseCC("[%s] %d\n",__func__, selID);
+
+		menu = gtk_menu_new();
+		delItem = gtk_menu_item_new_with_label(_("Delete"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), delItem);
+		g_signal_connect(delItem, "activate", (GCallback)contactDelcb, NULL);
+		editItem = gtk_menu_item_new_with_label(_("Edit"));
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), editItem);
+		g_signal_connect(editItem, "activate", (GCallback)contactEditcb, NULL);
+		gtk_widget_show_all(menu);
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
+	}
 }
 
 /**
@@ -1654,6 +1751,8 @@ void guiInit(void){
 	contactSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList));
 	gtk_tree_selection_set_mode (contactSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(contactSel, "changed", G_CALLBACK(selContact), NULL);
+	g_signal_connect(appBase.contactList, "button_press_event", G_CALLBACK(contactsTreeContextMenu), NULL);
+	g_signal_connect(appBase.addressbookList, "button_press_event", G_CALLBACK(addressbookTreeContextMenu), NULL);
 
 	g_signal_connect(G_OBJECT(ascContact), "clicked", G_CALLBACK(listSortorderAsc), NULL);
 	g_signal_connect(G_OBJECT(descContact), "clicked", G_CALLBACK(listSortorderDesc), NULL);
