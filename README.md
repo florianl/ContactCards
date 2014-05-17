@@ -23,3 +23,4 @@ Build
 
 License: GPLv2
 Contact: dev (AT) der-flo.net
+More Information: https://der-flo.net/ContactCards.html
