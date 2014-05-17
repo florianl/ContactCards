@@ -516,6 +516,15 @@ sendAgain:
 			break;
 
 		/*
+		 * request to delete a collection
+		 */
+		case DAV_REQ_DEL_COLLECTION:
+			davPath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", itemID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			req = ne_request_create(sess, "DELETE", davPath);
+			break;
+
+		/*
 		 * request to push a new contact to the server
 		 */
 		case DAV_REQ_PUT_NEW_CONTACT:
@@ -633,7 +642,6 @@ sendAgain:
 	((ContactCards_stack_t *)userdata)->reqMethod = method;
 	((ContactCards_stack_t *)userdata)->serverID = serverID;
 	((ContactCards_stack_t *)userdata)->addressbookID = itemID;
-
 	if(method == DAV_REQ_GET){
 		ret = ne_begin_request(req);
 		if(ret == NE_OK){
@@ -910,6 +918,29 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	}
 
 	dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", selID);
+	return stack->statuscode;
+}
+
+/**
+ * serverDelCollection - delete a address book from a server
+ */
+int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
+	printfunc(__func__);
+
+	ContactCards_stack_t		*stack;
+
+	stack = serverRequest(DAV_REQ_DEL_COLLECTION, serverID, selID, sess, ptr);
+
+	switch(stack->statuscode){
+		case 200 ... 204:
+			break;
+		default:
+			return stack->statuscode;
+	}
+
+	cleanUpRequest(appBase.db, selID, 1);
+	dbRemoveItem(ptr, "addressbooks", 2, "", "", "addressbookID", selID);
+
 	return stack->statuscode;
 }
 

@@ -615,6 +615,8 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 		return;
 	}
 
+	debugCC("[%s] %s\n", __func__, sql_query);
+
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		switch(type){
 			// addressbooks

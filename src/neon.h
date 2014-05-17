@@ -52,6 +52,7 @@
 #define	DAV_REQ_REP_3					133
 
 #define DAV_REQ_DEL_CONTACT				141
+#define DAV_REQ_DEL_COLLECTION			142
 
 #define	DAV_REQ_PUT_CONTACT				151
 #define	DAV_REQ_POST_CONTACT			152
@@ -183,6 +184,7 @@ extern int oAuthUpdate(sqlite3 *ptr, int serverID);
 extern int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
 extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
+extern int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);
 extern void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID);
 

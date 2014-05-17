@@ -1060,7 +1060,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 /**
  * contactEditdb - Callback for contactEdit()
  */
-static void contactEditcb(GtkMenuItem *menuitem, gpointer     user_data){
+static void contactEditcb(GtkMenuItem *menuitem, gpointer data){
 	printfunc(__func__);
 
 	contactEdit(NULL, NULL);
@@ -1244,6 +1244,49 @@ void *syncOneServer(void *trans){
 }
 
 /**
+ * addressbookDel - delete an address book from the server
+ */
+static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget			*dialog;
+	int					srvID, aID;
+	ne_session 			*sess = NULL;
+	int 				resp;
+	int					isOAuth = 0;
+
+	aID = GPOINTER_TO_INT(data);
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this address book?"));
+
+	debugCC("[%s] deleting address book %d\n", __func__, aID);
+
+	resp = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+	if (resp != GTK_RESPONSE_YES) return;
+
+	g_mutex_lock(&mutex);
+	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
+
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
+
+	if(isOAuth){
+		int 		ret = 0;
+		ret = oAuthUpdate(appBase.db, srvID);
+		if(ret != OAUTH_UP2DATE)
+			goto failure;
+	}
+
+	sess = serverConnect(srvID);
+	serverDelCollection(appBase.db, sess, srvID, aID);
+	serverDisconnect(sess, appBase.db, srvID);
+	addressbookTreeUpdate();
+
+failure:
+		g_mutex_unlock(&mutex);
+}
+
+/**
  * addressbookTreeContextMenu - a simple context menu for the address books view
  */
 void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
@@ -1259,8 +1302,8 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 		return;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
-		GtkWidget			*menu,
-							*menuItem;
+		GtkWidget			*menu = NULL,
+							*menuItem = NULL;
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
@@ -1273,12 +1316,15 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 
 		switch(typ){
 			case 0:		/*	server	*/
+				return;
+				/*	Creating new address books isn't supported so far	*/
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
+				g_signal_connect(menuItem, "activate", (GCallback)addressbookDel, GINT_TO_POINTER(selID));
 				break;
 		}
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
