@@ -1642,7 +1642,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 	retList = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 
 	if(g_slist_length(retList) == 1){
-		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book to sync."));
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no server to sync."));
 		g_slist_free(retList);
 		return;
 	}

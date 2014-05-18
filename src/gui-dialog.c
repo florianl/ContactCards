@@ -449,6 +449,11 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 
 	verboseCC("[%s] %d\n", __func__, buffers->srvID);
 
+	if(buffers->srvID == 0){
+		verboseCC("[%s] this isn't a server\n", __func__);
+		return;
+	}
+
 	dbRemoveItem(appBase.db, "cardServer", 2, "", "", "serverID", buffers->srvID);
 	dbRemoveItem(appBase.db, "certs", 2, "", "", "serverID", buffers->srvID);
 	cleanUpRequest(appBase.db, buffers->srvID, 0);
@@ -482,6 +487,11 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 
 	ContactCards_pref_t		*buffers = trans;
 
+	if(buffers->srvID == 0){
+		verboseCC("[%s] this isn't a server\n", __func__);
+		return;
+	}
+
 	updateAddressbooks(appBase.db, buffers->aBooks);
 	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
@@ -500,6 +510,11 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 	ne_session					*sess = NULL;
 	GList						*children, *iter;
 	GSList						*abList;
+
+	if(buffers->srvID == 0){
+		verboseCC("[%s] this isn't a server\n", __func__);
+		return;
+	}
 
 	g_mutex_lock(&mutex);
 
@@ -562,6 +577,11 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 	GtkWidget					*dirChooser;
 	int							result;
 	char						*path = NULL;
+
+	if(buffers->srvID == 0){
+		verboseCC("[%s] this isn't a server\n", __func__);
+		return;
+	}
 
 	dirChooser = gtk_file_chooser_dialog_new(_("Export Certificate"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Export"), GTK_RESPONSE_ACCEPT, NULL);
 
