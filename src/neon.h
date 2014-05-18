@@ -41,11 +41,13 @@
 /*
  * Request-Methods
  */
-#define	DAV_REQ_EMPTY					111
-#define	DAV_REQ_CUR_PRINCIPAL			112
-#define	DAV_REQ_ADDRBOOK_HOME			113
-#define	DAV_REQ_ADDRBOOKS				116
-#define	DAV_REQ_ADDRBOOK_SYNC			117
+#define	DAV_REQ_EMPTY					101
+#define	DAV_REQ_OPTIONS					102
+
+#define	DAV_REQ_CUR_PRINCIPAL			111
+#define	DAV_REQ_ADDRBOOK_HOME			112
+#define	DAV_REQ_ADDRBOOKS				113
+#define	DAV_REQ_ADDRBOOK_SYNC			114
 
 #define	DAV_REQ_REP_1					131
 #define	DAV_REQ_REP_2					132
@@ -60,6 +62,7 @@
 #define	DAV_REQ_PUT_NEW_CONTACT			154
 
 #define	DAV_REQ_GET						161
+
 #define	DAV_REQ_GET_GRANT				171
 #define	DAV_REQ_GET_TOKEN				172
 #define	DAV_REQ_GET_REFRESH				173

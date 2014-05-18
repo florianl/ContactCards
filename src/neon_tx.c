@@ -420,6 +420,13 @@ sendAgain:
 			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
 			break;
 
+		/*
+		 * Discovery of Support for CardDAV
+		 */
+		case DAV_REQ_OPTIONS:
+			req = ne_request_create(sess, "OPTIONS", davPath);
+			break;
+
 		case DAV_REQ_CUR_PRINCIPAL:
 			req = ne_request_create(sess, "PROPFIND", davPath);
 			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_PROPFIND_START,DAV_PROP_START, DAV_CUR_PRINCIPAL, DAV_PROP_END, DAV_PROPFIND_END, NULL);
@@ -907,18 +914,22 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 	printfunc(__func__);
 
 	ContactCards_stack_t		*stack;
+	int							ret = 0;
 
 	stack = serverRequest(DAV_REQ_DEL_CONTACT, serverID, selID, sess, ptr);
 
-	switch(stack->statuscode){
+	ret = stack->statuscode;
+	g_free(stack);
+
+	switch(ret){
 		case 200 ... 299:
 			break;
 		default:
-			return stack->statuscode;
+			return ret;
 	}
 
 	dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", selID);
-	return stack->statuscode;
+	return ret;
 }
 
 /**
@@ -928,20 +939,24 @@ int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID)
 	printfunc(__func__);
 
 	ContactCards_stack_t		*stack;
+	int							ret = 0;
 
 	stack = serverRequest(DAV_REQ_DEL_COLLECTION, serverID, selID, sess, ptr);
 
-	switch(stack->statuscode){
+	ret = stack->statuscode;
+	g_free(stack);
+
+	switch(ret){
 		case 200 ... 204:
 			break;
 		default:
-			return stack->statuscode;
+			return ret;
 	}
 
 	cleanUpRequest(appBase.db, selID, 1);
 	dbRemoveItem(ptr, "addressbooks", 2, "", "", "addressbookID", selID);
 
-	return stack->statuscode;
+	return ret;
 }
 
 /**
@@ -952,6 +967,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 
 	char					*postURI = NULL;
 	ContactCards_stack_t	*stack;
+	int						ret = 0;
 
 	postURI = getSingleChar(ptr, "addressbooks", "postURI", 14, "cardServer", srvID, "", "", "", "", "addressbookID", addrBookID);
 	if(strlen(postURI) <= 1){
@@ -967,8 +983,10 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 	free(postURI);
 
 	stack = serverRequest(DAV_REQ_POST_CONTACT, srvID, newID, sess, ptr);
+	ret = stack->statuscode;
+	g_free(stack);
 
-	switch(stack->statuscode){
+	switch(ret){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
@@ -1015,7 +1033,11 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	} else {
 		stack = serverRequest(DAV_REQ_PUT_NEW_CONTACT, srvID, newID, sess, ptr);
 	}
-	switch(stack->statuscode){
+
+	ret = stack->statuscode;
+	g_free(stack);
+
+	switch(ret){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
@@ -1067,15 +1089,22 @@ sendAgain:
 			return;
 	}
 	responseHandle(stack, sess, ptr);
+	g_free(stack);
+
+	stack = serverRequest(DAV_REQ_OPTIONS, serverID, 0, sess, ptr);
+	g_free(stack);
 
 	stack = serverRequest(DAV_REQ_CUR_PRINCIPAL, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
+	g_free(stack);
 
 	stack = serverRequest(DAV_REQ_ADDRBOOK_HOME, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
+	g_free(stack);
 
 	stack = serverRequest(DAV_REQ_ADDRBOOKS, serverID, 0, sess, ptr);
 	responseHandle(stack, sess, ptr);
+	g_free(stack);
 }
 
 /**

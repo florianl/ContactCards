@@ -1097,6 +1097,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				return;
 		}
 		responseHandle(stack, sess, ptr);
+		g_free(stack);
 nextBoook:
 		retList = next;
 	}
