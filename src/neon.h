@@ -39,6 +39,15 @@
 #define	DAV_ADDRBOOK_DONT_SYNC			8
 
 /*
+ * Server Options
+ */
+#define	DAV_OPT_POST					0x800
+#define	DAV_OPT_PUT						0x400
+#define	DAV_OPT_DELETE					0x200
+#define	DAV_OPT_MKCOL					0x100
+#define	DAV_OPT_PROPPATCH				0x080
+
+/*
  * Request-Methods
  */
 #define	DAV_REQ_EMPTY					101

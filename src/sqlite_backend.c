@@ -1168,3 +1168,44 @@ void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *val
 
 	doSimpleRequest(ptr, sql_query, __func__);
 }
+
+/**
+ * handleServerOptions - handles the Options returned from a server and update the local database
+ */
+void handleServerOptions(char *val, int serverID){
+	printfunc(__func__);
+
+	gchar			**ptr = NULL;
+	int				i = 0;
+	int				flags = 0;
+
+	if(!ptr)
+		return;
+
+	ptr = g_strsplit(val, ",", -1);
+
+	while(ptr[i] != NULL){
+		char		*item = NULL;
+
+		item = g_strstrip(ptr[i]);
+
+		if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "post") == 0){
+			flags |= DAV_OPT_POST;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "put") == 0){
+			flags |= DAV_OPT_PUT;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "delete") == 0){
+			flags |= DAV_OPT_DELETE;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "mkcol") == 0){
+			flags |= DAV_OPT_MKCOL;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "proppatch") == 0){
+			flags |= DAV_OPT_PROPPATCH;
+		} else {
+			debugCC("[%s] %s\n", __func__, item);
+		}
+		g_free(item);
+		i++;
+	}
+	g_strfreev(ptr);
+	g_free(val);
+//	updateServerFlags(serverID, flags);
+}

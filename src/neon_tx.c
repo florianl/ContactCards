@@ -702,6 +702,9 @@ sendAgain:
 			}
 			break;
 		case 200:
+			if(method == DAV_REQ_OPTIONS){
+				handleServerOptions((char *)ne_get_response_header(req, "Allow"), serverID);
+			}
 		case 202 ... 203:
 		case 205 ... 206:
 		case 208 ... 299:
