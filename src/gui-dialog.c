@@ -99,6 +99,7 @@ static void newDialogApply(GtkWidget *widget, gpointer trans){
 	buf4 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
 	newServer(appBase.db, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
 	syncMenuUpdate();
+	addressbookTreeUpdate();
 	return;
 
 fruux:
@@ -107,6 +108,7 @@ fruux:
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
 	newServer(appBase.db, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
 	syncMenuUpdate();
+	addressbookTreeUpdate();
 	return;
 
 google:
@@ -115,6 +117,7 @@ google:
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "grantEntry");
 	newServerOAuth(appBase.db, "google", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), 1);
 	syncMenuUpdate();
+	addressbookTreeUpdate();
 	return;
 }
 

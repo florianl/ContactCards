@@ -1170,6 +1170,31 @@ void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *val
 }
 
 /**
+ * updateServerFlags - updates the Flags of the server in the database
+ */
+static void updateServerFlags(int serverID, int flags){
+	printfunc(__func__);
+
+	int			old = 0;
+	int			diff = 0;
+
+	old = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", serverID, "", "", "", "");
+
+	diff = old & DAV_OPT_MASK;
+	if(diff == flags){
+		/* Nothing has changed	*/
+		verboseCC("[%s] server options hasn't changed\n", __func__);
+		return;
+	}
+
+	/* Clear the old stuff	*/
+	old &= ~DAV_OPT_MASK;
+	/* Set the new flags	*/
+	old |= flags;
+	setSingleInt(appBase.db, "cardServer", "flags", old, "serverID", serverID);
+}
+
+/**
  * handleServerOptions - handles the Options returned from a server and update the local database
  */
 void handleServerOptions(char *val, int serverID){
@@ -1195,13 +1220,18 @@ void handleServerOptions(char *val, int serverID){
 			flags |= DAV_OPT_MKCOL;
 		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "proppatch") == 0){
 			flags |= DAV_OPT_PROPPATCH;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "move") == 0){
+			flags |= DAV_OPT_MOVE;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "report") == 0){
+			flags |= DAV_OPT_REPORT;
 		} else {
 			debugCC("[%s] %s\n", __func__, item);
 		}
 		g_free(item);
 		i++;
 	}
-
 	g_strfreev(ptr);
-//	updateServerFlags(serverID, flags);
+
+	if(flags != 0)
+		updateServerFlags(serverID, flags);
 }

@@ -1518,7 +1518,6 @@ void contactsTreeUpdate(int type, int id){
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 	gtk_tree_store_clear(store);
-
 	/* Insert new elements	*/
 	switch(type){
 		case 0:		/*	server selected	*/

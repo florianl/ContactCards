@@ -33,19 +33,23 @@
 /*
  * Sync-Methods
  */
-#define	DAV_SYNC_COLLECTION				1
-#define	DAV_ADDRBOOK_MULTIGET			2
-#define	DAV_ADDRBOOK_QUERY				4
-#define	DAV_ADDRBOOK_DONT_SYNC			8
+#define	DAV_SYNC_MASK					0x00F
+#define	DAV_SYNC_COLLECTION				0x001
+#define	DAV_ADDRBOOK_MULTIGET			0x002
+#define	DAV_ADDRBOOK_QUERY				0x004
+#define	DAV_ADDRBOOK_DONT_SYNC			0x008
 
 /*
  * Server Options
  */
+#define	DAV_OPT_MASK					0xFE0
 #define	DAV_OPT_POST					0x800
 #define	DAV_OPT_PUT						0x400
 #define	DAV_OPT_DELETE					0x200
 #define	DAV_OPT_MKCOL					0x100
 #define	DAV_OPT_PROPPATCH				0x080
+#define	DAV_OPT_MOVE					0x040
+#define	DAV_OPT_REPORT					0x020
 
 /*
  * Request-Methods
@@ -89,6 +93,7 @@
 #define	OAUTH_ACCESSTOKEN_FAILURE		211
 #define	OAUTH_REFRESHTOKEN_FAILURE		212
 #define	OAUTH_UP2DATE					213
+
 /*
  * General stuff
  */
