@@ -704,6 +704,7 @@ sendAgain:
 		case 200:
 			if(method == DAV_REQ_OPTIONS){
 				handleServerOptions((char *)ne_get_response_header(req, "Allow"), serverID);
+				handleServerOptions((char *)ne_get_response_header(req, "Dav"), serverID);
 			}
 		case 202 ... 203:
 		case 205 ... 206:

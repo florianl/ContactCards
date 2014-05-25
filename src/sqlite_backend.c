@@ -1179,15 +1179,11 @@ void handleServerOptions(char *val, int serverID){
 	int				i = 0;
 	int				flags = 0;
 
-	if(!ptr)
-		return;
-
 	ptr = g_strsplit(val, ",", -1);
 
 	while(ptr[i] != NULL){
 		char		*item = NULL;
-
-		item = g_strstrip(ptr[i]);
+		item = g_strndup(g_strstrip(ptr[i]), strlen(g_strstrip(ptr[i])));
 
 		if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "post") == 0){
 			flags |= DAV_OPT_POST;
@@ -1205,7 +1201,7 @@ void handleServerOptions(char *val, int serverID){
 		g_free(item);
 		i++;
 	}
+
 	g_strfreev(ptr);
-	g_free(val);
 //	updateServerFlags(serverID, flags);
 }
