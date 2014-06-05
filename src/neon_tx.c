@@ -576,6 +576,22 @@ sendAgain:
 			break;
 
 		/*
+		 * Create a new address book
+		 */
+		case DAV_REQ_NEW_COLLECTION:
+			{
+			char			*displayname = NULL;
+			displayname = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", itemID, "", "", "", "", "", 0);
+			if(displayname== NULL) goto failedRequest;
+			req = ne_request_create(sess, "MKCOL", davPath);
+			ne_buffer_concat(req_buffer, DAV_XML_HEAD, DAV_MKCOL_START, DAV_SET_START, DAV_PROP_START, DAV_RESOURCETYPE_START, DAV_COLLECTION, DAV_ADDRESSBOOK, DAV_RESOURCETYPE_END, DAV_DISPLAYNAME_START, displayname, DAV_DISPLAYNAME_END, DAV_PROP_END, DAV_SET_END, DAV_MKCOL_END, NULL);
+			ne_add_request_header(req, "Content-Type", NE_XML_MEDIA_TYPE);
+			ne_xml_push_handler(pXML, elementStart, elementData, elementEnd, userdata);
+			ne_add_response_body_reader(req, ne_accept_2xx, cbReader, pXML);
+			}
+			break;
+
+		/*
 		 * oAuth-Stuff
 		 */
 		case DAV_REQ_GET_TOKEN:

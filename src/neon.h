@@ -80,6 +80,8 @@
 #define	DAV_REQ_GET_TOKEN				172
 #define	DAV_REQ_GET_REFRESH				173
 
+#define	DAV_REQ_NEW_COLLECTION			181
+
 /*
  * OAuth-Elements
  */
@@ -124,6 +126,17 @@
 #define	DAV_REP_SYNC_TOKEN_END			"</d:sync-token>"
 #define	DAV_REP_ETAG					"<d:getetag />"
 #define	DAV_REP_SYNC_END				"</d:sync-collection>"
+
+#define	DAV_MKCOL_START					"<d:mkcol xmlns:d=\"DAV:\" xmlns:e=\"urn:ietf:params:xml:ns:carddav\">"
+#define	DAV_MKCOL_END					"</d:mkcol>"
+#define	DAV_SET_START					"<d:set>"
+#define	DAV_SET_END						"</d:set>"
+#define	DAV_RESOURCETYPE_START			"<d:resourcetype>"
+#define	DAV_RESOURCETYPE_END			"</d:resourcetype>"
+#define	DAV_COLLECTION					"<d:collection/>"
+#define	DAV_ADDRESSBOOK					"<e:addressbook/>"
+#define	DAV_DISPLAYNAME_START			"<d:displayname>"
+#define	DAV_DISPLAYNAME_END				"</d:displayname>"
 
 #define	ContactCards_NO_LEAVE					512
 #define	ContactCards_ELEMENT_END				513
