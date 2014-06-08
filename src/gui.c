@@ -1296,6 +1296,7 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 	GtkTreeModel		*model;
 	int					selID;
 	int					typ;
+	int 				flags = 0;
 
 	/*	right mouse button	*/
 	if(event->button.button != 3)
@@ -1318,6 +1319,12 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 			case 0:		/*	server	*/
 				return;
 				/*	Creating new address books isn't supported so far	*/
+				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
+				if(flags & DAV_OPT_MKCOL){
+					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
+				} else {
+					break;
+				}
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				break;
