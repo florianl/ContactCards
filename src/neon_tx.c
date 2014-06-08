@@ -812,7 +812,7 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
 	isOAuth = getSingleInt(ptr, "cardServer", "isOAuth", 1, "serverID", serverID, "", "", "", "");
 
 	if(isOAuth){
-		setSingleChar(ptr, "cardServer", "oAuthAccessToken", NULL, "serverID", serverID);
+		setSingleChar(ptr, "cardServer", "oAuthAccessToken", "", "serverID", serverID);
 	}
 
 	ne_close_connection(sess);
