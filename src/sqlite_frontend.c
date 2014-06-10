@@ -19,11 +19,20 @@ void contactsTreeFill(GSList *contacts){
 	while(contacts){
 		GSList				*next =  contacts->next;
 		int					id = GPOINTER_TO_INT(contacts->data);
+		int					flags = 0;
 		char				*card = NULL;
 		if(id == 0){
 			contacts = next;
 			continue;
 		}
+
+		flags = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", id, "", "", "", "");
+		if(flags & CONTACTCARDS_TMP){
+			debugCC("[%s] hiding %d\n", __func__, id);
+			contacts = next;
+			continue;
+		}
+
 		card = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", id, "", "", "", "", "", 0);
 		contactsTreeAppend(card, id);
 		g_free(card);

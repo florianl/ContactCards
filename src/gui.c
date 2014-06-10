@@ -687,6 +687,36 @@ static void *pushingCard(void *trans){
 }
 
 /**
+ * checkInput - very simple input check
+ */
+gboolean checkInput(GSList *list){
+	printfunc(__func__);
+
+	GSList			*next;
+	while(list){
+		ContactCards_item_t		*item;
+		next = list->next;
+		if(!list->data){
+			goto stepForward;
+		}
+		item = (ContactCards_item_t *)list->data;
+		switch(item->itemID){
+			case CARDTYPE_FN_FIRST:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					return FALSE;
+				break;
+			case CARDTYPE_FN_LAST:
+				if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(item->element)) == 0)
+					return FALSE;
+				break;
+		}
+stepForward:
+		list = next;
+	}
+	return TRUE;
+}
+
+/**
  * contactEditSave - save the changes on a vCard
  */
 static void contactEditSave(GtkWidget *widget, gpointer trans){
@@ -694,9 +724,13 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	GError						*error = NULL;
 	GThread						*thread;
+	ContactCards_add_t			*value = trans;
 
+	if(checkInput(value->list)== FALSE){
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
+		return;
+	}
 	cleanCard(((ContactCards_add_t *)trans)->grid);
-
 	thread = g_thread_try_new("pushing vCard", pushingCard, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
@@ -1008,18 +1042,19 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
 	GtkWidget			*newCard;
-	int					abID = 0;
+	int					abID = 0,
+						selTyp = 0;
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &abID,  -1);
+		gtk_tree_model_get(model, &iter, ID_COL, &abID, TYP_COL, &selTyp, -1);
 	}
 
 	verboseCC("[%s] %d\n",__func__, abID);
 
-	if(abID == 0){
+	if(abID == 0 || selTyp == 0){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
 		return;
 	}

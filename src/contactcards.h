@@ -46,6 +46,8 @@
 GtkListStore			*comboList;
 GMutex 					mutex;
 
+#define	CONTACTCARDS_TMP		0x1
+
 #define	printfunc(X)	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", X);
 
 #endif	/*	ContactCards_H		*/

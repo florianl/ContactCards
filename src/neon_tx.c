@@ -1010,6 +1010,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
@@ -1061,7 +1062,9 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
 			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
 		case 204:
+			verboseCC("[%s] going to get the new vCars\n", __func__);
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
 			break;
@@ -1071,6 +1074,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 				ret = -1;
 			} else {
 				ret = 1;
+				setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
 			}
 			break;
 		default:

@@ -785,7 +785,7 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 
 	path = g_strconcat(g_strstrip(basePath), g_strstrip(cardPath), ".vcf", NULL);
 
-	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href) VALUES ('%d','%q', '%q');", addressbookID, card, path);
+	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href, flags) VALUES ('%d','%q', '%q', '%d');", addressbookID, card, path, CONTACTCARDS_TMP);
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
