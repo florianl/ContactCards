@@ -50,10 +50,36 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 }
 
 /**
+ * dbCleanUp - remove stuff, which are marked as temporary
+ */
+static void dbCleanUp(sqlite3 *ptr){
+	printfunc(__func__);
+
+	GSList		*temporary;
+
+	temporary = getListInt(ptr, "contacts", "contactID", 1, "flags", CONTACTCARDS_TMP, "", "", "", "");
+
+	while(temporary){
+		GSList				*next = temporary->next;
+		int					id = GPOINTER_TO_INT(temporary->data);
+		if(id == 0){
+			temporary = next;
+			continue;
+		}
+		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", id);
+				temporary = next;
+	}
+	g_slist_free(temporary);
+
+}
+
+/**
  * dbClose - close the connection to the local database
  */
 void dbClose(sqlite3 *ptr){
 	printfunc(__func__);
+
+	dbCleanUp(ptr);
 
 	sqlite3_close(ptr);
 }
