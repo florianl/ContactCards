@@ -57,7 +57,7 @@ static void dbCleanUp(sqlite3 *ptr){
 
 	GSList		*temporary;
 
-	temporary = getListInt(ptr, "contacts", "contactID", 1, "flags", CONTACTCARDS_TMP, "", "", "", "");
+	temporary = getListInt(ptr, "contacts", "contactID", 91, "flags", CONTACTCARDS_TMP, "", "", "", "");
 
 	while(temporary){
 		GSList				*next = temporary->next;
@@ -281,6 +281,9 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			break;
 		case 123:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
+			break;
+		case 91:	/* SQL Query using bitwise operation	*/
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE (%q & %d) = %d;", selValue, tableName, row1, value1, value1);
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
