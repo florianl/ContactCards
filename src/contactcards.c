@@ -35,12 +35,19 @@ int main(int argc, char **argv){
 
 	db = g_build_filename(app->configdir, "ContactCards.sql", NULL);
 
-	ret = sqlite3_open_v2(db, &db_handler, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+	ret = sqlite3_open_v2(db, &db_handler, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL);
 	sqlite3_extended_result_codes(db_handler, TRUE);
 
 	if (ret != SQLITE_OK) {
-		printf("Error occured connecting to the database. Errorcode: %d\n", ret);
+		verboseCC("[%s] Error occured while connecting to the database\n", __func__);
+		verboseCC("[%s] Errorcode: %d\n", __func__, ret);
 		return ret;
+	}
+
+	dbMutex = sqlite3_mutex_alloc(SQLITE_MUTEX_FAST);
+	if(dbMutex == NULL){
+		verboseCC("[%s] mutex for the database could not be allocated\n", __func__);
+		return -1;
 	}
 
 	dbCreate(db_handler);
@@ -64,6 +71,7 @@ int main(int argc, char **argv){
 
 	g_free(app->configdir);
 	g_free(db);
+	sqlite3_mutex_free(dbMutex);
 
 	return 0;
 }

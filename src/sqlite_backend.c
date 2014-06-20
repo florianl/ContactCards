@@ -28,10 +28,13 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	sqlite3_stmt 		*vm;
 	int					ret;
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return;
 	}
 
@@ -41,12 +44,13 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 
 	if (ret != SQLITE_DONE){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
-
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
@@ -200,10 +204,13 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 			verboseCC("[%s] can't handle this number: %d\n", __func__, rows);
 	}
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return 0;
 	}
 
@@ -213,6 +220,7 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 
 	return count;
 }
@@ -289,10 +297,13 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 	}
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return list;
 	}
 
@@ -304,6 +315,7 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 
 	return list;
 
@@ -352,12 +364,16 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			return -1;
 	}
+
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return count;
 	}
 
@@ -374,11 +390,13 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 
 	if(count != 1){
 		verboseCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
+		sqlite3_mutex_leave(dbMutex);
 		return -1;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 
 	return retValue;
 }
@@ -428,12 +446,16 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			return NULL;
 	}
+
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return NULL;
 	}
 
@@ -450,11 +472,13 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 
 	if(count != 1){
 		verboseCC("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
+		sqlite3_mutex_leave(dbMutex);
 		return NULL;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 
 	return retValue;
 }
@@ -637,10 +661,13 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 				break;
 	}
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return;
 	}
 
@@ -662,6 +689,7 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
@@ -702,10 +730,13 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 
 	sql_query = sqlite3_mprintf("SELECT user, passwd FROM cardServer WHERE serverID = '%d';", serverID);
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
 		return;
 	}
 
@@ -718,6 +749,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
