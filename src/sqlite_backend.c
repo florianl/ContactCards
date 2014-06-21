@@ -271,7 +271,6 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 	g_strstrip(row3);
 	g_strstrip(value3);
 
-
 	switch(selRow){
 		case 1:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d';", selValue, tableName, row1, value1);
@@ -347,6 +346,14 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	int					ret;
 	int					count = 0;
 	int					retValue = 0;
+
+	g_strstrip(tableName);
+	g_strstrip(selValue);
+	g_strstrip(row1);
+	g_strstrip(row2);
+	g_strstrip(value2);
+	g_strstrip(row3);
+	g_strstrip(value3);
 
 	switch(selRow){
 		case 1:
@@ -429,6 +436,15 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	int					ret;
 	int					count = 0;
 	char				*retValue = NULL;
+
+	g_strstrip(tableName);
+	g_strstrip(selValue);
+	g_strstrip(row1);
+	g_strstrip(row2);
+	g_strstrip(value2);
+	g_strstrip(row3);
+	g_strstrip(value3);
+	g_strstrip(row4);
 
 	switch(selRow){
 		case 1:
