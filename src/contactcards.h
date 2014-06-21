@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib/gi18n.h>
+#include <glib-unix.h>
 #endif	/*	std_H		*/
 
 #ifndef	gui_H
