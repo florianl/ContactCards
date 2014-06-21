@@ -616,12 +616,15 @@ void showServer(sqlite3 *ptr){
 
 	sqlite3_stmt		*vm;
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	sqlite3_prepare_v2(ptr, "SELECT * FROM cardServer", -1, &vm, NULL);
 	while(sqlite3_step(vm) != SQLITE_DONE){
 		printf("[%i]\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_text(vm, 1), sqlite3_column_text(vm, 4));
 	}
 
 	sqlite3_finalize(vm);
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
@@ -634,12 +637,15 @@ void showAddressbooks(sqlite3 *ptr){
 
 	sqlite3_stmt		*vm;
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	sqlite3_prepare_v2(ptr, "SELECT * FROM addressbooks", -1, &vm, NULL);
 	while(sqlite3_step(vm) != SQLITE_DONE){
 		printf("[%i - %i]\t%s\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_int(vm, 1), sqlite3_column_text(vm, 2), sqlite3_column_text(vm, 3), sqlite3_column_text(vm, 4));
 	}
 
 	sqlite3_finalize(vm);
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
@@ -891,6 +897,8 @@ void showContacts(sqlite3 *ptr){
 
 	sqlite3_stmt		*vm;
 
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
 	sqlite3_prepare_v2(ptr, "SELECT * FROM contacts", -1, &vm, NULL);
 
 	while(sqlite3_step(vm) != SQLITE_DONE)
@@ -899,6 +907,7 @@ void showContacts(sqlite3 *ptr){
 	}
 
 	sqlite3_finalize(vm);
+	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
