@@ -45,6 +45,8 @@
 /*	GLOBALS		*/
 GtkListStore			*comboList;
 GMutex 					mutex;
+GMutex 					aBookTreeMutex;
+GMutex					contactsTreeMutex;
 sqlite3_mutex			*dbMutex;
 
 #define	CONTACTCARDS_TMP		0x1

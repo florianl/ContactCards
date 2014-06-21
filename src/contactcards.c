@@ -55,6 +55,8 @@ int main(int argc, char **argv){
 
 	guiInit();
 	g_mutex_init(&mutex);
+	g_mutex_init(&aBookTreeMutex);
+	g_mutex_init(&contactsTreeMutex);
 
 
 	newOAuthEntity(db_handler, "google.com", "741969998490.apps.googleusercontent.com", "71adV1QbUKszvBV_xXliTD34", "https://www.googleapis.com/.well-known/carddav", "https://www.googleapis.com/auth/carddav", "https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", "code", "urn:ietf:wg:oauth:2.0:oob", "authorization_code");
@@ -72,6 +74,10 @@ int main(int argc, char **argv){
 	g_free(app->configdir);
 	g_free(db);
 	sqlite3_mutex_free(dbMutex);
+
+	g_mutex_clear(&mutex);
+	g_mutex_clear(&aBookTreeMutex);
+	g_mutex_clear(&contactsTreeMutex);
 
 	return 0;
 }

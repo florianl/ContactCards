@@ -1242,8 +1242,6 @@ void *syncOneServer(void *trans){
 	char				*msg = NULL;
 	int					ctxID;
 
-	g_mutex_lock(&mutex);
-
 	srv = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
 	msg = g_strconcat(_("syncing "), srv, NULL);
 	ctxID = gtk_statusbar_get_context_id(GTK_STATUSBAR(appBase.statusbar), "info");
@@ -1385,6 +1383,8 @@ void addressbookTreeUpdate(void){
 	GSList			*servers, *addressBooks;
 	GtkTreeIter		toplevel, child;
 
+	g_mutex_lock(&aBookTreeMutex);
+
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.addressbookList)));
 	gtk_tree_store_clear(store);
@@ -1434,6 +1434,7 @@ void addressbookTreeUpdate(void){
 		servers = next;
 	}
 	g_slist_free(servers);
+	g_mutex_unlock(&aBookTreeMutex);
 }
 
 /**
@@ -1557,6 +1558,8 @@ void contactsTreeUpdate(int type, int id){
 	GtkTreeStore	*store;
 	GSList			*contacts = NULL;
 
+	g_mutex_lock(&contactsTreeMutex);
+
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 	gtk_tree_store_clear(store);
@@ -1589,6 +1592,7 @@ void contactsTreeUpdate(int type, int id){
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
+				g_mutex_unlock(&contactsTreeMutex);
 				return;
 			}
 			break;
@@ -1600,6 +1604,7 @@ void contactsTreeUpdate(int type, int id){
 	}
 	contactsTreeFill(contacts);
 	g_slist_free(contacts);
+	g_mutex_unlock(&contactsTreeMutex);
 }
 
 /**
@@ -1695,10 +1700,12 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
+		g_mutex_lock(&mutex);
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
 			verboseCC("%s\n", error->message);
+			g_mutex_unlock(&mutex);
 		}
 		g_thread_unref(thread);
 		retList = next;
