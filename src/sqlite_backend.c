@@ -295,6 +295,7 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
+			return NULL;
 	}
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
