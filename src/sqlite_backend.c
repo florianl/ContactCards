@@ -202,6 +202,7 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, rows);
+			return 0;
 	}
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
