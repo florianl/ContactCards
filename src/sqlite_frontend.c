@@ -182,6 +182,35 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 }
 
 /**
+ * exportOneContact - exports one contact
+ */
+void exportOneContact(int selID, char *base){
+	printfunc(__func__);
+
+	char				*path = NULL;
+	char				*contactName = NULL;
+	char				*contactFile = NULL;
+	char				*contactCard = NULL;
+	GError 				*error = NULL;
+
+	path = g_strconcat(base, NULL);
+	if(g_chdir(path)){
+		return;
+	}
+
+	contactName = getSingleChar(appBase.db, "contacts", "displayname", 1, "contactID", selID, "", "", "", "", "", 0);
+	contactFile = g_strconcat(contactName, ".vcf", NULL);
+	contactCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
+	g_build_filename(contactFile, NULL);
+	g_file_set_contents(contactFile, contactCard, strlen(contactCard), &error);
+	printGError(error);
+
+	g_free(contactName);
+	g_free(contactFile);
+	g_free(contactCard);
+}
+
+/**
  * exportContacts - exports all contacts of a server
  */
 void exportContacts(sqlite3 *ptr, char *base){
