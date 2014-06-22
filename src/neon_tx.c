@@ -144,7 +144,7 @@ newCert:
 	setServerCert(appBase.db, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
-	free(dbDigest);
+	g_free(dbDigest);
 
 	return trust;
 }
@@ -167,7 +167,7 @@ int serverConnectionTest(int serverID){
 	if(davServer== NULL) return ret;
 
 	ne_uri_parse(davServer, &uri);
-	free(davServer);
+	g_free(davServer);
 	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
 
 	 if (ne_sock_init() != 0){
@@ -235,7 +235,7 @@ ne_session *serverConnect(int serverID){
 
 	ne_ssl_set_verify(sess, verifyCert, GINT_TO_POINTER(serverID));
 
-	free(davServer);
+	g_free(davServer);
 
 	return sess;
 }
@@ -313,8 +313,8 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
 		existingCtx = g_strdup(((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->content);
 		concat = g_strconcat(existingCtx, newCtx, NULL);
 		((ContactCards_node_t *)((GNode *)((ContactCards_stack_t *)userdata)->lastBranch)->data)->content = concat;
-		free(existingCtx);
-		free(newCtx);
+		g_free(existingCtx);
+		g_free(newCtx);
 	}
 
 	verboseCC("[%s]\t\t%s\n", __func__, newCtx);
@@ -789,12 +789,12 @@ failedRequest:
 	ne_request_destroy(req);
 	ne_buffer_destroy(req_buffer);
 	ne_xml_destroy(pXML);
-	free(davPath);
-	free(addrbookPath);
-	free(srvUrl);
-	free(davSyncToken);
-	free(oAuthSession);
-	free(ContactCardsIdent);
+	g_free(davPath);
+	g_free(addrbookPath);
+	g_free(srvUrl);
+	g_free(davSyncToken);
+	g_free(oAuthSession);
+	g_free(ContactCardsIdent);
 
 	return userdata;
 }
@@ -858,9 +858,9 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 		ret = OAUTH_UP2DATE;
 	}
 
-	free(oAuthGrant);
-	free(oAuthToken);
-	free(oAuthRefresh);
+	g_free(oAuthGrant);
+	g_free(oAuthToken);
+	g_free(oAuthRefresh);
 
 	return ret;
 }
@@ -919,8 +919,8 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 			break;
 	}
 
-	free(srvURI);
-	free(grant);
+	g_free(srvURI);
+	g_free(grant);
 
 	ne_close_connection(sess);
 	ne_session_destroy(sess);
@@ -995,12 +995,12 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 		responseHandle(stack, sess, ptr);
 		postURI = getSingleChar(ptr, "addressbooks", "postURI", 14, "cardServer", srvID, "", "", "", "", "addressbookID", addrBookID);
 		if(strlen(postURI) <= 1){
-			free(postURI);
+			g_free(postURI);
 			/* Without a URI, we can post to, we can't do anything so far	*/
 			return -1;
 		}
 	}
-	free(postURI);
+	g_free(postURI);
 
 	stack = serverRequest(DAV_REQ_POST_CONTACT, srvID, newID, sess, ptr);
 	ret = stack->statuscode;

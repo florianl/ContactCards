@@ -353,11 +353,11 @@ void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *se
 	if(syncToken != NULL){
 		dbSyncToken = getSingleChar(ptr, "addressbooks", "syncToken", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
 		if(strlen(dbSyncToken) == 1){
-			free(dbSyncToken);
+			g_free(dbSyncToken);
 			return;
 		}
 		if(!strncmp(syncToken, dbSyncToken, strlen(syncToken))){
-			free(dbSyncToken);
+			g_free(dbSyncToken);
 			return;
 		}
 		updateSyncToken(ptr, addressbookID, syncToken);

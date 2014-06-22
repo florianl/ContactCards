@@ -153,13 +153,13 @@ stepForward:
 	adr = g_strndup(tmp->str, tmp->len);
 
 	g_string_free(tmp, TRUE);
-	free(poBox);
-	free(extAdr);
-	free(str);
-	free(loc);
-	free(reg);
-	free(zip);
-	free(country);
+	g_free(poBox);
+	g_free(extAdr);
+	g_free(str);
+	g_free(loc);
+	g_free(reg);
+	g_free(zip);
+	g_free(country);
 
 stepEmpty:
 	return adr;
@@ -358,8 +358,8 @@ stepForward:
 
 	card = g_strndup(cardString->str, cardString->len);
 
-	free(firstN);
-	free(lastN);
+	g_free(firstN);
+	g_free(lastN);
 	g_string_free(cardString, TRUE);
 
 	return card;

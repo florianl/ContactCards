@@ -699,12 +699,12 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	}
 
 	g_slist_free(abList);
-	free(frameTitle);
-	free(user);
-	free(passwd);
-	free(issued);
-	free(issuer);
-	free(url);
+	g_free(frameTitle);
+	g_free(user);
+	g_free(passwd);
+	g_free(issued);
+	g_free(issuer);
+	g_free(url);
 }
 
 /**

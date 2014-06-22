@@ -627,8 +627,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	g_slist_free(list);
 	line++;
 
-	free(vData);
-	free(markup);
+	g_free(vData);
+	g_free(markup);
 
 	return card;
 }
@@ -1294,8 +1294,8 @@ void *syncOneServer(void *trans){
 		if(ret != OAUTH_UP2DATE){
 			gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 			g_mutex_unlock(&mutex);
-			free(srv);
-			free(msg);
+			g_free(srv);
+			g_free(msg);
 			return NULL;
 		}
 	}
@@ -1306,8 +1306,8 @@ void *syncOneServer(void *trans){
 
 	gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 
-	free(srv);
-	free(msg);
+	g_free(srv);
+	g_free(msg);
 	g_mutex_unlock(&mutex);
 
 	addressbookTreeUpdate();

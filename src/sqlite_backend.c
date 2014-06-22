@@ -557,7 +557,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 	g_mutex_unlock(&mutex);
 
-	free(davBase);
+	g_free(davBase);
 
 	return;
 }
@@ -831,7 +831,7 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 		/* If the href == basePath, then go on	*/
 		return;
 	}
-	free(basePath);
+	g_free(basePath);
 
 	if(countElements(ptr, "contacts", 123, "addressbookID", addressbookID, "etag", etag, "href", href) != 0){
 		return;
@@ -874,9 +874,9 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
-	free(basePath);
-	free(cardPath);
-	free(path);
+	g_free(basePath);
+	g_free(cardPath);
+	g_free(path);
 
 	newID = sqlite3_last_insert_rowid(ptr);
 
@@ -943,7 +943,7 @@ void setDisplayname(sqlite3 *ptr, int contactID, char *vData){
 		sql_query = sqlite3_mprintf("UPDATE contacts SET displayname = %Q WHERE contactID = '%d';", g_strstrip(displayName), contactID);
 	}
 	doSimpleRequest(ptr, sql_query, __func__);
-	free(displayName);
+	g_free(displayName);
 }
 
 /**
@@ -1011,10 +1011,10 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 	if(certSel == FALSE)
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
 
-	free(oldDesc);
-	free(oldUrl);
-	free(oldUser);
-	free(oldPw);
+	g_free(oldDesc);
+	g_free(oldUrl);
+	g_free(oldUser);
+	g_free(oldPw);
 }
 
 /**
@@ -1066,7 +1066,7 @@ void updateContact(sqlite3 *ptr, int contactID, char *vData){
 	if(strlen(dbData) == 1) return;
 
 	setDisplayname(ptr, contactID, dbData);
-	free(dbData);
+	g_free(dbData);
 }
 
 /**
@@ -1110,8 +1110,8 @@ void updateUri(sqlite3 *ptr, int serverID, char *new, gboolean force){
 	sql_query = sqlite3_mprintf("UPDATE cardServer SET srvUrl = %Q WHERE serverID = '%d';", uri, serverID);
 
 	doSimpleRequest(ptr, sql_query, __func__);
-	free(old);
-	free(uri);
+	g_free(old);
+	g_free(uri);
 }
 
 /**
@@ -1130,7 +1130,7 @@ gboolean checkSyncToken(sqlite3 *ptr, int addressbookID){
 		return FALSE;
 	}
 
-	free(syncToken);
+	g_free(syncToken);
 	return TRUE;
 }
 
