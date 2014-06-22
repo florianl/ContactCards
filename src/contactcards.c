@@ -19,6 +19,9 @@
 gboolean exitOnSignal(gpointer data){
 	printfunc(__func__);
 
+	/*	It doesn't work so far	*/
+	return FALSE;
+
 	dbClose(appBase.db);
 
 	sqlite3_mutex_free(dbMutex);
