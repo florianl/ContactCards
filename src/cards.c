@@ -373,8 +373,13 @@ static char *getAttributValue(char *line){
 
 	char				**elements = g_strsplit(line, ":", 2);
 	char				**element = elements;
+	char				*attr = NULL;
 
-	return g_strdup(element[1]);
+	attr = g_strdup(element[1]);
+
+	g_strfreev(elements);
+
+	return attr;
 }
 
 /**
