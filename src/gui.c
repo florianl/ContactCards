@@ -1785,12 +1785,21 @@ void guiInit(void){
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
+	GError				*error = NULL;
+	GdkPixbuf			*pixbuf;
 
 	gtk_init(NULL, NULL);
 
 	appBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(appBase.window), "ContactCards");
 	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 760,496);
+	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+	gtk_window_set_icon(GTK_WINDOW(appBase.window), pixbuf);
+	g_object_unref(pixbuf);
 
 	mainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
