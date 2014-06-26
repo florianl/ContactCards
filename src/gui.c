@@ -61,6 +61,15 @@ void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
 static void dialogAbout(void){
 	printfunc(__func__);
 
+	GError			*error = NULL;
+	GdkPixbuf		*pixbuf;
+
+	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_128.png", &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+
 	gtk_show_about_dialog(NULL,
 		"title", _("About ContactCards"),
 		"program-name", "ContactCards",
@@ -68,7 +77,10 @@ static void dialogAbout(void){
 		"website", "https://www.der-flo.net/contactcards/",
 		"license", "GNU General Public License, version 2\nhttp://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
 		"version", VERSION,
+		"logo", pixbuf,
 		NULL);
+
+	g_object_unref(pixbuf);
 }
 
 /**
