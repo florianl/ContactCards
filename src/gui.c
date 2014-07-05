@@ -514,6 +514,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			verboseCC("[%s] %s\n", __func__, error->message);
 		}
 		photo = gtk_image_new_from_pixbuf (pixbuf);
+		g_object_unref(pixbuf);
 	}
 	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
