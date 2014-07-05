@@ -1439,12 +1439,22 @@ void addressbookTreeUpdate(void){
 
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.addressbookList)));
+	/*	something is wrong	*/
+	if(store == NULL){
+		g_mutex_unlock(&aBookTreeMutex);
+		return;
+	}
+
 	gtk_tree_store_clear(store);
 
 	/* Insert new elements	*/
 	servers = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("All"), ID_COL, 0, TYP_COL, 0,  -1);
+	if(g_slist_length(servers) == 0){
+		g_mutex_unlock(&aBookTreeMutex);
+		return;
+	}
 	while(servers){
 		GSList				*next = servers->next;
 		int					serverID = GPOINTER_TO_INT(servers->data);
@@ -1618,6 +1628,11 @@ void contactsTreeUpdate(int type, int id){
 
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
+	/*	something is wrong	*/
+	if(store == NULL){
+		g_mutex_unlock(&contactsTreeMutex);
+		return;
+	}
 	gtk_tree_store_clear(store);
 	/* Insert new elements	*/
 	switch(type){
