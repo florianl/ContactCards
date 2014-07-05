@@ -1163,7 +1163,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 	GtkWidget					*card;
 	int							selID;
 
-	gtk_tree_model_get(model, iter, ID_COLUMN, &selID,  -1);
+	gtk_tree_model_get(model, iter, SELECTION_COLUMN, &selID,  -1);
 	verboseCC("[%s] %d\n",__func__, selID);
 	card = buildNewCard(appBase.db, selID);
 	gtk_widget_show_all(card);
