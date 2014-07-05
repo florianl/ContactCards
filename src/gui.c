@@ -524,6 +524,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	fn = gtk_label_new(NULL);
 	markup = g_markup_printf_escaped ("<span size=\"18000\"><b>%s</b></span>", getSingleCardAttribut(CARDTYPE_FN, vData));
 	gtk_label_set_markup (GTK_LABEL(fn), markup);
+	gtk_label_set_line_wrap(GTK_LABEL(fn), TRUE);
 	gtk_grid_attach_next_to(GTK_GRID(card), fn, photo, GTK_POS_RIGHT, 1, 1);
 
 	/*	BDAY	*/
