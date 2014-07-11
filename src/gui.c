@@ -1391,7 +1391,8 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
 		GtkWidget			*menu = NULL,
-							*menuItem = NULL;
+							*menuItem = NULL,
+							*menuItem2 = NULL;
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
@@ -1414,14 +1415,18 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				}
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)addressbookDel, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+				menuItem2 = gtk_menu_item_new_with_label(_("Add new contact"));
+				g_signal_connect(menuItem2, "activate", (GCallback)contactNew, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
 				break;
 		}
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
 		gtk_widget_show_all(menu);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
 	}
