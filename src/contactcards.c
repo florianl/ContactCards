@@ -14,25 +14,6 @@
 #include "contactcards.h"
 
 /**
- * exitOnSignal - simple try, to exit properly on a signal
- */
-gboolean exitOnSignal(gpointer data){
-	printfunc(__func__);
-
-	/*	It doesn't work so far	*/
-	return FALSE;
-
-	dbClose(appBase.db);
-
-	sqlite3_mutex_free(dbMutex);
-
-	g_mutex_clear(&mutex);
-	g_mutex_clear(&aBookTreeMutex);
-	g_mutex_clear(&contactsTreeMutex);
-	return TRUE;
-}
-
-/**
  * main - do I need to say more?
  */
 int main(int argc, char **argv){
@@ -47,11 +28,6 @@ int main(int argc, char **argv){
 	setlocale (LC_ALL, "");
 	bindtextdomain (PACKAGE, LOCALEDIR);
 	textdomain (PACKAGE);
-
-	/*	capture some signals	*/
-	g_unix_signal_add(SIGINT, exitOnSignal, NULL);
-	g_unix_signal_add(SIGTERM, exitOnSignal, NULL);
-	g_unix_signal_add(SIGHUP, exitOnSignal, NULL);
 
 	app = parseCmdLine(&argc, &argv);
 

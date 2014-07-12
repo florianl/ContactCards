@@ -25,6 +25,18 @@ void guiRun(sqlite3 *ptr){
 }
 
 /**
+ * exitOnSignal - simple try, to exit properly on a signal
+ */
+gboolean exitOnSignal(gpointer data){
+	printfunc(__func__);
+
+	gtk_main_quit();
+	g_slist_free_full(data, g_free);
+
+	return TRUE;
+}
+
+/**
  * guiExit - exit the basic GUI and clean up
  */
 void guiExit(GtkWidget *widget, gpointer data){
@@ -2091,6 +2103,11 @@ void guiInit(void){
 	appBase.statusbar 		= mainStatusbar;
 	appBase.syncMenu 		= syncMenu;
 	appBase.contactView		= scroll;
+
+	/*	capture some signals	*/
+	g_unix_signal_add(SIGINT, exitOnSignal, cleanUpList);
+	g_unix_signal_add(SIGTERM, exitOnSignal, cleanUpList);
+	g_unix_signal_add(SIGHUP, exitOnSignal, cleanUpList);
 
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
