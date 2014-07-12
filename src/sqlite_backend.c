@@ -886,6 +886,43 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 }
 
 /**
+ * newAddressbookTmp - creates a temporary address book
+ */
+int newAddressbookTmp(int srvID, char *name){
+	printfunc(__func__);
+
+	int				newID = 0;
+	int				ret = 0;
+	char		 	*sql_query;
+	sqlite3_stmt 	*vm;
+
+	sql_query = sqlite3_mprintf("INSERT INTO addressbooks (cardServer, displayname) VALUES ('%d','%q');", srvID, name);
+	doSimpleRequest(appBase.db, sql_query, __func__);
+
+	sql_query = sqlite3_mprintf("SELECT addressbookID FROM addressbooks ORDER BY addressbookID DESC LIMIT 1;"); 
+
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
+	ret = sqlite3_prepare_v2(appBase.db, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret != SQLITE_OK){
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(appBase.db), sqlite3_errmsg(appBase.db));
+		sqlite3_mutex_leave(dbMutex);
+		return 0;
+	}
+
+	while(sqlite3_step(vm) != SQLITE_DONE){
+			newID = sqlite3_column_int(vm, 0);
+	}
+
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
+
+	return newID;
+}
+
+/**
  * newAddressbook - create a new address book at the local database
  */
 void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path){

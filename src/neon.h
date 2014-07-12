@@ -213,6 +213,7 @@ extern void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int t
 extern int oAuthUpdate(sqlite3 *ptr, int serverID);
 extern int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID);
 extern int responseOAuthHandle(void *data, const char *block, size_t len);
+extern int serverCreateCollection(ne_session *sess, int srvID, char *colName);
 extern int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID);
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);

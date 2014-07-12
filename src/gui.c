@@ -478,6 +478,142 @@ static void cleanCard(GtkWidget *widget){
 }
 
 /**
+ * collectionCreate - Signalcallback to create a new collection
+ */
+static void collectionCreate(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	ContactCards_item_t		*data = trans;
+	char					*colName = NULL;
+	int						isOAuth = 0;
+	ne_session 				*sess = NULL;
+
+
+	if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(data->element)) == 0){
+		cleanCard(appBase.contactView);
+		g_free(data);
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to create an address book without a name"));
+		return;
+	}
+	colName = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(data->element)));
+
+	cleanCard(appBase.contactView);
+
+	g_mutex_lock(&mutex);
+
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", data->itemID, "", "", "", "");
+	if(isOAuth){
+		int 		ret = 0;
+		ret = oAuthUpdate(appBase.db,  data->itemID);
+		if(ret != OAUTH_UP2DATE){
+			g_mutex_unlock(&mutex);
+			g_free(data);
+			g_free(colName);
+			return;
+		}
+	}
+
+	sess = serverConnect(data->itemID);
+	serverCreateCollection(sess, data->itemID, colName);
+	serverDisconnect(sess, appBase.db, data->itemID);
+	addressbookTreeUpdate();
+
+	g_mutex_unlock(&mutex);
+
+	g_free(data);
+	g_free(colName);
+}
+
+/**
+ * collectionDiscard - Signalcallback to delete obsolete stuff
+ */
+static void collectionDiscard(GtkWidget *widget, gpointer trans){
+	printfunc(__func__);
+
+	ContactCards_item_t		*data = trans;
+
+	cleanCard(appBase.contactView);
+
+	g_free(data);
+
+}
+
+/**
+ * createNewCollectionCard - Frontend for the user to create a new collection
+ */
+static GtkWidget *createNewCollectionCard(int srvID){
+	printfunc(__func__);
+
+	GtkWidget				*collection;
+	GtkWidget				*discardBtn, *saveBtn, *row;
+	GtkWidget				*label, *input;
+	GtkEntryBuffer			*colNameBuf;
+	int						line = 1;
+	char					*markup;
+	ContactCards_item_t		*transCol = NULL;
+
+	transCol = g_new(ContactCards_item_t, 1);
+
+	collection = gtk_grid_new();
+
+	gtk_widget_set_hexpand(GTK_WIDGET(collection), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(collection), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(collection), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(collection), GTK_ALIGN_START);
+
+	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+
+	discardBtn = gtk_button_new_with_label(_("Discard"));
+	saveBtn = gtk_button_new_with_label(_("Save"));
+	gtk_box_pack_end(GTK_BOX(row), discardBtn, FALSE, FALSE, 1);
+	gtk_box_pack_end(GTK_BOX(row), saveBtn, FALSE, FALSE, 1);
+	gtk_grid_attach(GTK_GRID(collection), row, 0, line++, 3, 1);
+
+	colNameBuf = gtk_entry_buffer_new(NULL, -1);
+
+	line++;
+	label = gtk_label_new(NULL);
+	markup =  g_markup_printf_escaped ("<span size=\"18000\"><b>Create new address book</b></span>");
+	gtk_label_set_markup (GTK_LABEL(label), markup);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+	gtk_grid_attach(GTK_GRID(collection), label, 0, line++, 2, 1);
+	line++;
+
+	label = gtk_label_new(_("Address book name"));
+	input = gtk_entry_new_with_buffer(colNameBuf);
+	gtk_grid_attach(GTK_GRID(collection), label, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(collection), input, 1, line++, 2, 1);
+
+	transCol->itemID = srvID;
+	transCol->element = colNameBuf;
+
+	/*		Connect Signales		*/
+	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(collectionCreate), transCol);
+	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(collectionDiscard), transCol);
+
+	return collection;
+}
+
+/**
+ * createNewCollection - Callback from popup-menu to create a new collection
+ */
+void createNewCollection(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	int				srvID = 0;
+	GtkWidget		*collection;
+
+	srvID = GPOINTER_TO_INT(data);
+	verboseCC("[%s] new collection on %d\n", __func__, srvID);
+
+	collection = createNewCollectionCard(srvID);
+	gtk_widget_show_all(collection);
+	cleanCard(appBase.contactView);
+	gtk_container_add(GTK_CONTAINER(appBase.contactView), collection);
+
+}
+
+/**
  * buildNewCard - display the data of a selected vCard
  */
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
@@ -1405,16 +1541,16 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 
 		switch(typ){
 			case 0:		/*	server	*/
-				return;
-				/*	Creating new address books isn't supported so far	*/
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
 				if(flags & DAV_OPT_MKCOL){
 					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
 				} else {
+					verboseCC("[%s] %d doesn't support MKCOL\n", __func__, selID);
 					break;
 				}
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
+				g_signal_connect(menuItem, "activate", (GCallback)createNewCollection, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
 				break;
 			case 1:		/* address book	*/

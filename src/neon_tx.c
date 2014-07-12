@@ -953,6 +953,41 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
 }
 
 /**
+ * serverCreateCollection - create a new address book
+ */
+int serverCreateCollection(ne_session *sess, int srvID, char *colName){
+	printfunc(__func__);
+
+	ContactCards_stack_t		*stack;
+	int 						ret = 0;
+	int							newID = 0;
+
+	newID = newAddressbookTmp(srvID, colName);
+
+	stack = serverRequest(DAV_REQ_NEW_COLLECTION, srvID, newID, sess, appBase.db);
+
+	ret = stack->statuscode;
+	g_free(stack);
+
+	switch(ret){
+		case 200 ... 207:
+			debugCC("[%s] address book created successfully\n", __func__);
+			break;
+		default:
+			debugCC("[%s] something went wrong: %d\n", __func__, ret);
+	}
+
+	dbRemoveItem(appBase.db, "addressbooks", 2, "", "", "addressbookID", newID);
+
+	/*	Get the latest address books from the server	*/
+	stack = serverRequest(DAV_REQ_ADDRBOOKS, srvID, 0, sess, appBase.db);
+	responseHandle(stack, sess, appBase.db);
+	g_free(stack);
+
+	return ret;
+}
+
+/**
  * serverDelCollection - delete a address book from a server
  */
 int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
