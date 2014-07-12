@@ -794,8 +794,8 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 
 	card = buildNewCard(((ContactCards_add_t *)trans)->db, ((ContactCards_add_t *)trans)->editID);
 	gtk_widget_show_all(card);
-	cleanCard(((ContactCards_add_t *)trans)->grid);
-	gtk_container_add(GTK_CONTAINER(((ContactCards_add_t *)trans)->grid), card);
+	cleanCard(appBase.contactView);
+	gtk_container_add(GTK_CONTAINER(appBase.contactView), card);
 
 	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
 	g_free(trans);
@@ -881,7 +881,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
 		return;
 	}
-	cleanCard(((ContactCards_add_t *)trans)->grid);
+	cleanCard(appBase.contactView);
 	thread = g_thread_try_new("pushing vCard", pushingCard, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
@@ -953,7 +953,6 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	}
 
 	transNew->db = ptr;
-	transNew->grid = card;
 	transNew->list = items;
 	transNew->editID = selID;
 	if(!abID)

@@ -120,7 +120,6 @@ typedef struct ContactCards_pix {
  */
 typedef struct ContactCards_add {
 	sqlite3				*db;
-	GtkWidget			*grid;
 	GSList				*list;
 	int					editID;
 	int					aID;
