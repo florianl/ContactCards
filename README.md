@@ -6,6 +6,8 @@ ContactCards is a simple address book written in C.
 vCards are safed  in a local database and fetched from a remote server using the
 cardDav protocoll.
 
+[Bugtracker](https://github.com/florianl/ContactCards/issues)
+
 Requirements
 ------------
 
