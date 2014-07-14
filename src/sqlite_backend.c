@@ -1343,12 +1343,16 @@ void handleServerOptions(char *val, int serverID){
 			flags |= DAV_OPT_DELETE;
 		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "mkcol") == 0){
 			flags |= DAV_OPT_MKCOL;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "extended-mkcol") == 0){
+			flags |= DAV_OPT_MKCOL;
 		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "proppatch") == 0){
 			flags |= DAV_OPT_PROPPATCH;
 		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "move") == 0){
 			flags |= DAV_OPT_MOVE;
 		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "report") == 0){
 			flags |= DAV_OPT_REPORT;
+		} else if(g_strcmp0(g_ascii_strdown(item, strlen(item)), "addressbook") == 0){
+			flags |= DAV_OPT_ADDRESSBOOK;
 		} else {
 			debugCC("[%s] %s\n", __func__, item);
 		}

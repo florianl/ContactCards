@@ -42,7 +42,7 @@
 /*
  * Server Options
  */
-#define	DAV_OPT_MASK					0xFE0
+#define	DAV_OPT_MASK					0xFF0
 #define	DAV_OPT_POST					0x800
 #define	DAV_OPT_PUT						0x400
 #define	DAV_OPT_DELETE					0x200
@@ -50,6 +50,7 @@
 #define	DAV_OPT_PROPPATCH				0x080
 #define	DAV_OPT_MOVE					0x040
 #define	DAV_OPT_REPORT					0x020
+#define	DAV_OPT_ADDRESSBOOK				0x010
 
 /*
  * Request-Methods
