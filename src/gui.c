@@ -154,12 +154,23 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 	GtkListStore		*store;
 	GtkWidget			*dialog;
 	int					selID, addrID, srvID;
+	int					flag = 0;
 	ne_session 			*sess = NULL;
 	gint 				resp;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		int				isOAuth = 0;
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
+
+		addrID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
+		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "", "", "");
+
+		flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+		if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+			feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
+			return;
+		}
+
 		verboseCC("[%s] %d\n",__func__, selID);
 
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
@@ -169,8 +180,6 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		if (resp != GTK_RESPONSE_YES) return;
 
 		g_mutex_lock(&mutex);
-		addrID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
-		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "", "", "");
 
 		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
@@ -500,7 +509,6 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
 	int						isOAuth = 0;
 	ne_session 				*sess = NULL;
 
-
 	if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(data->element)) == 0){
 		cleanCard(appBase.contactView);
 		g_free(data);
@@ -614,9 +622,16 @@ void createNewCollection(GtkMenuItem *menuitem, gpointer data){
 
 	int				srvID = 0;
 	GtkWidget		*collection;
+	int				flag = 0;
 
 	srvID = GPOINTER_TO_INT(data);
 	verboseCC("[%s] new collection on %d\n", __func__, srvID);
+
+	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
+		return;
+	}
 
 	collection = createNewCollectionCard(srvID);
 	gtk_widget_show_all(collection);
@@ -1208,6 +1223,8 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 						selTyp = 0;
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
+	int					srvID	= 0,
+						flag	= 0;
 
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
@@ -1218,6 +1235,13 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 
 	if(abID == 0 || selTyp == 0){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no address book selected."));
+		return;
+	}
+
+	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
+	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
 
@@ -1236,12 +1260,23 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 	GtkTreeModel		*model;
 	GtkWidget			*editCard;
 	int					selID;
+	int					flag 	= 0,
+						abID 	= 0,
+						srvID 	= 0;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected to edit."));
+		return;
+	}
+
+	abID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
+	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
+	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
 
@@ -1488,8 +1523,17 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	ne_session 			*sess = NULL;
 	int 				resp;
 	int					isOAuth = 0;
+	int					flag = 0;
 
 	aID = GPOINTER_TO_INT(data);
+
+	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
+
+	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
+		return;
+	}
 
 	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this address book?"));
 
@@ -1500,7 +1544,6 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	if (resp != GTK_RESPONSE_YES) return;
 
 	g_mutex_lock(&mutex);
-	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
 
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
@@ -1531,6 +1574,7 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 	int					selID;
 	int					typ;
 	int 				flags = 0;
+	int					srvID = 0;
 
 	/*	right mouse button	*/
 	if(event->button.button != 3)
@@ -1559,6 +1603,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 					verboseCC("[%s] %d doesn't support MKCOL\n", __func__, selID);
 					break;
 				}
+				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
+					break;
+				}
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)createNewCollection, GINT_TO_POINTER(selID));
@@ -1566,6 +1613,11 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
+				srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", selID, "", "", "", "");
+				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
+					break;
+				}
 				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)addressbookDel, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
@@ -1702,6 +1754,9 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 	int					selID;
+	int					abID	= 0,
+						srvID	= 0,
+						flag	= 0;
 
 	/*	right mouse button	*/
 	if(event->button.button != 3)
@@ -1717,12 +1772,17 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 		verboseCC("[%s] %d\n",__func__, selID);
 
 		menu = gtk_menu_new();
-		delItem = gtk_menu_item_new_with_label(_("Delete"));
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), delItem);
-		g_signal_connect(delItem, "activate", (GCallback)contactDelcb, NULL);
-		editItem = gtk_menu_item_new_with_label(_("Edit"));
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), editItem);
-		g_signal_connect(editItem, "activate", (GCallback)contactEditcb, NULL);
+		abID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
+		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
+		flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+		if(flag & ~CONTACTCARDS_ONE_WAY_SYNC){
+			delItem = gtk_menu_item_new_with_label(_("Delete"));
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), delItem);
+			g_signal_connect(delItem, "activate", (GCallback)contactDelcb, NULL);
+			editItem = gtk_menu_item_new_with_label(_("Edit"));
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), editItem);
+			g_signal_connect(editItem, "activate", (GCallback)contactEditcb, NULL);
+		}
 		exportItem = gtk_menu_item_new_with_label(_("Export"));
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), exportItem);
 		g_signal_connect(exportItem, "activate", (GCallback)contactExportcb, NULL);

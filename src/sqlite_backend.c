@@ -126,7 +126,7 @@ void dbCreate(sqlite3 *ptr){
 
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS cardServer( \
 	serverID INTEGER PRIMARY KEY AUTOINCREMENT,\
-	flags INTEGER default 0, \
+	flags INTEGER default 2, \
 	desc TEXT,\
 	user TEXT, \
 	passwd TEXT, \
@@ -1025,15 +1025,25 @@ stepForward:
 /**
  * updateServerDetails - update changes to the server settings
  */
-void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel){
+void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel){
 	printfunc(__func__);
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
+	int					flag = 0;
 
 	oldDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUrl = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldPw =  getSingleChar(ptr, "cardServer", "passwd", 1, "serverID", srvID, "", "", "", "", "", 0);
+
+	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+
+	if(syncSel == FALSE){
+		flag &= ~CONTACTCARDS_ONE_WAY_SYNC;
+	} else {
+		flag |= CONTACTCARDS_ONE_WAY_SYNC;
+	}
+	setSingleInt(appBase.db, "cardServer", "flags", flag, "serverID", srvID);
 
 	if(g_strcmp0(oldDesc, newDesc))
 		setSingleChar(ptr, "cardServer", "desc", (char *) newDesc, "serverID", srvID);
@@ -1043,10 +1053,11 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleChar(ptr, "cardServer", "user", (char *) newUser, "serverID", srvID);
 	if(g_strcmp0(oldPw, newPw))
 		setSingleChar(ptr, "cardServer", "passwd", (char *) newPw, "serverID", srvID);
-	if(certSel == TRUE)
+	if(certSel == TRUE){
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
-	if(certSel == FALSE)
+	} else {
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_UNTRUSTED, "serverID", srvID);
+	}
 
 	g_free(oldDesc);
 	g_free(oldUrl);

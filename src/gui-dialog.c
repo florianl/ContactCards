@@ -498,7 +498,8 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 	updateAddressbooks(appBase.db, buffers->aBooks);
 	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
-						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)));
+						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)),
+						gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)));
 	addressbookTreeUpdate();
 }
 
@@ -668,6 +669,15 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
+
+		res = 0;
+		res = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
+		if(res & CONTACTCARDS_ONE_WAY_SYNC){
+			gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), TRUE);
+		} else {
+			gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), FALSE);
+		}
+
 		abList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
 
 		/* Flush the list box before adding new items	*/
@@ -738,7 +748,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkWidget			*vbox, *hbox, *abbox;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
-	GtkWidget			*digSwitch;
+	GtkWidget			*digSwitch, *uploadSwitch;
 	GtkWidget			*sep;
 	GtkWidget			*ablist;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
@@ -829,10 +839,23 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Trust Certificate?"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	digSwitch = gtk_switch_new();
 	gtk_box_pack_start(GTK_BOX(hbox), digSwitch, FALSE, TRUE, 2);
+	label = gtk_label_new(_("Trust Certificate?"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("One-Way-Sync"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	uploadSwitch = gtk_switch_new();
+	gtk_box_pack_start(GTK_BOX(hbox), uploadSwitch, FALSE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -875,6 +898,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->issuerBuf = issuer;
 	buffers->srvPrefList = serverPrefList;
 	buffers->certSel = digSwitch;
+	buffers->syncSel = uploadSwitch;
 	buffers->listbox = ablist;
 	buffers->aBooks = aBooks;
 

@@ -94,6 +94,7 @@ typedef struct ContactCards_pref {
 	GtkEntryBuffer		*issuerBuf;
 	GtkWidget			*srvPrefList;
 	GtkWidget			*certSel;
+	GtkWidget			*syncSel;
 	GtkWidget			*listbox;
 	GSList				*aBooks;
 	int					srvID;
