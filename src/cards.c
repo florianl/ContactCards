@@ -40,7 +40,7 @@ static char *getUID(void){
 
 /**
  * buildAdr - create the address field of a vCard
- * 
+ *
  * RFC 2426 - 3.2.1 ADR Type Definition:
  *
  * The structured type value corresponds, in sequence, to
@@ -591,12 +591,12 @@ char *getSingleCardAttribut(int type, char *card){
 			case CARDTYPE_FN:
 				if(g_str_has_prefix(*line, "FN"))
 					goto getValue;
-				else 
+				else
 					goto next;
 			case CARDTYPE_N:
 				if(g_str_has_prefix(*line, "N:"))
 					goto getValue;
-				else 
+				else
 					goto next;
 			case CARDTYPE_UID:
 				if(g_str_has_prefix(*line, "UID"))
@@ -1057,4 +1057,66 @@ stepForward:
 	g_string_free(cmp, FALSE);
 
 	return old;
+}
+
+/**
+ * validateCard - validates a single vCard
+ */
+char *validateCard(char *card){
+	printfunc(__func__);
+
+	char			*vcf = NULL;
+	char			**lines = g_strsplit(card, "\n", -1);
+	char			**line = lines;
+	gboolean		valid = TRUE;
+
+	if(*line != NULL){
+		if(g_str_has_prefix(*line, "BEGIN:VCARD")){
+			line++;
+		} else{
+			valid = FALSE;
+			g_strfreev(lines);
+			return vcf;
+		}
+	} else {
+		valid = FALSE;
+		g_strfreev(lines);
+		return vcf;
+	}
+
+	while(*line != NULL){
+		debugCC("%s\n", *line);
+		line++;
+	}
+	g_strfreev(lines);
+
+	if(valid == TRUE){
+		/*	Append END:VCARD back to the to string after it was lost at g_strsplit()	*/
+		vcf = g_strconcat (card, "END:VCARD\r\n", NULL);
+	}
+
+	return vcf;
+}
+
+/**
+ * validateFile - returns a list of valid vCards
+ */
+GSList *validateFile(char *content){
+	printfunc(__func__);
+
+	GSList				*list = g_slist_alloc();
+	char				**cards = g_strsplit(content, "END:VCARD\n", -1);
+	char				**card = cards;
+
+	while(*card != NULL){
+		char		*new = NULL;
+		new = validateCard(*card);
+		if(new != NULL){
+			list = g_slist_append(list, new);
+		}
+		card++;
+	}
+	g_strfreev(cards);
+
+	return list;
 }

@@ -34,8 +34,7 @@ typedef struct ContactCardsGuiBase{
 	GtkWidget	*addressbookList;
 	GtkWidget	*contactList;
 	GtkWidget	*contactView;
-}
-ContactCardsGuiBase;
+}ContactCardsGuiBase;
 
 ContactCardsGuiBase appBase;
 

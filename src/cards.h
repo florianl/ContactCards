@@ -109,5 +109,6 @@ extern char *getSingleCardAttribut(int type, char *card);
 extern GSList *getMultipleCardAttribut(int type, char *card);
 extern ContactCards_pix_t *getCardPhoto(char *card);
 extern char *mergeCards(GSList *new, char *old);
+extern GSList *validateFile(char *content);
 
 #endif	/*	cards_H		*/

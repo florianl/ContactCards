@@ -1513,6 +1513,68 @@ void *syncOneServer(void *trans){
 }
 
 /**
+ * importVCF - context menu callback to import vCards
+ */
+static void importVCF(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	GtkWidget			*chooser;
+	GError				*error = NULL;
+	gboolean			read = FALSE;
+	GSList				*cards;
+	char				*filename=NULL;
+	char				*content = NULL;
+	int					aID = 0,
+						srvID = 0;
+	int					result = 0;
+
+	aID = GPOINTER_TO_INT(data);
+
+	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
+
+	debugCC("[%s] aID: %d\tsrvID: %d\n", __func__, aID, srvID);
+
+	chooser = gtk_file_chooser_dialog_new (_("Open *.vcf"),
+											GTK_WINDOW (appBase.window),
+											GTK_FILE_CHOOSER_ACTION_OPEN,
+											_("_Cancel"),
+											GTK_RESPONSE_CANCEL,
+											_("_Import"),
+											GTK_RESPONSE_OK,
+											NULL);
+
+	result = gtk_dialog_run (GTK_DIALOG (chooser));
+
+	switch(result){
+		case GTK_RESPONSE_OK:
+			filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (chooser));
+			break;
+		default:
+			break;
+	}
+
+	gtk_widget_destroy (chooser);
+
+	if(filename == NULL)
+		return;
+
+	read = g_file_get_contents(filename, &content, NULL, &error);
+	if(read != TRUE){
+		verboseCC("[%s] %s\n", __func__, error->message);
+		g_free(filename);
+		g_free(content);
+		return;
+	}
+
+	cards = validateFile(content);
+	g_slist_free_full(cards, g_free);
+
+	g_free(filename);
+	g_free(content);
+	return;
+}
+
+/**
  * addressbookDel - delete an address book from the server
  */
 static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
@@ -1583,7 +1645,8 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList))), &model, &iter)) {
 		GtkWidget			*menu = NULL,
 							*menuItem = NULL,
-							*menuItem2 = NULL;
+							*menuItem2 = NULL,
+							*menuItem3 = NULL;
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
@@ -1624,6 +1687,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem2 = gtk_menu_item_new_with_label(_("Add new contact"));
 				g_signal_connect(menuItem2, "activate", (GCallback)contactNew, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
+				menuItem3 = gtk_menu_item_new_with_label(_("Import *.vcf"));
+				g_signal_connect(menuItem3, "activate", (GCallback)importVCF, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
 				break;
 		}
 		gtk_widget_show_all(menu);
