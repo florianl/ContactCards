@@ -567,6 +567,8 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 		gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
 		abList = next;
 	}
+	g_slist_free(abList);
+
 
 	return;
 }

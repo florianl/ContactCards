@@ -852,8 +852,8 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	g_slist_free(future);
-	g_slist_free(present);
+	g_slist_free_full(future, g_free);
+	g_slist_free_full(present, g_free);
 
 	/*	Url	*/
 	present = getMultipleCardAttribut(CARDTYPE_URL, old);
@@ -872,8 +872,8 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	g_slist_free(future);
-	g_slist_free(present);
+	g_slist_free_full(future, g_free);
+	g_slist_free_full(present, g_free);
 
 	/*	EMail	*/
 	present = getMultipleCardAttribut(CARDTYPE_EMAIL, old);
@@ -892,8 +892,8 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	g_slist_free(future);
-	g_slist_free(present);
+	g_slist_free_full(future, g_free);
+	g_slist_free_full(present, g_free);
 
 	/*	Postal Address	*/
 	present = getMultipleCardAttribut(CARDTYPE_ADR, old);
@@ -912,8 +912,8 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	g_slist_free(future);
-	g_slist_free(present);
+	g_slist_free_full(future, g_free);
+	g_slist_free_full(present, g_free);
 
 	/*	Note	*/
 	present = getMultipleCardAttribut(CARDTYPE_NOTE, old);
@@ -932,8 +932,8 @@ char *mergeMultipleItems(char *old, char *new){
 				present = next;
 		}
 	}
-	g_slist_free(future);
-	g_slist_free(present);
+	g_slist_free_full(future, g_free);
+	g_slist_free_full(present, g_free);
 
 	data = g_string_new(NULL);
 	data = g_string_assign(data, old);

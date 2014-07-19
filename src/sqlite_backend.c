@@ -1214,7 +1214,10 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				 * get the latest content of each address book
 				 */
 				syncType = getSingleInt(ptr, "addressbooks", "syncMethod", 1, "addressbookID", addressbookID, "", "", "", "");
-				if(syncType == -1) return;
+				if(syncType == -1){
+					g_slist_free(retList);
+					return;
+				}
 				if(syncType & (1<<DAV_ADDRBOOK_DONT_SYNC)){
 					goto nextBoook;
 				}
@@ -1230,6 +1233,7 @@ void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess){
 				break;
 			default:
 				verboseCC("[%s] can't handle this number: %d\n", __func__, type);
+				g_slist_free(retList);
 				return;
 		}
 		responseHandle(stack, sess, ptr);

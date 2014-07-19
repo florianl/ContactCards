@@ -714,7 +714,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				list = next;
 		}
 	}
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 	line++;
 
 	/*	Phone	*/
@@ -735,7 +735,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				list = next;
 		}
 	}
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 	line++;
 
 	/*	EMAIL	*/
@@ -759,7 +759,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				list = next;
 		}
 	}
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 	line++;
 
 	/*	URL	*/
@@ -781,7 +781,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				list = next;
 		}
 	}
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 	line++;
 
 	/*	Note	*/
@@ -802,7 +802,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				list = next;
 		}
 	}
-	g_slist_free(list);
+	g_slist_free_full(list, g_free);
 	line++;
 
 	g_free(vData);
@@ -1060,7 +1060,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	transPhone->grid = card;
 	transPhone->list = items;
@@ -1087,7 +1087,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	line++;
 
@@ -1111,7 +1111,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	transEMail->grid = card;
 	transEMail->list = items;
@@ -1138,7 +1138,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	transUrl->grid = card;
 	transUrl->list = items;
@@ -1165,7 +1165,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	transIM->grid = card;
 	transIM->list = items;
@@ -1192,7 +1192,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 					list = next;
 			}
 		}
-		g_slist_free(list);
+		g_slist_free_full(list, g_free);
 	}
 	transNote->grid = card;
 	transNote->list = items;
