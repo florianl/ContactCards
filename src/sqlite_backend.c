@@ -867,6 +867,9 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 
 	basePath = getSingleChar(ptr, "addressbooks", "path", 1, "addressbookID", addressbookID, "", "", "", "", "", 0);
 	cardPath = getSingleCardAttribut(CARDTYPE_UID, card);
+	if(!cardPath){
+		cardPath = getUID();
+	}
 
 	path = g_strconcat(g_strstrip(basePath), g_strstrip(cardPath), ".vcf", NULL);
 
