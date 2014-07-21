@@ -19,7 +19,7 @@
  * Based on the comment by Andrew Moore on
  * http://www.php.net/manual/en/function.uniqid.php#94959
  */
-static char *getUID(void){
+char *getUID(void){
 	printfunc(__func__);
 
 	char		*uid = NULL;
