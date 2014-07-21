@@ -1068,10 +1068,14 @@ char *validateCard(char *card){
 	char			*vcf = NULL;
 	char			**lines = g_strsplit(card, "\n", -1);
 	char			**line = lines;
-	gboolean		valid = TRUE;
+	unsigned int	valid = 0;
+
+	/*	The last END:VCARD was lost at g_strsplit() in validateFile()	*/
+	valid ^= HAVE_END;
 
 	if(*line != NULL){
-		if(g_str_has_prefix(*line, "BEGIN:VCARD")){
+		if(g_str_has_prefix(*line, "BEGIN:")){
+			valid ^= HAVE_BEGIN;
 			line++;
 		} else{
 			valid = FALSE;
@@ -1085,12 +1089,28 @@ char *validateCard(char *card){
 	}
 
 	while(*line != NULL){
-		debugCC("%s\n", *line);
+		if(g_str_has_prefix(*line, "BEGIN:")){
+			valid ^= HAVE_BEGIN;
+			goto next;
+		}
+		if(g_str_has_prefix(*line, "FN:")){
+			valid ^= HAVE_FN;
+			goto next;
+		}
+		if(g_str_has_prefix(*line, "VERSION:")){
+			valid ^= HAVE_VERSION;
+			goto next;
+		}
+		if(g_str_has_prefix(*line, "END:")){
+			valid ^= HAVE_END;
+			goto next;
+		}
+next:
 		line++;
 	}
 	g_strfreev(lines);
 
-	if(valid == TRUE){
+	if(valid & MUST_BE_MASK){
 		/*	Append END:VCARD back to the to string after it was lost at g_strsplit()	*/
 		vcf = g_strconcat (card, "END:VCARD\r\n", NULL);
 	}

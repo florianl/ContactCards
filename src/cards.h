@@ -15,6 +15,16 @@
 #define	cards_H
 
 /*
+ *	To Have and Have Not
+ *	According to RFC 6350
+ */
+#define	MUST_BE_MASK			0xF
+#define	HAVE_BEGIN				0x1
+#define	HAVE_FN					0x2
+#define	HAVE_VERSION			0x4
+#define	HAVE_END				0x8
+
+/*
  *	GENERAL TYPES
  */
 #define	CARDTYPE_BEGIN			11
