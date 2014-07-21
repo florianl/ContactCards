@@ -1020,7 +1020,7 @@ int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID)
 /**
  * postPushCard - send a new vCard using RFC 5995
  */
-int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID, int oldID){
+int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID, int oldID, int existing){
 	printfunc(__func__);
 
 	char					*postURI = NULL;
@@ -1047,7 +1047,9 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 	switch(ret){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
-			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			if(existing){
+				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			}
 			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
@@ -1099,7 +1101,9 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	switch(ret){
 		case 201:
 			verboseCC("[%s] 201\n", __func__);
-			dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			if(existing){
+				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
+			}
 			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
 		case 204:
 			verboseCC("[%s] going to get the new vCars\n", __func__);
@@ -1108,7 +1112,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 			break;
 		case 400:
 			/* Try the way RFC 5995 describes	*/
-			if(postPushCard(ptr, sess, srvID, addrBookID, newID, oldID) != 1){
+			if(postPushCard(ptr, sess, srvID, addrBookID, newID, oldID, existing) != 1){
 				ret = -1;
 			} else {
 				ret = 1;
