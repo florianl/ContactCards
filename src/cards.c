@@ -1110,7 +1110,7 @@ next:
 	}
 	g_strfreev(lines);
 
-	if(valid & MUST_BE_MASK){
+	if(valid == MUST_BE_MASK){
 		/*	Append END:VCARD back to the to string after it was lost at g_strsplit()	*/
 		vcf = g_strconcat (card, "END:VCARD\r\n", NULL);
 	}
