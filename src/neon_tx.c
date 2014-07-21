@@ -1061,7 +1061,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 }
 
 /**
- * postPushCard - send a new vCard to a server
+ * pushCard - send a new vCard to a server
  */
 int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 	printfunc(__func__);
