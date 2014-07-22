@@ -535,7 +535,18 @@ sendAgain:
 		 * request to push a new contact to the server
 		 */
 		case DAV_REQ_PUT_NEW_CONTACT:
+			{
+			char			*vCard = NULL;
+			davPath = getSingleChar(ptr, "contacts", "href", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(davPath == NULL) goto failedRequest;
+			vCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", itemID, "", "", "", "", "", 0);
+			if(vCard == NULL) goto failedRequest;
+			req = ne_request_create(sess, "PUT", davPath);
+			ne_add_request_header(req, "Content-Type", "text/vcard");
 			ne_add_request_header(req, "If-None-Match", "*");
+			ne_buffer_concat(req_buffer, vCard, NULL);
+			}
+			break;
 		case DAV_REQ_PUT_CONTACT:
 			{
 			char			*vCard = NULL;

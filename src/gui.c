@@ -1524,15 +1524,12 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 	GSList				*cards;
 	char				*filename=NULL;
 	char				*content = NULL;
-	int					aID = 0,
-						srvID = 0;
+	int					aID = 0;
 	int					result = 0;
 
 	aID = GPOINTER_TO_INT(data);
 
-	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
-
-	debugCC("[%s] aID: %d\tsrvID: %d\n", __func__, aID, srvID);
+	debugCC("[%s] aID: %d\n", __func__, aID);
 
 	chooser = gtk_file_chooser_dialog_new (_("Open *.vcf"),
 											GTK_WINDOW (appBase.window),
@@ -1567,6 +1564,17 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 	}
 
 	cards = validateFile(content);
+	g_mutex_lock(&mutex);
+	while(cards){
+		GSList				*next = cards->next;
+		if(cards->data == NULL){
+			cards = next;
+			continue;
+		}
+		pushCard(appBase.db, g_strstrip(cards->data), aID, 0, 0);
+		cards = next;
+	}
+	g_mutex_unlock(&mutex);
 	g_slist_free_full(cards, g_free);
 
 	g_free(filename);
