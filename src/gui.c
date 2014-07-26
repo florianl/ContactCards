@@ -1512,6 +1512,30 @@ void *syncOneServer(void *trans){
 	return NULL;
 }
 
+void *importCards(void *trans){
+	printfunc(__func__);
+
+	ContactCards_item_t		*data = trans;
+	int						aID = data->itemID;
+	GSList					*cards = data->element;
+
+	g_mutex_lock(&mutex);
+	while(cards){
+		GSList				*next = cards->next;
+		if(cards->data == NULL){
+			cards = next;
+			continue;
+		}
+		pushCard(appBase.db, g_strstrip(cards->data), aID, 0, 0);
+		cards = next;
+	}
+	g_mutex_unlock(&mutex);
+	g_slist_free_full(cards, g_free);
+	g_free(data);
+
+	return NULL;
+}
+
 /**
  * importVCF - context menu callback to import vCards
  */
@@ -1526,6 +1550,10 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 	char				*content = NULL;
 	int					aID = 0;
 	int					result = 0;
+	GThread						*thread;
+	ContactCards_item_t			*trans = NULL;
+
+	trans = g_new(ContactCards_item_t, 1);
 
 	aID = GPOINTER_TO_INT(data);
 
@@ -1564,18 +1592,16 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 	}
 
 	cards = validateFile(content);
-	g_mutex_lock(&mutex);
-	while(cards){
-		GSList				*next = cards->next;
-		if(cards->data == NULL){
-			cards = next;
-			continue;
-		}
-		pushCard(appBase.db, g_strstrip(cards->data), aID, 0, 0);
-		cards = next;
+
+	trans->itemID = aID;
+	trans->element = cards;
+
+	thread = g_thread_try_new("syncingServer", importCards, trans, &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong with threads\n", __func__);
+		verboseCC("%s\n", error->message);
 	}
-	g_mutex_unlock(&mutex);
-	g_slist_free_full(cards, g_free);
+	g_thread_unref(thread);
 
 	g_free(filename);
 	g_free(content);
