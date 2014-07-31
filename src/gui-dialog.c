@@ -495,6 +495,11 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
+	if(validateUrl((char *)gtk_entry_buffer_get_text(buffers->urlBuf)) == FALSE){
+		feedbackDialog(GTK_MESSAGE_ERROR, _("Seems like that is not a valid URL"));
+		return;
+	}
+
 	updateAddressbooks(appBase.db, buffers->aBooks);
 	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
