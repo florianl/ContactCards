@@ -43,11 +43,13 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 
 /**
  * validateUrl -checks if url is valid
+ * Not that nice like https://tools.ietf.org/html/rfc3986#appendix-B
+ * but I'm ok with it. So far.
  */
 gboolean validateUrl(char *url){
 	printfunc(__func__);
 
-	return g_regex_match_simple("^(https://|carddavs://|)?([A-Za-z0-9]+\\.)+[A-Za-z0-9]+", url, 0, 0);
+	return g_regex_match_simple("^(https://|carddavs://|webdavs://)?([A-Za-z0-9-]+\\.)+[A-Za-z-]{1,22}(:[0-9]{1,5})?(/|(/[A-Za-z0-9-\\.@]+)*(/)?)?$", url, G_REGEX_EXTENDED, 0);
 }
 
 /**
