@@ -54,6 +54,46 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 }
 
 /**
+ * insertAndID - Insert some stuff into the database and get the id
+ */
+int insertAndID(sqlite3 *ptr, char *sql_query, const char *func){
+	printfunc(__func__);
+
+	int					id = -1;
+	sqlite3_stmt 		*vm;
+	int					ret;
+
+	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret != SQLITE_OK){
+		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
+		return -1;
+	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
+
+	ret = sqlite3_step(vm);
+
+	if (ret != SQLITE_DONE){
+		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
+		return -1;
+	}
+
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+
+	id = sqlite3_last_insert_rowid(ptr);
+
+	sqlite3_mutex_leave(dbMutex);
+
+	return id;
+}
+
+/**
  * dbCleanUp - remove stuff, which are marked as temporary
  */
 static void dbCleanUp(sqlite3 *ptr){
@@ -546,9 +586,8 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 
 	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, srvUrl, isOAuth, oAuthType) VALUES ('%q','%q','%q','%d','%d');", desc, newuser,  davBase, 1, oAuthEntity);
 
-	doSimpleRequest(ptr, sql_query, __func__);
+	serverID = insertAndID(ptr, sql_query, __func__);
 
-	serverID = getSingleInt(ptr, "cardServer", "serverID", 12, "oAuthType", oAuthEntity, "user", newuser, "", "");
 	setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
 
 	g_mutex_lock(&mutex);
@@ -612,9 +651,8 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 
 	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", desc, user, passwd, url, uri.host);
 
-	doSimpleRequest(ptr, sql_query, __func__);
+	serverID = insertAndID(ptr, sql_query, __func__);
 
-	serverID = getSingleInt(ptr, "cardServer", "serverID", 23, "", 0, "user", user, "srvUrl", url);
 	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
 	g_mutex_unlock(&mutex);
@@ -845,6 +883,7 @@ void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addre
 
 	doSimpleRequest(ptr, sql_query, __func__);
 
+	/*	In case we just updated a contact, we can not use insertAndID()	*/
 	contactID = getSingleInt(ptr, "contacts", "contactID", 12, "addressbookID", addressbookID, "href", href, "", "");
 
 	if(contactID == -1) return;
@@ -875,15 +914,14 @@ int newContact(sqlite3 *ptr, int addressbookID, char *card){
 
 	sql_query = sqlite3_mprintf("INSERT INTO contacts (addressbookID, vCard, href, flags) VALUES ('%d','%q', '%q', '%d');", addressbookID, card, path, CONTACTCARDS_TMP);
 
-	doSimpleRequest(ptr, sql_query, __func__);
+	newID = insertAndID(ptr, sql_query, __func__);
 
 	g_free(basePath);
 	g_free(cardPath);
 	g_free(path);
 
-	newID = sqlite3_last_insert_rowid(ptr);
-
-	setDisplayname(ptr, newID, card);
+	if(newID > 0)
+		setDisplayname(ptr, newID, card);
 
 	return newID;
 }
@@ -895,32 +933,11 @@ int newAddressbookTmp(int srvID, char *name){
 	printfunc(__func__);
 
 	int				newID = 0;
-	int				ret = 0;
 	char		 	*sql_query;
-	sqlite3_stmt 	*vm;
 
 	sql_query = sqlite3_mprintf("INSERT INTO addressbooks (cardServer, displayname) VALUES ('%d','%q');", srvID, name);
-	doSimpleRequest(appBase.db, sql_query, __func__);
 
-	sql_query = sqlite3_mprintf("SELECT addressbookID FROM addressbooks ORDER BY addressbookID DESC LIMIT 1;"); 
-
-	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
-
-	ret = sqlite3_prepare_v2(appBase.db, sql_query, strlen(sql_query), &vm, NULL);
-
-	if (ret != SQLITE_OK){
-		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(appBase.db), sqlite3_errmsg(appBase.db));
-		sqlite3_mutex_leave(dbMutex);
-		return 0;
-	}
-
-	while(sqlite3_step(vm) != SQLITE_DONE){
-			newID = sqlite3_column_int(vm, 0);
-	}
-
-	sqlite3_finalize(vm);
-	sqlite3_free(sql_query);
-	sqlite3_mutex_leave(dbMutex);
+	newID = insertAndID(appBase.db, sql_query, __func__);
 
 	return newID;
 }
