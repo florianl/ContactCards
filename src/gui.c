@@ -1899,31 +1899,39 @@ void contactsTreeAppend(char *card, int id){
 
 	GtkTreeStore		*store;
 	GtkTreeIter 		iter;
-	char				*fn = NULL,
+	char				*show = NULL,
 						*n = NULL,
 						*first  = NULL,
 						*last = NULL;
 	char				**nPtr = NULL;
 
-	fn = getSingleCardAttribut(CARDTYPE_FN, card);
-	if(strlen(g_strstrip(fn)) == 0)
-		fn = g_strndup("(no name)", sizeof("(no name)"));
-
 	n = getSingleCardAttribut(CARDTYPE_N, card);
 
 	nPtr = g_strsplit(n, ";", 5);
-	last = g_strndup(g_strstrip(nPtr[0]), sizeof(g_strstrip(nPtr[0])));
-	first = g_strndup(g_strstrip(nPtr[1]), sizeof(g_strstrip(nPtr[1])));
+	last = g_strndup(g_strstrip(nPtr[0]), strlen(g_strstrip(nPtr[0])));
+	first = g_strndup(g_strstrip(nPtr[1]), strlen(g_strstrip(nPtr[1])));
 	g_strfreev(nPtr);
 
+	if(strlen(g_strstrip(last)) == 0)
+		last = g_strndup("(no name)", sizeof("(no name)"));
+
+	if(appBase.flags & FAMILYNAME_FIRST){
+		show = g_strconcat(g_strstrip(last), " ", g_strstrip(first), NULL);
+	} else if (appBase.flags & GIVENNAME_FIST){
+		show = g_strconcat(g_strstrip(first), " ", g_strstrip(last), NULL);
+	} else if (appBase.flags & FAMILYNAME_ONLY){
+		show = g_strconcat(g_strstrip(last), " ", g_strndup(g_strstrip(first), 1), ".", NULL);
+	} else {
+		show = g_strconcat(g_strstrip(last), " ", g_strstrip(first), NULL);
+	}
 	debugCC("[%s] first: %s\tlast: %s\n", __func__, first, last);
 
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 
 	gtk_tree_store_append(store, &iter, NULL);
-	gtk_tree_store_set(store, &iter, FN_COLUMN, fn, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, -1);
+	gtk_tree_store_set(store, &iter, FN_COLUMN, show, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, -1);
 
-	g_free(fn);
+	g_free(show);
 	g_free(n);
 	g_free(first);
 	g_free(last);

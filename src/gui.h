@@ -34,9 +34,14 @@ typedef struct ContactCardsGuiBase{
 	GtkWidget	*addressbookList;
 	GtkWidget	*contactList;
 	GtkWidget	*contactView;
+	int			flags;
 }ContactCardsGuiBase;
 
 ContactCardsGuiBase appBase;
+
+#define		FAMILYNAME_FIRST	0x01
+#define		GIVENNAME_FIST		0x02
+#define		FAMILYNAME_ONLY		0x04
 
 /*	Adress Book Tree	*/
 enum {
