@@ -71,9 +71,11 @@ int main(int argc, char **argv){
 
 	dbClose(db_handler);
 
-	g_free(app->configdir);
 	g_free(db);
 	sqlite3_mutex_free(dbMutex);
+
+	g_free(app->configdir);
+	g_free(app);
 
 	g_mutex_clear(&mutex);
 	g_mutex_clear(&aBookTreeMutex);
