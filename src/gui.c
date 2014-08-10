@@ -179,7 +179,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		gtk_widget_destroy(dialog);
 		if (resp != GTK_RESPONSE_YES) return;
 
-		g_mutex_lock(&mutex);
+		while(g_mutex_trylock(&mutex) != TRUE){}
 
 		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
@@ -519,7 +519,7 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
 
 	cleanCard(appBase.contactView);
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
 
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", data->itemID, "", "", "", "");
 	if(isOAuth){
@@ -840,7 +840,7 @@ static void *pushingCard(void *trans){
 	int							oldID = value->editID;
 	int							addrID = value->aID;
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
 
 	if(oldID){
 		dbCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
@@ -1519,7 +1519,7 @@ void *importCards(void *trans){
 	int						aID = data->itemID;
 	GSList					*cards = data->element;
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
 	while(cards){
 		GSList				*next = cards->next;
 		if(cards->data == NULL){
@@ -1639,7 +1639,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	gtk_widget_destroy(dialog);
 	if (resp != GTK_RESPONSE_YES) return;
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
 
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
@@ -1741,7 +1741,7 @@ void addressbookTreeUpdate(void){
 	GSList			*servers, *addressBooks;
 	GtkTreeIter		toplevel, child;
 
-	g_mutex_lock(&aBookTreeMutex);
+	while(g_mutex_trylock(&aBookTreeMutex) != TRUE){}
 
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.addressbookList)));
@@ -1946,7 +1946,7 @@ void contactsTreeUpdate(int type, int id){
 	GtkTreeStore	*store;
 	GSList			*contacts = NULL;
 
-	g_mutex_lock(&contactsTreeMutex);
+	while(g_mutex_trylock(&contactsTreeMutex) != TRUE){}
 
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
@@ -2093,7 +2093,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		g_mutex_lock(&mutex);
+		while(g_mutex_trylock(&mutex) != TRUE){}
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);

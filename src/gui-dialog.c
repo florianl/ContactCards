@@ -525,7 +525,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
 
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "", "", "");
 
