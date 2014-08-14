@@ -2069,6 +2069,50 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 }
 
 /**
+ * completionCB - very simple Callback to check whether a entry fits
+ */
+static gboolean completionCB(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer user_data){
+	printfunc(__func__);
+
+	gboolean			match = FALSE;
+	GtkTreeModel		*model;
+	char				*first = NULL,
+						*last = NULL;
+	char				*cFirst = NULL,
+						*cLast = NULL,
+						*cKey = NULL;
+	int					len = 0;
+
+	model = gtk_entry_completion_get_model(completion);
+	gtk_tree_model_get(model, iter, FIRST_COLUMN, &first, LAST_COLUMN, &last, -1);
+
+	cKey = g_utf8_casefold(key, -1);
+	cFirst = g_utf8_casefold(first, -1);
+	cLast = g_utf8_casefold(last, -1);
+
+	len = strlen(cKey);
+
+	if (!strncmp(cKey, cFirst, len)){
+		match = TRUE;
+		goto next;
+	}
+
+	if (!strncmp(cKey, cLast, len)){
+		match = TRUE;
+		goto next;
+	}
+
+next:
+	free(first);
+	free(last);
+	free(cKey);
+	free(cFirst);
+	free(cLast);
+
+	return match;
+}
+
+/**
  * syncServer - check all available server for new data
  */
 static void syncServer(GtkWidget *widget, gpointer trans){
@@ -2231,6 +2275,7 @@ void guiInit(void){
 	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(appBase.contactList))));
 	gtk_entry_completion_set_text_column(completion, FN_COLUMN);
 	gtk_entry_completion_set_minimum_key_length(completion, 3);
+	gtk_entry_completion_set_match_func (completion, completionCB, NULL, NULL);
 	searchbar = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(searchbar), GTK_ENTRY_ICON_SECONDARY, "stock_search");
 	gtk_entry_set_completion(GTK_ENTRY(searchbar), GTK_ENTRY_COMPLETION(completion));
