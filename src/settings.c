@@ -116,3 +116,35 @@ void checkAndSetConfig(ContactCards_app_t *app){
 	checkConfigDir(app->configdir);
 	configOutput(app);
 }
+
+static void config_load_ui(GKeyFile *config){
+	printfunc(__func__);
+
+	GError			*error;
+	int				flags = 0;
+
+	flags |= g_key_file_get_integer(config, "Contactlist", "type", &error);
+	if (error){
+			verboseCC("%s\n", error->message);
+			g_clear_error(&error);
+	}
+
+}
+
+void config_load(ContactCards_app_t *app){
+	printfunc(__func__);
+
+	gchar			*configfile = g_build_filename(app->configdir, "contactcards.conf", NULL);
+	GKeyFile		*config = g_key_file_new();
+
+	if (! g_file_test(configfile, G_FILE_TEST_IS_REGULAR)){
+		verboseCC("[%s] configuration file doesn't exist yet\n", __func__);
+		return;
+	}
+	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE, NULL);
+	g_free(configfile);
+
+	config_load_ui(config);
+
+	g_key_file_free(config);
+}

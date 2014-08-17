@@ -32,6 +32,7 @@ int main(int argc, char **argv){
 	app = parseCmdLine(&argc, &argv);
 
 	checkAndSetConfig(app);
+	config_load(app);
 
 	db = g_build_filename(app->configdir, "ContactCards.sql", NULL);
 
