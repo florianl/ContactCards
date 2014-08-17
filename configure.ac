@@ -17,7 +17,7 @@ AM_GNU_GETTEXT_VERSION([0.18.1])
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h locale.h stdlib.h string.h sqlite3.h])
+AC_CHECK_HEADERS([libintl.h locale.h stdlib.h stdio.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

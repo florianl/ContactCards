@@ -12,5 +12,5 @@ contactcards_SOURCES = 	contactcards.c \
 						sqlite_frontend.c \
 						sqlite_backend.c
 
-contactcards_CPPFLAGS = $(GTK3_CFLAGS) $(NEON_CFLAGS) $(SQLITE3_CFLAGS)
-contactcards_LDADD = $(GTK3_LIBS) $(NEON_LIBS) $(SQLITE3_LIBS)
+AM_CFLAGS += $(GTK3_CFLAGS) $(NEON_CFLAGS) $(SQLITE3_CFLAGS)
+AM_LDFLAGS = $(GTK3_LIBS) $(NEON_LIBS) $(SQLITE3_LIBS)
