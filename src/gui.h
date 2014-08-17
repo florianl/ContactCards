@@ -17,7 +17,6 @@
 #ifndef	GTK_LIB_H
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
-#include <gdk/gdkkeysyms.h>
 #define GTK_LIB_H
 #endif	/*	GTK_LIB_H	*/
 
@@ -124,7 +123,6 @@ typedef struct ContactCards_pix {
  * struct ContactCards_add	- structure for creating a new vCard
  */
 typedef struct ContactCards_add {
-	sqlite3				*db;
 	GSList				*list;
 	int					editID;
 	int					aID;

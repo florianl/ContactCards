@@ -139,9 +139,6 @@
 #define	DAV_DISPLAYNAME_START			"<d:displayname>"
 #define	DAV_DISPLAYNAME_END				"</d:displayname>"
 
-#define	ContactCards_NO_LEAVE					512
-#define	ContactCards_ELEMENT_END				513
-
 /*
  * DAV-Elementtypes
  */

@@ -819,7 +819,7 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 
 	GtkWidget		*card;
 
-	card = buildNewCard(((ContactCards_add_t *)trans)->db, ((ContactCards_add_t *)trans)->editID);
+	card = buildNewCard(appBase.db, ((ContactCards_add_t *)trans)->editID);
 	gtk_widget_show_all(card);
 	cleanCard(appBase.contactView);
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), card);
@@ -979,7 +979,6 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		g_strfreev(namingPtr);
 	}
 
-	transNew->db = ptr;
 	transNew->list = items;
 	transNew->editID = selID;
 	if(!abID)
