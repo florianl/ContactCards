@@ -121,13 +121,19 @@ static void config_load_ui(GKeyFile *config){
 	printfunc(__func__);
 
 	GError			*error;
+	int				tmp = 0;
 	int				flags = 0;
 
-	flags |= g_key_file_get_integer(config, "Contactlist", "type", &error);
+	tmp |= g_key_file_get_integer(config, PACKAGE, "formation", &error);
 	if (error){
 			verboseCC("%s\n", error->message);
 			g_clear_error(&error);
+	} else {
+		flags |= tmp;
 	}
+	tmp = 0;
+
+	appBase.flags = flags;
 
 }
 
