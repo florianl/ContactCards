@@ -114,6 +114,39 @@
 #define	CARDTYPE_CALADRURI		92
 #define	CARDTYPE_CALURI			93
 
+/*
+ *	TYPE VALUES
+ */
+#define	TYPE_WORK						1 << 1
+#define	TYPE_HOME						1 << 2
+#define	TYPE_TEL_TEXT					1 << 3
+#define	TYPE_TEL_VOICE					1 << 4
+#define	TYPE_TEL_FAX					1 << 5
+#define	TYPE_TEL_CELL					1 << 6
+#define	TYPE_TEL_VIDEO					1 << 7
+#define	TYPE_TEL_PAGER					1 << 8
+#define	TYPE_TEL_TEXTPHONE				1 << 9
+#define	TYPE_RELATED_CONTACT			1 << 10
+#define	TYPE_RELATED_ACQUAINTANCE		1 << 11
+#define	TYPE_RELATED_FRIEND				1 << 12
+#define	TYPE_RELATED_MET				1 << 13
+#define	TYPE_RELATED_CO_WORKER			1 << 14
+#define	TYPE_RELATED_COLLEAGUE			1 << 15
+#define	TYPE_RELATED_CO_RESIDENT		1 << 16
+#define	TYPE_RELATED_NEIGHBOR			1 << 17
+#define	TYPE_RELATED_CHILD				1 << 18
+#define	TYPE_RELATED_PARENT				1 << 19
+#define	TYPE_RELATED_SIBLING			1 << 20
+#define	TYPE_RELATED_SPOUSE				1 << 21
+#define	TYPE_RELATED_KIN				1 << 22
+#define	TYPE_RELATED_MUSE				1 << 23
+#define	TYPE_RELATED_CRUSH				1 << 24
+#define	TYPE_RELATED_DATE				1 << 25
+#define	TYPE_RELATED_SWEETHEART			1 << 26
+#define	TYPE_RELATED_ME					1 << 27
+#define	TYPE_RELATED_AGENT				1 << 28
+#define	TYPE_RELATED_EMERGENCY			1 << 29
+
 extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 extern char *getUID(void);

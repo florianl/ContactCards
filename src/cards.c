@@ -366,6 +366,114 @@ stepForward:
 }
 
 /**
+ * getTypeValue(element[0])
+ */
+static unsigned long getAttributType(char *line){
+	printfunc(__func__);
+
+	char				**attributes = g_strsplit(line, ";", 0);
+	char				**attribute = attributes;
+	unsigned long		type = 0;
+
+	while (*attribute != NULL) {
+		char 		*tmp = g_utf8_strdown(*attribute, -1);
+
+		if(g_str_has_prefix(tmp, "type=") == TRUE){
+
+			if(g_str_has_suffix(tmp, "work") == TRUE)
+				type |= TYPE_WORK;
+			if(g_str_has_suffix(tmp, "home") == TRUE)
+				type |= TYPE_HOME;
+			if(g_str_has_suffix(tmp, "text") == TRUE)
+				type |= TYPE_TEL_TEXT;
+			if(g_str_has_suffix(tmp, "voice") == TRUE)
+				type |= TYPE_TEL_VOICE;
+			if(g_str_has_suffix(tmp, "fax") == TRUE)
+				type |= TYPE_TEL_FAX;
+			if(g_str_has_suffix(tmp, "cell") == TRUE)
+				type |= TYPE_TEL_CELL;
+			if(g_str_has_suffix(tmp, "video") == TRUE)
+				type |= TYPE_TEL_VIDEO;
+			if(g_str_has_suffix(tmp, "pager") == TRUE)
+				type |= TYPE_TEL_PAGER;
+			if(g_str_has_suffix(tmp, "textphone") == TRUE)
+				type |= TYPE_TEL_TEXTPHONE;
+			if(g_str_has_suffix(tmp, "contact") == TRUE)
+				type |= TYPE_RELATED_CONTACT;
+			if(g_str_has_suffix(tmp, "acquaintance") == TRUE)
+				type |= TYPE_RELATED_ACQUAINTANCE;
+			if(g_str_has_suffix(tmp, "friend") == TRUE)
+				type |= TYPE_RELATED_FRIEND;
+			if(g_str_has_suffix(tmp, "met") == TRUE)
+				type |= TYPE_RELATED_MET;
+			if(g_str_has_suffix(tmp, "co-worker") == TRUE)
+				type |= TYPE_RELATED_CO_WORKER;
+			if(g_str_has_suffix(tmp, "colleague") == TRUE)
+				type |= TYPE_RELATED_COLLEAGUE;
+			if(g_str_has_suffix(tmp, "co-resident") == TRUE)
+				type |= TYPE_RELATED_CO_RESIDENT;
+			if(g_str_has_suffix(tmp, "neighbor") == TRUE)
+				type |= TYPE_RELATED_NEIGHBOR;
+			if(g_str_has_suffix(tmp, "child") == TRUE)
+				type |= TYPE_RELATED_CHILD;
+			if(g_str_has_suffix(tmp, "parent") == TRUE)
+				type |= TYPE_RELATED_PARENT;
+			if(g_str_has_suffix(tmp, "sibling") == TRUE)
+				type |= TYPE_RELATED_SIBLING;
+			if(g_str_has_suffix(tmp, "spouse") == TRUE)
+				type |= TYPE_RELATED_SPOUSE;
+			if(g_str_has_suffix(tmp, "kin") == TRUE)
+				type |= TYPE_RELATED_KIN;
+			if(g_str_has_suffix(tmp, "muse") == TRUE)
+				type |= TYPE_RELATED_MUSE;
+			if(g_str_has_suffix(tmp, "crush") == TRUE)
+				type |= TYPE_RELATED_CRUSH;
+			if(g_str_has_suffix(tmp, "date") == TRUE)
+				type |= TYPE_RELATED_DATE;
+			if(g_str_has_suffix(tmp, "sweetheart") == TRUE)
+				type |= TYPE_RELATED_SWEETHEART;
+			if(g_str_has_suffix(tmp, "me") == TRUE)
+				type |= TYPE_RELATED_ME;
+			if(g_str_has_suffix(tmp, "agent") == TRUE)
+				type |= TYPE_RELATED_AGENT;
+			if(g_str_has_suffix(tmp, "emergency") == TRUE)
+				type |= TYPE_RELATED_EMERGENCY;
+		}
+		g_free(tmp);
+		attribute++;
+	}
+
+	g_strfreev(attributes);
+
+	return type;
+}
+
+/**
+ * getAttributValueWithType - split the line of a vCard in its elements and return the value with its type
+ */
+static ContactCards_item_t *getAttributValueWithType(char *line){
+	printfunc(__func__);
+
+	char						**elements = g_strsplit(line, ":", 2);
+	char						**element = elements;
+	ContactCards_item_t			*item;
+	unsigned long				type = 0;
+	char						*attr = NULL;
+
+	item = g_new(ContactCards_item_t, 1);
+
+	type = getAttributType(element[0]);
+	attr = g_strdup(element[1]);
+
+	item->itemID = type;
+	item->element = attr;
+
+	g_strfreev(elements);
+
+	return item;
+}
+
+/**
  * getAttributValue - split the line of a vCard in its elements and return the value
  */
 static char *getAttributValue(char *line){
@@ -385,7 +493,7 @@ static char *getAttributValue(char *line){
 /**
  * getMultipleCardAttribut - return a vCard element which can occur multiple times
  */
-GSList *getMultipleCardAttribut(int type, char *card){
+GSList *getMultipleCardAttribut(int key, char *card){
 	printfunc(__func__);
 
 	GSList				*list = g_slist_alloc();
@@ -394,7 +502,7 @@ GSList *getMultipleCardAttribut(int type, char *card){
 	char				*value = NULL;
 
 	while (*line != NULL) {
-		switch(type){
+		switch(key){
 			case CARDTYPE_ADR:
 				if(g_regex_match_simple ("[^item]?ADR", *line, 0,0))
 					goto getValue;
