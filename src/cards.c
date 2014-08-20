@@ -504,97 +504,97 @@ GSList *getMultipleCardAttribut(int key, char *card){
 	while (*line != NULL) {
 		switch(key){
 			case CARDTYPE_ADR:
-				if(g_regex_match_simple ("[^item]?ADR", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?ADR", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_TEL:
-				if(g_regex_match_simple ("[^item]?TEL", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?TEL", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_URL:
-				if(g_regex_match_simple ("[^item]?URL", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?URL", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_EMAIL:
-				if(g_regex_match_simple ("[^item]?EMAIL", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?EMAIL", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_SOURCE:
-				if(g_regex_match_simple ("[^item]?SOURCE", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?SOURCE", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_NICKNAME:
-				if(g_regex_match_simple ("[^item]?NICKNAME", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?NICKNAME", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_IMPP:
-				if(g_regex_match_simple ("[^item]?IMPP", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?IMPP", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_LANG:
-				if(g_regex_match_simple ("[^item]?LANG", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?LANG", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_TZ:
-				if(g_regex_match_simple ("[^item]?TZ", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?TZ", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_GEO:
-				if(g_regex_match_simple ("[^item]?GEO", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?GEO", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_TITLE:
-				if(g_regex_match_simple ("[^item]?TITLE", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?TITLE", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_ROLE:
-				if(g_regex_match_simple ("[^item]?ROLE", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?ROLE", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_LOGO:
-				if(g_regex_match_simple ("[^item]?LOGO", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?LOGO", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_ORG:
-				if(g_regex_match_simple ("[^item]?ORG", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?ORG", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_MEMBER:
-				if(g_regex_match_simple ("[^item]?MEMBER", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?MEMBER", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_RELATED:
-				if(g_regex_match_simple ("[^item]?RELATED", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?RELATED", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_CATEGORIES:
-				if(g_regex_match_simple ("[^item]?CATEGORIES", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?CATEGORIES", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_NOTE:
-				if(g_regex_match_simple ("[^item]?NOTE", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?NOTE", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
 			case CARDTYPE_SOUND:
-				if(g_regex_match_simple ("[^item]?SOUND", *line, 0,0))
+				if(g_regex_match_simple ("^(item)?SOUND", *line, 0,0))
 					goto getValue;
 				else
 					goto next;
