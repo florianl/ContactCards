@@ -672,14 +672,34 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	} else {
 		GdkPixbuf			*pixbuf = NULL;
 		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
+		int					w = 0,
+							h = 0,
+							f = 0;
 		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, &error);
 		if(error){
 			verboseCC("[%s] %s\n", __func__, error->message);
 		}
-		photo = gtk_image_new_from_pixbuf (pixbuf);
+		w = gdk_pixbuf_get_width (pixbuf);
+		h = gdk_pixbuf_get_height (pixbuf);
+		if(w > 104){
+			GdkPixbuf		*scaled = NULL;
+			f = w/104;
+			scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+			photo = gtk_image_new_from_pixbuf (scaled);
+			g_object_unref(scaled);
+		} else if (h > 104){
+			GdkPixbuf		*scaled = NULL;
+			f = h/104;
+			scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+			photo = gtk_image_new_from_pixbuf (scaled);
+			g_object_unref(scaled);
+		} else {
+			photo = gtk_image_new_from_pixbuf (pixbuf);
+		}
 		g_object_unref(pixbuf);
 	}
 	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
+	gtk_widget_set_vexpand(GTK_WIDGET(photo), FALSE);
 	gtk_grid_attach(GTK_GRID(card), photo, 1,1, 1,2);
 	g_free(tmp);
 
