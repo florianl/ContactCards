@@ -151,7 +151,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
-	GtkListStore		*store;
+	GtkTreeStore		*store;
 	GtkWidget			*dialog;
 	int					selID, addrID, srvID;
 	int					flag = 0;
@@ -194,8 +194,8 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		serverDelContact(appBase.db, sess, srvID, selID);
 		serverDisconnect(sess, appBase.db, srvID);
 
-		store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
-		gtk_list_store_remove(store, &iter);
+		store = GTK_TREE_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
+		gtk_tree_store_remove(store, &iter);
 
 failure:
 		g_mutex_unlock(&mutex);
