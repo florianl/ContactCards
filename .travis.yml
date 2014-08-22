@@ -8,6 +8,7 @@ before_script:
     - sudo apt-get install libsqlite3-dev
     - sudo apt-get install libneon27-dev
     - sudo apt-get install autopoint
+    - sudo apt-get install intltool
 
 script:
     - ./autogen.sh
