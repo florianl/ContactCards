@@ -1926,10 +1926,15 @@ void contactsTreeAppend(char *card, int id){
 
 	n = getSingleCardAttribut(CARDTYPE_N, card);
 
-	nPtr = g_strsplit(n, ";", 5);
-	last = g_strndup(g_strstrip(nPtr[0]), strlen(g_strstrip(nPtr[0])));
-	first = g_strndup(g_strstrip(nPtr[1]), strlen(g_strstrip(nPtr[1])));
-	g_strfreev(nPtr);
+	if(n){
+		nPtr = g_strsplit(n, ";", 5);
+		last = g_strndup(g_strstrip(nPtr[0]), strlen(g_strstrip(nPtr[0])));
+		first = g_strndup(g_strstrip(nPtr[1]), strlen(g_strstrip(nPtr[1])));
+		g_strfreev(nPtr);
+	} else {
+		last = getSingleCardAttribut(CARDTYPE_FN, card);
+		first = g_strndup(" ", sizeof(" "));
+	}
 
 	if(strlen(g_strstrip(last)) == 0)
 		last = g_strndup("(no name)", sizeof("(no name)"));
