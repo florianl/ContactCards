@@ -668,7 +668,20 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	/*	PHOTO	*/
 	tmp = getCardPhoto(vData);
 	if(tmp->size == 0){
-		photo = gtk_image_new_from_icon_name("avatar-default-symbolic",   GTK_ICON_SIZE_DIALOG);
+		char			*cmp = NULL;
+		cmp = getSingleCardAttribut(CARDTYPE_SHOWAS, vData);
+		if(cmp){
+			char		*down = g_utf8_strdown(cmp, strlen(cmp));
+			if(g_regex_match_simple ("company$", down, 0,0) == TRUE){
+				photo = gtk_image_new_from_icon_name("stock_home", GTK_ICON_SIZE_DIALOG);
+			}else{
+				photo = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
+			}
+			g_free(cmp);
+			g_free(down);
+		} else {
+			photo = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
+		}
 	} else {
 		GdkPixbuf			*pixbuf = NULL;
 		GInputStream		*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);

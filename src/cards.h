@@ -115,6 +115,11 @@
 #define	CARDTYPE_CALURI			93
 
 /*
+ *	OFF THE RFC
+ */
+#define	CARDTYPE_SHOWAS			100
+
+/*
  *	TYPE VALUES
  */
 #define	TYPE_WORK						1 << 1
