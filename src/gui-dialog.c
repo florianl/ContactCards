@@ -343,10 +343,20 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
 	printfunc(__func__);
 
 	GtkWidget 			*assistant = NULL;
+	GError				*error = NULL;
+	GdkPixbuf			*pixbuf;
 
 	assistant = gtk_assistant_new ();
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(assistant), TRUE);
 	gtk_window_set_default_size (GTK_WINDOW (assistant), -1, 300);
+
+	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+	gtk_window_set_icon(GTK_WINDOW(assistant), pixbuf);
+	g_object_unref(pixbuf);
 
 	newDialogSelectType(assistant, trans);
 	newDialogServerSettings(assistant, trans);
@@ -762,6 +772,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GtkEntryBuffer		*issued, *issuer;
 	GtkTreeSelection	*serverSel;
 	GSList				*aBooks = g_slist_alloc();
+	GError				*error = NULL;
+	GdkPixbuf			*pixbuf;
 
 	ContactCards_pref_t		*buffers = NULL;
 
@@ -782,6 +794,14 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_window_set_title(GTK_WINDOW(prefWindow), _("Preferences"));
 	gtk_window_resize(GTK_WINDOW(prefWindow), 640, 384);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(prefWindow), TRUE);
+
+	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+	gtk_window_set_icon(GTK_WINDOW(prefWindow), pixbuf);
+	g_object_unref(pixbuf);
 
 	prefView = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 
