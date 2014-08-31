@@ -120,7 +120,7 @@ void checkAndSetConfig(ContactCards_app_t *app){
 static void config_load_ui(GKeyFile *config){
 	printfunc(__func__);
 
-	GError			*error;
+	GError			*error = NULL;
 	int				tmp = 0;
 	int				flags = 0;
 
