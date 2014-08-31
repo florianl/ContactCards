@@ -726,14 +726,13 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
-
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
 		return;
 	}
+	sqlite3_mutex_leave(dbMutex);
 
-	debugCC("[%s] %s\n", __func__, sql_query);
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
 		switch(type){
@@ -748,10 +747,8 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 					break;
 		}
 	}
-
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
-	sqlite3_mutex_leave(dbMutex);
 }
 
 /**
