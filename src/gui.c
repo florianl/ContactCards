@@ -2228,7 +2228,7 @@ void guiInit(void){
 
 	newServer = gtk_tool_button_new(NULL, _("New"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(newServer), _("New"));
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (newServer), "document-new");
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (newServer), "address-book-new");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), newServer, -1);
 
 	prefItem = gtk_tool_button_new(NULL, _("Preferences"));
