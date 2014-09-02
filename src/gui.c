@@ -1003,13 +1003,21 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 
 	if(selID){
 		naming = getSingleCardAttribut(CARDTYPE_N, vData);
-		namingPtr = g_strsplit(naming, ";", 5);
-		gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
-		gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
-		gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
-		gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
-		gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
-		g_strfreev(namingPtr);
+		if(naming){
+			namingPtr = g_strsplit(naming, ";", 5);
+			gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
+			gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
+			gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
+			gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
+			gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
+			g_strfreev(namingPtr);
+		} else {
+			gtk_entry_buffer_set_text(lastNBuf, "", 0);
+			gtk_entry_buffer_set_text(firstNBuf, "", 0);
+			gtk_entry_buffer_set_text(middleNBuf, "", 0);
+			gtk_entry_buffer_set_text(prefixBuf, "", 0);
+			gtk_entry_buffer_set_text(suffixBuf, "", 0);
+		}
 	}
 
 	transNew->list = items;
