@@ -1616,7 +1616,7 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 		return;
 
 	read = g_file_get_contents(filename, &content, NULL, &error);
-	if(read != TRUE){
+	if(error){
 		verboseCC("[%s] %s\n", __func__, error->message);
 		g_free(filename);
 		g_free(content);
