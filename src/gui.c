@@ -1381,6 +1381,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 
 	gtk_tree_model_get(model, iter, SELECTION_COLUMN, &selID,  -1);
 	verboseCC("[%s] %d\n",__func__, selID);
+	gtk_tree_selection_select_iter(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), iter);
 	card = buildNewCard(appBase.db, selID);
 	gtk_widget_show_all(card);
 	cleanCard(appBase.contactView);
