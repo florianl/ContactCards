@@ -1862,7 +1862,7 @@ static GtkTreeModel *addressbookModelCreate(void){
 /**
  * addressbookTreeCreate - creates the model and view for the adress books
  */
-static GtkWidget *addressbookTreeCreate(void){
+GtkWidget *addressbookTreeCreate(void){
 	printfunc(__func__);
 
 	GtkWidget				*view;
@@ -2209,7 +2209,7 @@ void guiInit(void){
 	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkWidget			*emptyCard, *noContact;
 	GtkWidget			*syncMenu;
-	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem;
+	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem, *calItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
@@ -2249,6 +2249,11 @@ void guiInit(void){
 	gtk_widget_set_tooltip_text(GTK_WIDGET(exportItem), _("Export"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (exportItem), "document-save");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
+
+	calItem = gtk_tool_button_new(NULL, _("Birthday Calendar"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(exportItem), _("Birthday Calendar"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (calItem), "x-office-calendar");
+	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), calItem, -1);
 
 	syncItem = gtk_menu_tool_button_new(NULL, _("Refresh"));
 	syncMenu = gtk_menu_new();
@@ -2357,6 +2362,7 @@ void guiInit(void){
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), NULL);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), NULL);
 	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), NULL);
+	g_signal_connect(G_OBJECT(calItem), "clicked", G_CALLBACK(birthdayDialog), NULL);
 
 	/*	Build the base structure 	*/
 	appBase.statusbar 		= mainStatusbar;

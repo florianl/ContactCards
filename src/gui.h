@@ -78,11 +78,13 @@ extern void *syncOneServer(void *trans);
 extern void addressbookTreeUpdate(void);
 extern void contactsTreeUpdate(int type, int id);
 extern void contactsTreeAppend(char *card, int id);
+extern GtkWidget *addressbookTreeCreate(void);
 
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);
 extern void prefWindow(GtkWidget *widget, gpointer trans);
 extern void syncMenuUpdate();
+extern void birthdayDialog(GtkWidget *widget, gpointer trans);
 
 /**
  * struct ContactCards_pref	- structure for handling the preference dialog
@@ -144,5 +146,13 @@ typedef struct ContactCards_item {
 	int			itemID;
 	void		*element;
 } ContactCards_item_t;
+
+/**
+ * struct ContactCards_cal	- structure for displaying the right stuff in the calender
+ */
+typedef struct ContactCards_cal {
+	GtkWidget			*cal;
+	GtkWidget			*tree;
+} ContactCards_cal_t;
 
 #endif	/*	gui_H	*/
