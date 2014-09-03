@@ -1008,6 +1008,8 @@ void markDay(GSList *contacts, GtkWidget *cal){
 		int					id = GPOINTER_TO_INT(contacts->data);
 		int					flags = 0;
 		char				*card = NULL;
+		char				*bday = NULL;
+
 		if(id == 0){
 			contacts = next;
 			continue;
@@ -1022,6 +1024,22 @@ void markDay(GSList *contacts, GtkWidget *cal){
 
 		card = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", id, "", "", "", "", "", 0);
 
+		bday = getSingleCardAttribut(CARDTYPE_BDAY, card);
+		if(bday != NULL){
+			GDate		*date;
+			int			month;
+			date = g_date_new();
+			g_date_set_parse(date, bday);
+			if(g_date_valid(date) == TRUE){
+				gtk_calendar_get_date(GTK_CALENDAR(cal), NULL, &month, NULL);
+				if(g_date_get_month(date) == (month+1)){
+					gtk_calendar_mark_day(GTK_CALENDAR(cal), (int)g_date_get_day(date));
+				}
+			}
+			g_date_free(date);
+			g_free(bday);
+			bday = NULL;
+		}
 		g_free(card);
 		contacts = next;
 	}
@@ -1237,6 +1255,7 @@ void birthdayDialog(GtkWidget *widget, gpointer trans){
 	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
 	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selABook), transCal);
+	g_signal_connect (cal, "month-changed", G_CALLBACK (selABook), transCal);
 
 	gtk_container_add(GTK_CONTAINER(treeView), addressbookList);
 	gtk_container_add(GTK_CONTAINER(splitView), treeView);
