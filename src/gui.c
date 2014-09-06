@@ -1585,7 +1585,6 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 
 	GtkWidget			*chooser;
 	GError				*error = NULL;
-	gboolean			read = FALSE;
 	GSList				*cards;
 	char				*filename=NULL;
 	char				*content = NULL;
@@ -1624,7 +1623,7 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
 	if(filename == NULL)
 		return;
 
-	read = g_file_get_contents(filename, &content, NULL, &error);
+	g_file_get_contents(filename, &content, NULL, &error);
 	if(error){
 		verboseCC("[%s] %s\n", __func__, error->message);
 		g_free(filename);
