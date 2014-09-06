@@ -493,7 +493,7 @@ static char *getAttributValue(char *line){
 /**
  * getMultipleCardAttribut - return a vCard element which can occur multiple times
  */
-GSList *getMultipleCardAttribut(int key, char *card){
+GSList *getMultipleCardAttribut(int key, char *card, gboolean attribute){
 	printfunc(__func__);
 
 	GSList				*list = g_slist_alloc();
@@ -602,7 +602,11 @@ GSList *getMultipleCardAttribut(int key, char *card){
 				goto next;
 		}
 		getValue:
-			value = getAttributValue(*line);
+			if(attribute == TRUE){
+				value = getAttributValueWithType(*line);
+			} else {
+				value = getAttributValue(*line);
+			}
 			list = g_slist_append(list, value);
 		next:
 			line++;
@@ -949,8 +953,8 @@ char *mergeMultipleItems(char *old, char *new){
 	GString				*data;
 
 	/*	Phone	*/
-	present = getMultipleCardAttribut(CARDTYPE_TEL, old);
-	future = getMultipleCardAttribut(CARDTYPE_TEL, new);
+	present = getMultipleCardAttribut(CARDTYPE_TEL, old, FALSE);
+	future = getMultipleCardAttribut(CARDTYPE_TEL, new, FALSE);
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
@@ -969,8 +973,8 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free_full(present, g_free);
 
 	/*	Url	*/
-	present = getMultipleCardAttribut(CARDTYPE_URL, old);
-	future = getMultipleCardAttribut(CARDTYPE_URL, new);
+	present = getMultipleCardAttribut(CARDTYPE_URL, old, FALSE);
+	future = getMultipleCardAttribut(CARDTYPE_URL, new, FALSE);
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
@@ -989,8 +993,8 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free_full(present, g_free);
 
 	/*	EMail	*/
-	present = getMultipleCardAttribut(CARDTYPE_EMAIL, old);
-	future = getMultipleCardAttribut(CARDTYPE_EMAIL, new);
+	present = getMultipleCardAttribut(CARDTYPE_EMAIL, old, FALSE);
+	future = getMultipleCardAttribut(CARDTYPE_EMAIL, new, FALSE);
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
@@ -1009,8 +1013,8 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free_full(present, g_free);
 
 	/*	Postal Address	*/
-	present = getMultipleCardAttribut(CARDTYPE_ADR, old);
-	future = getMultipleCardAttribut(CARDTYPE_ADR, new);
+	present = getMultipleCardAttribut(CARDTYPE_ADR, old, FALSE);
+	future = getMultipleCardAttribut(CARDTYPE_ADR, new, FALSE);
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
@@ -1029,8 +1033,8 @@ char *mergeMultipleItems(char *old, char *new){
 	g_slist_free_full(present, g_free);
 
 	/*	Note	*/
-	present = getMultipleCardAttribut(CARDTYPE_NOTE, old);
-	future = getMultipleCardAttribut(CARDTYPE_NOTE, new);
+	present = getMultipleCardAttribut(CARDTYPE_NOTE, old, FALSE);
+	future = getMultipleCardAttribut(CARDTYPE_NOTE, new, FALSE);
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;

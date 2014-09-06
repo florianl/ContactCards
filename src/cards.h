@@ -155,7 +155,7 @@
 extern char *buildCard(GSList *list);
 extern char *getSingleCardAttribut(int type, char *card);
 extern char *getUID(void);
-extern GSList *getMultipleCardAttribut(int type, char *card);
+extern GSList *getMultipleCardAttribut(int key, char *card, gboolean attribute);
 extern ContactCards_pix_t *getCardPhoto(char *card);
 extern char *mergeCards(GSList *new, char *old);
 extern GSList *validateFile(char *content);

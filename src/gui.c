@@ -730,7 +730,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	gtk_widget_set_valign(GTK_WIDGET(bday), GTK_ALIGN_START);
 
 	/*	Adress	*/
-	list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData, FALSE);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("Address"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -751,7 +751,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*	Phone	*/
-	list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+	list = getMultipleCardAttribut(CARDTYPE_TEL, vData, FALSE);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("Phone"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -772,7 +772,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*	EMAIL	*/
-	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+	list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData, FALSE);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("EMail"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -796,7 +796,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*	URL	*/
-	list = getMultipleCardAttribut(CARDTYPE_URL, vData);
+	list = getMultipleCardAttribut(CARDTYPE_URL, vData, FALSE);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("URL"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -818,7 +818,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	line++;
 
 	/*	Note	*/
-	list = getMultipleCardAttribut(CARDTYPE_NOTE, vData);
+	list = getMultipleCardAttribut(CARDTYPE_NOTE, vData, FALSE);
 	if (g_slist_length(list) > 1){
 		label = gtk_label_new(_("Note"));
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1089,7 +1089,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_TEL, vData);
+		list = getMultipleCardAttribut(CARDTYPE_TEL, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
@@ -1116,7 +1116,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line++, 2, 1);
 	//gtk_grid_attach(GTK_GRID(card), addPostal, 2, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_ADR, vData);
+		list = getMultipleCardAttribut(CARDTYPE_ADR, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
@@ -1140,7 +1140,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData);
+		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
@@ -1167,7 +1167,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_URL, vData);
+		list = getMultipleCardAttribut(CARDTYPE_URL, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
@@ -1194,7 +1194,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addIM, 3, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_IMPP, vData);
+		list = getMultipleCardAttribut(CARDTYPE_IMPP, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
@@ -1221,7 +1221,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
 	gtk_grid_attach(GTK_GRID(card), addNote, 3, line++, 1, 1);
 	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_NOTE, vData);
+		list = getMultipleCardAttribut(CARDTYPE_NOTE, vData, FALSE);
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
