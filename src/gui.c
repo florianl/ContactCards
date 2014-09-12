@@ -615,6 +615,58 @@ static GtkWidget *createNewCollectionCard(int srvID){
 }
 
 /**
+ * dialogExportBirthdays - dialog to export vCards
+ */
+static void dialogExportBirthdays(int type, int id){
+	printfunc(__func__);
+
+	GtkWidget					*dirChooser;
+	int							result;
+	char						*path = NULL;
+
+	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+
+	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
+	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
+
+	switch(result){
+		case GTK_RESPONSE_ACCEPT:
+			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
+			exportBirthdays(type, id, path);
+			g_free(path);
+			break;
+		default:
+			break;
+	}
+	gtk_widget_destroy(dirChooser);
+}
+
+/**
+ * cbAddrBookExportBirthdays - Callback from popup-menu to export birthdays
+ */
+void cbAddrBookExportBirthdays(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	int				abID = 0;
+
+	abID = GPOINTER_TO_INT(data);
+	dialogExportBirthdays(1, abID);
+}
+
+/**
+ * cbSrvExportBirthdays - Callback from popup-menu to export birthdays
+ */
+void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	int				srvID = 0;
+
+	srvID = GPOINTER_TO_INT(data);
+	dialogExportBirthdays(0, srvID);
+}
+
+/**
  * createNewCollection - Callback from popup-menu to create a new collection
  */
 void createNewCollection(GtkMenuItem *menuitem, gpointer data){
@@ -1720,7 +1772,8 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 		GtkWidget			*menu = NULL,
 							*menuItem = NULL,
 							*menuItem2 = NULL,
-							*menuItem3 = NULL;
+							*menuItem3 = NULL,
+							*menuItem4 = NULL;
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
@@ -1746,6 +1799,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)createNewCollection, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
@@ -1764,6 +1820,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem3 = gtk_menu_item_new_with_label(_("Import *.vcf"));
 				g_signal_connect(menuItem3, "activate", (GCallback)importVCF, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
+				menuItem4 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem4, "activate", (GCallback)cbAddrBookExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem4);
 				break;
 		}
 		gtk_widget_show_all(menu);

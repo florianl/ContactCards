@@ -60,6 +60,7 @@ extern void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken);
 
 /*		sqlite_frontend.c		*/
 extern void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list);
+extern void exportBirthdays(int type, int id, char *base);
 extern void exportContacts(sqlite3 *ptr, char *base);
 extern void exportOneContact(int selID, char *path);
 extern void exportCert(sqlite3 *ptr, char *base, int serverID);
