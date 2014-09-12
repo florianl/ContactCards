@@ -1056,8 +1056,6 @@ void calendarUpdate(GtkWidget *cal, int type, int id){
 	/*	Clean up at first	*/
 	gtk_calendar_clear_marks (GTK_CALENDAR(cal));
 
-	while(g_mutex_trylock(&contactsTreeMutex) != TRUE){}
-
 	/* Insert new elements	*/
 	switch(type){
 		case 0:		/*	server selected	*/
@@ -1087,7 +1085,6 @@ void calendarUpdate(GtkWidget *cal, int type, int id){
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
-				g_mutex_unlock(&contactsTreeMutex);
 				return;
 			}
 			break;
@@ -1099,7 +1096,6 @@ void calendarUpdate(GtkWidget *cal, int type, int id){
 	}
 	markDay(contacts, cal);
 	g_slist_free(contacts);
-	g_mutex_unlock(&contactsTreeMutex);
 
 }
 
