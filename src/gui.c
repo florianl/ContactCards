@@ -1855,7 +1855,8 @@ void addressbookTreeUpdate(void){
 	servers = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("All"), ID_COL, 0, TYP_COL, 0,  -1);
-	if(g_slist_length(servers) == 0){
+	if(g_slist_length(servers) <= 1){
+		debugCC("There are no servers actually\n");
 		g_mutex_unlock(&aBookTreeMutex);
 		return;
 	}
@@ -1873,6 +1874,14 @@ void addressbookTreeUpdate(void){
 		gtk_tree_store_set(store, &toplevel, DESC_COL, serverDesc, ID_COL, serverID, TYP_COL, 0,  -1);
 
 		addressBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "", "", "");
+
+		if(g_slist_length(addressBooks) <= 1){
+			debugCC("There are no address books actually\n");
+			g_slist_free(addressBooks);
+			g_mutex_unlock(&aBookTreeMutex);
+			return;
+		}
+
 		while(addressBooks){
 			GSList				*next2 =  addressBooks->next;
 			int					addressbookID = GPOINTER_TO_INT(addressBooks->data);
@@ -2068,6 +2077,7 @@ void contactsTreeUpdate(int type, int id){
 			} else {
 				GSList			*addressBooks;
 				addressBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", id, "", "", "", "");
+
 				while(addressBooks){
 					GSList				*next =  addressBooks->next;
 					int					addressbookID = GPOINTER_TO_INT(addressBooks->data);
@@ -2083,9 +2093,15 @@ void contactsTreeUpdate(int type, int id){
 						continue;
 					}
 					contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addressbookID, "", "", "", "");
-					contactsTreeFill(contacts);
-					g_slist_free(contacts);
-					addressBooks = next;
+					if(g_slist_length(contacts) <= 1){
+						debugCC("There are no contacts actually\n");
+						g_slist_free(contacts);
+						addressBooks = next;
+					} else {
+						contactsTreeFill(contacts);
+						g_slist_free(contacts);
+						addressBooks = next;
+					}
 				}
 				g_slist_free(addressBooks);
 				g_mutex_unlock(&contactsTreeMutex);
@@ -2098,9 +2114,15 @@ void contactsTreeUpdate(int type, int id){
 		default:
 			break;
 	}
-	contactsTreeFill(contacts);
-	g_slist_free(contacts);
-	g_mutex_unlock(&contactsTreeMutex);
+	if(g_slist_length(contacts) <= 1){
+		debugCC("There are no contacts actually\n");
+		g_slist_free(contacts);
+		g_mutex_unlock(&contactsTreeMutex);
+	} else {
+		contactsTreeFill(contacts);
+		g_slist_free(contacts);
+		g_mutex_unlock(&contactsTreeMutex);
+	}
 }
 
 /**
@@ -2227,7 +2249,7 @@ static void syncServer(GtkWidget *widget, gpointer trans){
 
 	retList = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 
-	if(g_slist_length(retList) == 1){
+	if(g_slist_length(retList) <= 1){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no server to sync."));
 		g_slist_free(retList);
 		return;
