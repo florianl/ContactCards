@@ -1782,35 +1782,37 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 			return;
 		}
 
+		menu = gtk_menu_new();
 		switch(typ){
 			case 0:		/*	server	*/
+				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
 				if(flags & DAV_OPT_MKCOL){
 					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
 				} else {
 					verboseCC("[%s] %d doesn't support MKCOL\n", __func__, selID);
-					return;
+					break;
 				}
 				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
-					return;
+					break;
 				}
-				menu = gtk_menu_new();
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)createNewCollection, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
-				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
-				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
-				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
 				srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", selID, "", "", "", "");
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
+				menuItem4 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem4, "activate", (GCallback)cbAddrBookExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem4);
 				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
-					return;
+					break;
 				}
-				menu = gtk_menu_new();
 				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)addressbookDel, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
@@ -1820,9 +1822,6 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem3 = gtk_menu_item_new_with_label(_("Import *.vcf"));
 				g_signal_connect(menuItem3, "activate", (GCallback)importVCF, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
-				menuItem4 = gtk_menu_item_new_with_label(_("Export Birthdays"));
-				g_signal_connect(menuItem4, "activate", (GCallback)cbAddrBookExportBirthdays, GINT_TO_POINTER(selID));
-				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem4);
 				break;
 		}
 		gtk_widget_show_all(menu);
