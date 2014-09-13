@@ -499,7 +499,7 @@ GSList *getMultipleCardAttribut(int key, char *card, gboolean attribute){
 	GSList				*list = g_slist_alloc();
 	char				**lines = g_strsplit(card, "\n", 0);
 	char				**line = lines;
-	char				*value = NULL;
+	void				*value = NULL;
 
 	while (*line != NULL) {
 		switch(key){
@@ -958,7 +958,7 @@ char *mergeMultipleItems(char *old, char *new){
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
-				char				*value = present->data;
+				char				*value = (char *) present->data;
 				if(value != NULL){
 					if(findData(future, value) == 1){
 						new = removeValue(new, value);
@@ -978,7 +978,7 @@ char *mergeMultipleItems(char *old, char *new){
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
-				char				*value = present->data;
+				char				*value = (char *) present->data;
 				if(value != NULL){
 					if(findData(future, value) == 1){
 						new = removeValue(new, value);
@@ -998,7 +998,7 @@ char *mergeMultipleItems(char *old, char *new){
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
-				char				*value = present->data;
+				char				*value = (char *) present->data;
 				if(value != NULL){
 					if(findData(future, value) == 1){
 						new = removeValue(new, value);
@@ -1018,7 +1018,7 @@ char *mergeMultipleItems(char *old, char *new){
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
-				char				*value = present->data;
+				char				*value = (char *) present->data;
 				if(value != NULL){
 					if(findData(future, value) == 1){
 						new = removeValue(new, value);
@@ -1038,7 +1038,7 @@ char *mergeMultipleItems(char *old, char *new){
 	if (g_slist_length(present) > 1){
 		while(present){
 				GSList				*next = present->next;
-				char				*value = present->data;
+				char				*value = (char *) present->data;
 				if(value != NULL){
 					if(findData(future, value) == 1){
 						new = removeValue(new, value);

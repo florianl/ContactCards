@@ -790,7 +790,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
-				char				*value = list->data;
+				char				*value = (char *) list->data;
 				if(value != NULL){
 					label = gtk_label_new(g_strstrip(g_strdelimit(value, ";", '\n')));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
@@ -811,7 +811,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
-				char				*value = list->data;
+				char				*value = (char *) list->data;
 				if(value != NULL){
 					label = gtk_label_new(g_strstrip(value));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
@@ -832,7 +832,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
-				char				*value = list->data;
+				char				*value = (char *) list->data;
 				if(value != NULL){
 					char			*uri = NULL;
 					uri = g_strconcat("mailto:", g_strcompress((g_strstrip(value))), NULL);
@@ -856,7 +856,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
-				char				*value = list->data;
+				char				*value = (char *) list->data;
 				if(value != NULL){
 					label = gtk_link_button_new(g_strdup_printf("%.42s", g_strcompress((g_strstrip(value)))));
 					gtk_link_button_set_uri (GTK_LINK_BUTTON(label), g_strcompress((g_strstrip(value))));
@@ -878,7 +878,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), sep, 2, line++, 1, 1);
 		while(list){
 				GSList				*next = list->next;
-				char				*value = list->data;
+				char				*value = (char *) list->data;
 				if(value != NULL){
 					label = gtk_label_new(g_strcompress(value));
 					gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
@@ -1145,7 +1145,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditSingleItem(card, items, CARDTYPE_TEL, line, g_strstrip(value));
 					}
@@ -1172,7 +1172,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditPostalItem(card, items, line, g_strstrip(value));
 					}
@@ -1196,7 +1196,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditSingleItem(card, items, CARDTYPE_EMAIL, line, g_strstrip(value));
 					}
@@ -1223,7 +1223,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditSingleItem(card, items, CARDTYPE_URL, line, g_strstrip(value));
 					}
@@ -1250,7 +1250,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditSingleItem(card, items, CARDTYPE_IMPP, line, g_strstrip(value));
 					}
@@ -1277,7 +1277,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		if (g_slist_length(list) > 1){
 			while(list){
 					GSList				*next = list->next;
-					char				*value = list->data;
+					char				*value = (char *) list->data;
 					if(value != NULL){
 						line = contactEditSingleMultilineItem(card, items, CARDTYPE_NOTE, line, g_strstrip(value));
 					}
