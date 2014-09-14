@@ -1215,6 +1215,53 @@ void bdExit(GtkWidget *widget, gpointer data){
 }
 
 /**
+ * birthdayDialogTreeContextMenu - a simple context menu
+ */
+void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID;
+	int					typ;
+
+	/*	right mouse button	*/
+	if(event->button.button != 3)
+		return;
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(data))), &model, &iter)) {
+		GtkWidget			*menu = NULL,
+							*menuItem = NULL;
+
+		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
+		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
+
+		if(typ == 0 && selID == 0){
+			verboseCC("[%s] generic item selected\n", __func__);
+			return;
+		}
+
+		menu = gtk_menu_new();
+		switch(typ){
+			case 0:		/*	server	*/
+				verboseCC("[%s] Server %d selected\n", __func__, selID);
+				menuItem = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+				break;
+			case 1:		/* address book	*/
+				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
+				menuItem = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem, "activate", (GCallback)cbAddrBookExportBirthdays, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+				break;
+		}
+		gtk_widget_show_all(menu);
+		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
+	}
+}
+
+/**
  * birthdayDialog - a simple calendar showing birthdays
  */
 void birthdayDialog(GtkWidget *widget, gpointer trans){
@@ -1260,6 +1307,7 @@ void birthdayDialog(GtkWidget *widget, gpointer trans){
 	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(addressbookList));
 	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selABook), transCal);
+	g_signal_connect(addressbookList, "button_press_event", G_CALLBACK(birthdayDialogTreeContextMenu), (void*) addressbookList);
 	g_signal_connect (cal, "month-changed", G_CALLBACK (selABook), transCal);
 	g_signal_connect(G_OBJECT(bdWindow), "destroy", G_CALLBACK(bdExit), transCal);
 
