@@ -138,7 +138,7 @@ void feedbackDialog(int type, char *msg){
 
 	GtkWidget		*infoDia;
 
-	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, type, GTK_BUTTONS_OK, msg);
+	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, type, GTK_BUTTONS_OK, "%s", msg);
 	gtk_dialog_run(GTK_DIALOG(infoDia));
 	gtk_widget_destroy(infoDia);
 }
