@@ -1,4 +1,4 @@
-AC_INIT([contactcards], [0.11], [https://github.com/florianl/ContactCards/issues])
+AC_INIT([contactcards], [0.12], [https://github.com/florianl/ContactCards/issues])
 AC_CONFIG_SRCDIR([src/contactcards.c])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
