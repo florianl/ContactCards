@@ -998,10 +998,58 @@ void syncMenuUpdate(void){
 }
 
 /**
+ * birthdayListAppend - appends the birthday to the list for the tooltips
+ */
+void birthdayListAppend(ContactCards_cal_t *data, int day, char *card){
+	printfunc(__func__);
+
+	ContactCards_cal_item_t			*item;
+	char							*displayname;
+	GSList							*list = data->list;
+
+	if(g_slist_length((data->list)) == 1){
+		goto insertDirect;
+	}
+
+	while(list){
+		GSList						*next = list->next;
+		ContactCards_cal_item_t		*item = list->data;
+		if(!item){
+			goto stepForward;
+		}
+		if(item->day == day){
+			char			*old = item->txt;
+			char			*append = getSingleCardAttribut(CARDTYPE_FN, card);
+			char			*new = NULL;
+
+			if(strlen(g_strstrip(append)) == 0)
+				append = g_strndup("(no name)", sizeof("(no name)"));
+
+			new = g_strconcat(old, "\n", append, NULL);
+			item->txt = new;
+			return;
+		}
+stepForward:
+		list = next;
+	}
+
+insertDirect:
+	item = g_new(ContactCards_cal_item_t, 1);
+	item->day = day;
+	displayname = getSingleCardAttribut(CARDTYPE_FN, card);
+	if(strlen(g_strstrip(displayname)) == 0)
+		displayname = g_strndup("(no name)", sizeof("(no name)"));
+	item->txt = displayname;
+	data->list = g_slist_append(data->list, item);
+}
+
+/**
  * markDay - mark the birthday of each contact in the calendar
  */
-void markDay(GSList *contacts, GtkWidget *cal){
+void markDay(GSList *contacts, ContactCards_cal_t *data){
 	printfunc(__func__);
+
+	GtkWidget		*cal = data->cal;
 
 	while(contacts){
 		GSList				*next =  contacts->next;
@@ -1034,6 +1082,7 @@ void markDay(GSList *contacts, GtkWidget *cal){
 				gtk_calendar_get_date(GTK_CALENDAR(cal), NULL, &month, NULL);
 				if(g_date_get_month(date) == (month+1)){
 					gtk_calendar_mark_day(GTK_CALENDAR(cal), (int)g_date_get_day(date));
+					birthdayListAppend(data, g_date_get_day(date), card);
 				}
 			}
 			g_date_free(date);
@@ -1048,13 +1097,18 @@ void markDay(GSList *contacts, GtkWidget *cal){
 /**
  * calendarUpdate - Update the birthday calendar
  */
-void calendarUpdate(GtkWidget *cal, int type, int id){
+void calendarUpdate(ContactCards_cal_t *data, int type, int id){
 	printfunc(__func__);
 
 	GSList			*contacts = NULL;
 
 	/*	Clean up at first	*/
-	gtk_calendar_clear_marks (GTK_CALENDAR(cal));
+	gtk_calendar_clear_marks (GTK_CALENDAR(data->cal));
+	if (g_slist_length (data->list) > 1){
+		debugCC("Delete old list and create a new one\n");
+		g_slist_free_full(data->list, g_free);
+		data->list = g_slist_alloc();
+	}
 
 	/* Insert new elements	*/
 	switch(type){
@@ -1080,11 +1134,12 @@ void calendarUpdate(GtkWidget *cal, int type, int id){
 						continue;
 					}
 					contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addressbookID, "", "", "", "");
-					markDay(contacts, cal);
+					markDay(contacts, data);
 					g_slist_free(contacts);
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
+				debugCC("\t\t\tcontaints %d elements\n", g_slist_length((data->list)));
 				return;
 			}
 			break;
@@ -1094,7 +1149,7 @@ void calendarUpdate(GtkWidget *cal, int type, int id){
 		default:
 			break;
 	}
-	markDay(contacts, cal);
+	markDay(contacts, data);
 	g_slist_free(contacts);
 
 }
@@ -1117,14 +1172,14 @@ static void selABook(GtkWidget *widget, gpointer trans){
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
-					calendarUpdate(data->cal, 0, 0);
+					calendarUpdate(data, 0, 0);
 				} else {
 					verboseCC("[%s] whole server\n", __func__);
-					calendarUpdate(data->cal, 0, selID);
+					calendarUpdate(data, 0, selID);
 				}
 				break;
 			case 1:		/* Just one address book selected	*/
-				calendarUpdate(data->cal, 1, selID);
+				calendarUpdate(data, 1, selID);
 				break;
 		}
 	}
@@ -1261,6 +1316,32 @@ void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer 
 	}
 }
 
+gchar *birthdayTooltip(GtkCalendar *cal, guint year, guint month, guint day, gpointer trans){
+	printfunc(__func__);
+
+	ContactCards_cal_t				*data = trans;
+	GSList							*list = data->list;
+
+	if(g_slist_length(list) == 1)
+		return NULL;
+
+	while(list){
+		GSList						*next = list->next;
+		ContactCards_cal_item_t		*cmp;
+		if(!list->data){
+			goto stepForward;
+		}
+		cmp = list->data;
+		if(cmp->day == day){
+			return g_strdup(cmp->txt);
+		}
+stepForward:
+		list = next;
+	}
+
+	return NULL;
+}
+
 /**
  * birthdayDialog - a simple calendar showing birthdays
  */
@@ -1275,6 +1356,7 @@ void birthdayDialog(GtkWidget *widget, gpointer trans){
 	ContactCards_cal_t	*transCal;
 
 	transCal = g_new(ContactCards_cal_t, 1);
+	transCal->list = g_slist_alloc ();
 
 	bdWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(bdWindow), _("Birthday Calendar"));
@@ -1292,6 +1374,8 @@ void birthdayDialog(GtkWidget *widget, gpointer trans){
 	splitView = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 
 	cal = gtk_calendar_new();
+	gtk_calendar_set_display_options(GTK_CALENDAR(cal), GTK_CALENDAR_SHOW_HEADING|GTK_CALENDAR_SHOW_DAY_NAMES);
+	gtk_calendar_set_detail_func(GTK_CALENDAR(cal), birthdayTooltip, transCal, NULL);
 
 	treeView = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_set_size_request(treeView, 128, -1);
