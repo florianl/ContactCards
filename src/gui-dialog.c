@@ -1208,7 +1208,7 @@ void addressbooksUpdate(GtkWidget *widget){
 /**
  * bdExit - exit the birthday dialog
  */
-void bdExit(GtkWidget *widget, gpointer data){
+void birthdayDialogExit(GtkWidget *widget, gpointer data){
 	printfunc(__func__);
 
 	g_free(data);
@@ -1309,7 +1309,7 @@ void birthdayDialog(GtkWidget *widget, gpointer trans){
 	g_signal_connect(bookSel, "changed", G_CALLBACK(selABook), transCal);
 	g_signal_connect(addressbookList, "button_press_event", G_CALLBACK(birthdayDialogTreeContextMenu), (void*) addressbookList);
 	g_signal_connect (cal, "month-changed", G_CALLBACK (selABook), transCal);
-	g_signal_connect(G_OBJECT(bdWindow), "destroy", G_CALLBACK(bdExit), transCal);
+	g_signal_connect(G_OBJECT(bdWindow), "destroy", G_CALLBACK(birthdayDialogExit), transCal);
 
 	gtk_container_add(GTK_CONTAINER(treeView), addressbookList);
 	gtk_container_add(GTK_CONTAINER(splitView), treeView);
