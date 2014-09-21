@@ -38,6 +38,7 @@ void contactsTreeFill(GSList *contacts){
 		g_free(card);
 		contacts = next;
 	}
+	contactsTreeSetSeperators();
 }
 
 /**

@@ -2041,7 +2041,7 @@ void contactsTreeAppend(char *card, int id){
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 
 	gtk_tree_store_append(store, &iter, NULL);
-	gtk_tree_store_set(store, &iter, FN_COLUMN, show, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, -1);
+	gtk_tree_store_set(store, &iter, FN_COLUMN, show, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, SEP_COLUMN, FALSE, -1);
 
 	g_free(show);
 	g_free(n);
@@ -2133,9 +2133,71 @@ static GtkTreeModel *contactsModelCreate(void){
 
 	GtkTreeStore  *treestore;
 
-	treestore = gtk_tree_store_new(TOTAL_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT);
+	treestore = gtk_tree_store_new(TOTAL_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_BOOLEAN);
 
 	return GTK_TREE_MODEL(treestore);
+}
+
+/**
+ * contactsTreeSetSeperators - sets the seperators between the contacts
+ */
+void contactsTreeSetSeperators(void){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeIter			new;
+	GtkTreeModel		*model = gtk_tree_view_get_model(GTK_TREE_VIEW(appBase.contactList));
+	GtkTreeStore		*store = GTK_TREE_STORE(model);
+	char				*cur = NULL,
+						*next = NULL;
+
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), LAST_COLUMN, GTK_SORT_ASCENDING);
+
+	gtk_tree_model_get_iter_first( model, &iter);
+	gtk_tree_model_get( model, &iter, LAST_COLUMN, &cur, -1);
+
+	while(gtk_tree_model_iter_next( model, &iter) == TRUE){
+		char			*cmpCur = NULL,
+						*cmpNext = NULL;
+
+		gtk_tree_model_get( model, &iter, LAST_COLUMN, &next, -1);
+		if(!next){
+			continue;
+		}
+
+		cmpCur = g_utf8_strdown(cur, -1);
+		cmpNext = g_utf8_strdown(next, -1);
+
+		if(cmpCur[0] != cmpNext[0]){
+			/* It's quite dirty. Isn't it?	*/
+			cmpCur = g_strconcat(cmpCur, "z", NULL);
+			gtk_tree_store_append(store, &new, NULL);
+			gtk_tree_store_set(store, &new, FN_COLUMN, "", FIRST_COLUMN, "", LAST_COLUMN, cmpCur, SELECTION_COLUMN, 0, SEP_COLUMN, TRUE, -1);
+		}
+
+		g_free(cur);
+		cur = g_strndup(next, strlen(next));
+		g_free(cmpCur);
+		g_free(cmpNext);
+	}
+
+	if(cur)
+		g_free(cur);
+	if(next)
+		g_free(next);
+}
+
+/**
+ * contactsTreeSeparator - returns TRUE, if row is a seperator
+ */
+static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, gpointer data){
+	printfunc(__func__);
+
+	gboolean		ret = FALSE;
+
+	gtk_tree_model_get (model, iter, SEP_COLUMN, &ret, -1);
+
+	return ret;
 }
 
 /**
@@ -2155,6 +2217,8 @@ static GtkWidget *contactsTreeCreate(void){
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+
+	gtk_tree_view_set_row_separator_func (GTK_TREE_VIEW(view), contactsTreeSeparator, NULL, NULL);
 
 	model = contactsModelCreate();
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
