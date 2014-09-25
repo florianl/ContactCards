@@ -2096,14 +2096,14 @@ void contactsTreeUpdate(int type, int id){
 					if(g_slist_length(contacts) <= 1){
 						debugCC("There are no contacts actually\n");
 						g_slist_free(contacts);
-						addressBooks = next;
 					} else {
 						contactsTreeFill(contacts);
 						g_slist_free(contacts);
-						addressBooks = next;
 					}
+					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
+				contactsTreeSetSeperators();
 				g_mutex_unlock(&contactsTreeMutex);
 				return;
 			}
@@ -2117,10 +2117,12 @@ void contactsTreeUpdate(int type, int id){
 	if(g_slist_length(contacts) <= 1){
 		debugCC("There are no contacts actually\n");
 		g_slist_free(contacts);
+		contactsTreeSetSeperators();
 		g_mutex_unlock(&contactsTreeMutex);
 	} else {
 		contactsTreeFill(contacts);
 		g_slist_free(contacts);
+		contactsTreeSetSeperators();
 		g_mutex_unlock(&contactsTreeMutex);
 	}
 }
@@ -2150,6 +2152,7 @@ void contactsTreeSetSeperators(void){
 	GtkTreeStore		*store = GTK_TREE_STORE(model);
 	char				*cur = NULL,
 						*next = NULL;
+	int					selID = 0;
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), LAST_COLUMN, GTK_SORT_ASCENDING);
 
@@ -2160,8 +2163,8 @@ void contactsTreeSetSeperators(void){
 		char			*cmpCur = NULL,
 						*cmpNext = NULL;
 
-		gtk_tree_model_get( model, &iter, LAST_COLUMN, &next, -1);
-		if(!next){
+		gtk_tree_model_get( model, &iter, SELECTION_COLUMN, &selID,  LAST_COLUMN, &next, -1);
+		if(!next || selID == 0){
 			continue;
 		}
 
