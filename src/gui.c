@@ -2206,7 +2206,10 @@ void contactsTreeSetSeperators(void){
 
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), LAST_COLUMN, GTK_SORT_ASCENDING);
 
-	gtk_tree_model_get_iter_first( model, &iter);
+	if(gtk_tree_model_get_iter_first( model, &iter) == FALSE){
+		verboseCC("[%s] empty tree\n", __func__);
+		return;
+	}
 	gtk_tree_model_get( model, &iter, LAST_COLUMN, &cur, -1);
 
 	while(gtk_tree_model_iter_next( model, &iter) == TRUE){
