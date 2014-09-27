@@ -693,6 +693,29 @@ void createNewCollection(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * getWidgetFromID - returns the type parameter
+ */
+static GtkWidget *getWidgetFromID(int id){
+	printfunc(__func__);
+
+	GtkWidget		*new;
+	GString			*value;
+
+	value = g_string_new(NULL);
+
+	if(id & TYPE_HOME){
+		g_string_append(value, _("Home "));
+	}
+	if(id & TYPE_WORK){
+		g_string_append(value, _("Work "));
+	}
+	new = gtk_label_new(value->str);
+	g_string_free(value, TRUE);
+
+	return new;
+}
+
+/**
  * buildNewCard - display the data of a selected vCard
  */
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
@@ -766,10 +789,9 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	}
 	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
 	gtk_widget_set_margin_left(photo, 18);
-	gtk_widget_set_margin_right(photo, 12);
 	gtk_widget_set_margin_top(photo, 6);
 	gtk_widget_set_halign(photo, GTK_ALIGN_START);
-	gtk_grid_attach(GTK_GRID(card), photo, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), photo, 0, line, 1, 3);
 	g_free(tmp);
 
 	/*		FN		*/
@@ -781,8 +803,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	gtk_widget_set_margin_right(fn, 12);
 	gtk_widget_set_margin_top(fn, 6);
 	gtk_widget_set_halign(fn, GTK_ALIGN_START);
-	gtk_grid_attach(GTK_GRID(card), fn, 1, line++, 1, 1);
-
+	gtk_grid_attach(GTK_GRID(card), fn, 1, line++, 1, 2);
+	line++;
 	/*		BDAY		*/
 	bday = gtk_label_new(getSingleCardAttribut(CARDTYPE_BDAY, vData));
 	gtk_widget_set_margin_left(bday, 12);
@@ -822,7 +844,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	g_slist_free_full(list, g_free);
 
 	/*		Address		*/
-	list = getMultipleCardAttribut(CARDTYPE_ADR, vData, FALSE);
+	list = getMultipleCardAttribut(CARDTYPE_ADR, vData, TRUE);
 	if (g_slist_length(list) > 1){
 		typ = gtk_label_new(_("Address"));
 		gtk_widget_set_margin_left(typ, 12);
@@ -832,19 +854,32 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		gtk_grid_attach(GTK_GRID(card), typ, 1, line++, 1, 1);
 		while(list){
 			GSList					*next = list->next;
-			char					*value = (char *) list->data;
-			if(value != NULL){
-				GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
-				gtk_text_buffer_set_text(val, g_strstrip(g_strdelimit(value, ";", '\n')), -1);
-				content = gtk_text_view_new_with_buffer(val);
-				gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
-				gtk_widget_set_margin_left(content, 12);
-				gtk_widget_set_margin_right(content, 12);
-				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
-				gtk_widget_set_hexpand(content, TRUE);
-				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
-				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+			ContactCards_item_t 	*item;
+			char					*value;
+			if(list->data){
+				item = (ContactCards_item_t *) list->data;
+				value = (char *) item->element;
+				if(value != NULL){
+					GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
+					GtkWidget		*attrType;
+					attrType = getWidgetFromID(item->itemID);
+					gtk_widget_set_margin_right(attrType, 6);
+					gtk_widget_set_margin_top(typ, 6);
+					gtk_grid_attach(GTK_GRID(card), attrType, 0, line, 1, 1);
+					gtk_widget_set_halign(GTK_WIDGET(attrType), GTK_ALIGN_END);
+					gtk_text_buffer_set_text(val, g_strstrip(g_strdelimit(value, ";", '\n')), -1);
+					content = gtk_text_view_new_with_buffer(val);
+					gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
+					gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(content), GTK_WRAP_WORD);
+					gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(content), GTK_TEXT_WINDOW_LEFT, 5);
+					gtk_widget_set_margin_left(content, 12);
+					gtk_widget_set_margin_right(content, 12);
+					gtk_widget_set_margin_top(content, 6);
+					gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+					gtk_widget_set_hexpand(content, TRUE);
+					gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
+					gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+				}
 			}
 			list = next;
 		}
@@ -928,6 +963,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_text_buffer_set_text(val, g_strstrip(value), -1);
 				content = gtk_text_view_new_with_buffer(val);
 				gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
+				gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(content), GTK_WRAP_WORD);
 				gtk_widget_set_margin_left(content, 12);
 				gtk_widget_set_margin_right(content, 12);
 				gtk_widget_set_margin_top(content, 6);
