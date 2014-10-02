@@ -1954,7 +1954,6 @@ void addressbookTreeUpdate(void){
 			servers = next;
 			continue;
 		}
-
 		serverDesc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
 		gtk_tree_store_append(store, &toplevel, NULL);
 		gtk_tree_store_set(store, &toplevel, DESC_COL, serverDesc, ID_COL, serverID, TYP_COL, 0,  -1);
@@ -1964,8 +1963,9 @@ void addressbookTreeUpdate(void){
 		if(g_slist_length(addressBooks) <= 1){
 			debugCC("There are no address books actually\n");
 			g_slist_free(addressBooks);
-			g_mutex_unlock(&aBookTreeMutex);
-			return;
+			g_free(serverDesc);
+			servers = next;
+			continue;
 		}
 
 		while(addressBooks){
