@@ -716,6 +716,60 @@ static GtkWidget *getWidgetFromID(int id){
 }
 
 /**
+ * edgy2roundCB - Callback to round off the corners
+ */
+static gboolean edgy2roundCB(GtkWidget *widget, GdkEventConfigure *event, gpointer *data){
+	printfunc(__func__);
+
+	cairo_t			*cr;
+	GError			*error = NULL;
+	GdkPixbuf		*pixbuf = NULL;
+	int				w = 0,
+					h = 0,
+					f = 0;
+
+	cr = gdk_cairo_create (gtk_widget_get_window (widget));
+	pixbuf = gdk_pixbuf_new_from_stream((GInputStream *)data, NULL, &error);
+	if(error){
+		verboseCC("%s\n", error->message);
+		return FALSE;
+	}
+	w = gdk_pixbuf_get_width (pixbuf);
+	h = gdk_pixbuf_get_height (pixbuf);
+
+	if(w > 100){
+		GdkPixbuf		*scaled = NULL;
+		f = w/100;
+		w = 100;
+		scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+		gdk_cairo_set_source_pixbuf (cr, scaled, 2.5, 2.5);
+		g_object_unref(scaled);
+	} else if (h > 100){
+		GdkPixbuf		*scaled = NULL;
+		f = h/100;
+		h = 100;
+		scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+		gdk_cairo_set_source_pixbuf (cr, scaled, 2.5, 2.5);
+		g_object_unref(scaled);
+	} else {
+		gdk_cairo_set_source_pixbuf (cr, pixbuf, 2.5, 2.5);
+	}
+
+	cairo_new_sub_path(cr);
+	cairo_arc(cr, 90.0, 10.0, 5.0, -3.14/2, 0);			// upper right
+	cairo_arc(cr,90.0,90.0, 5.0, 0, 3.14/2);			// lower right
+	cairo_arc(cr, 10.0,90.0, 5.0, 3.14/2, 3.14);		// lower left
+	cairo_arc(cr, 10.0, 10.0, 5.0, 3.14, 3*3.14/2);		// upper left
+	cairo_close_path(cr);
+
+	cairo_clip(cr);
+	cairo_paint (cr);
+	cairo_destroy (cr);
+
+	return TRUE;
+}
+
+/**
  * buildNewCard - display the data of a selected vCard
  */
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
@@ -728,7 +782,6 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	char				*vData = NULL;
 	int					line = 0;
 	char				*markup;
-	GError				*error = NULL;
 	ContactCards_pix_t	*tmp = NULL;
 
 	card = gtk_grid_new();
@@ -759,35 +812,12 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			photo = gtk_image_new_from_icon_name("avatar-default-symbolic", GTK_ICON_SIZE_DIALOG);
 		}
 	} else {
-		GdkPixbuf		*pixbuf = NULL;
 		GInputStream	*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
-		int				w = 0,
-						h = 0,
-						f = 0;
-		pixbuf = gdk_pixbuf_new_from_stream(ginput, NULL, &error);
-		if(error){
-			verboseCC("[%s] %s\n", __func__, error->message);
-		}
-		w = gdk_pixbuf_get_width (pixbuf);
-		h = gdk_pixbuf_get_height (pixbuf);
-		if(w > 104){
-			GdkPixbuf		*scaled = NULL;
-			f = w/104;
-			scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
-			photo = gtk_image_new_from_pixbuf (scaled);
-			g_object_unref(scaled);
-		} else if (h > 104){
-			GdkPixbuf		*scaled = NULL;
-			f = h/104;
-			scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
-			photo = gtk_image_new_from_pixbuf (scaled);
-			g_object_unref(scaled);
-		} else {
-			photo = gtk_image_new_from_pixbuf (pixbuf);
-		}
-		g_object_unref(pixbuf);
+
+		photo = gtk_drawing_area_new();
+		g_signal_connect (photo, "draw", G_CALLBACK(edgy2roundCB), ginput);
 	}
-	gtk_widget_set_size_request(GTK_WIDGET(photo), 104, 104);
+	gtk_widget_set_size_request(GTK_WIDGET(photo), 102, 102);
 	gtk_widget_set_margin_left(photo, 18);
 	gtk_widget_set_margin_top(photo, 6);
 	gtk_widget_set_halign(photo, GTK_ALIGN_START);
