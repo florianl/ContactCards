@@ -740,15 +740,15 @@ static gboolean edgy2roundCB(GtkWidget *widget, GdkEventConfigure *event, gpoint
 	if(w > 100){
 		GdkPixbuf		*scaled = NULL;
 		f = w/100;
-		w = 100;
 		scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+		w = 100;
 		gdk_cairo_set_source_pixbuf (cr, scaled, 2.5, 2.5);
 		g_object_unref(scaled);
 	} else if (h > 100){
 		GdkPixbuf		*scaled = NULL;
 		f = h/100;
-		h = 100;
 		scaled = gdk_pixbuf_scale_simple(pixbuf, w/f, h/f, GDK_INTERP_TILES);
+		h = 100;
 		gdk_cairo_set_source_pixbuf (cr, scaled, 2.5, 2.5);
 		g_object_unref(scaled);
 	} else {
