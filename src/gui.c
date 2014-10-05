@@ -1038,6 +1038,36 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	}
 	g_slist_free_full(list, g_free);
 
+	/*		Public Calendar URL		*/
+	list = getMultipleCardAttribut(CARDTYPE_CALURI, vData, FALSE);
+	if (g_slist_length(list) > 1){
+		typ = gtk_label_new(_("Public Calendar URL"));
+		gtk_widget_set_margin_left(typ, 12);
+		gtk_widget_set_margin_right(typ, 12);
+		gtk_widget_set_margin_top(typ, 18);
+		gtk_widget_set_halign(typ, GTK_ALIGN_START);
+		gtk_grid_attach(GTK_GRID(card), typ, 1, line++, 1, 1);
+		while(list){
+			GSList					*next = list->next;
+			char					*value = (char *) list->data;
+			if(value != NULL){
+				GtkEntryBuffer	*val = gtk_entry_buffer_new(NULL, -1);
+				gtk_entry_buffer_set_text(val, g_strstrip(value), -1);
+				content = gtk_entry_new_with_buffer(val);
+				gtk_editable_set_editable(GTK_EDITABLE(content), FALSE);
+				gtk_widget_set_margin_left(content, 12);
+				gtk_widget_set_margin_right(content, 12);
+				gtk_widget_set_margin_top(content, 6);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_hexpand(content, TRUE);
+				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
+				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+			}
+			list = next;
+		}
+	}
+	g_slist_free_full(list, g_free);
+
 	g_free(vData);
 
 	return card;
