@@ -2280,7 +2280,8 @@ void contactsTreeUpdate(int type, int id){
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
-				contactsTreeSetSeperators();
+				if(appBase.flags & USE_SEPARATOR)
+					contactsTreeSetSeperators();
 				g_mutex_unlock(&contactsTreeMutex);
 				return;
 			}
@@ -2294,12 +2295,14 @@ void contactsTreeUpdate(int type, int id){
 	if(g_slist_length(contacts) <= 1){
 		debugCC("There are no contacts actually\n");
 		g_slist_free(contacts);
-		contactsTreeSetSeperators();
+		if(appBase.flags & USE_SEPARATOR)
+			contactsTreeSetSeperators();
 		g_mutex_unlock(&contactsTreeMutex);
 	} else {
 		contactsTreeFill(contacts);
 		g_slist_free(contacts);
-		contactsTreeSetSeperators();
+		if(appBase.flags & USE_SEPARATOR)
+			contactsTreeSetSeperators();
 		g_mutex_unlock(&contactsTreeMutex);
 	}
 }

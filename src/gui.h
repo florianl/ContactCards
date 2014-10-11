@@ -41,6 +41,7 @@ ContactCardsGuiBase appBase;
 #define		FAMILYNAME_FIRST	0x01
 #define		GIVENNAME_FIST		0x02
 #define		FAMILYNAME_ONLY		0x04
+#define		USE_SEPARATOR		0x08
 
 /*	Adress Book Tree	*/
 enum {

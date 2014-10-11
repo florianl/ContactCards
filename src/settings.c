@@ -133,6 +133,19 @@ static void config_load_ui(GKeyFile *config){
 	}
 	tmp = 0;
 
+	tmp |= g_key_file_get_integer(config, PACKAGE, "separator", &error);
+	if (error){
+			verboseCC("%s\n", error->message);
+			g_clear_error(&error);
+	} else {
+		if(tmp == 1){
+			flags |= 1 << USE_SEPARATOR;
+		} else {
+			flags |= 0 << USE_SEPARATOR;
+		}
+	}
+	tmp = 0;
+
 	appBase.flags = flags;
 
 }
