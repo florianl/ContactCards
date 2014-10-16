@@ -1,271 +1,280 @@
-#: src/gui.c:45
+#: ../src/gui.c:86
 msgid "About ContactCards"
 msgstr ""
 
-#: src/gui.c:47
+#: ../src/gui.c:88
 msgid "Address book written in C using DAV"
 msgstr ""
 
-#: src/gui.c:122 src/gui.c:1231
-msgid "Export Certificate"
+#: ../src/gui.c:170 ../src/gui.c:684 ../src/gui.c:1513 ../src/gui.c:1548
+#: ../src/gui.c:1899
+msgid "With One-Way-Sync enabled you are not allowed to do this!"
 msgstr ""
 
-#: src/gui.c:122 src/gui.c:938 src/gui.c:1095
-msgid "_Cancel"
-msgstr ""
-
-#: src/gui.c:122
-msgid "_Export"
-msgstr ""
-
-#: src/gui.c:219
-msgid "E-mail"
-msgstr ""
-
-#: src/gui.c:221 src/gui.c:325 src/gui.c:390
-msgid "Home"
-msgstr ""
-
-#: src/gui.c:222 src/gui.c:326 src/gui.c:391
-msgid "Work"
-msgstr ""
-
-#: src/gui.c:223 src/gui.c:327 src/gui.c:392
-msgid "Other"
-msgstr ""
-
-#: src/gui.c:224 src/gui.c:328 src/gui.c:393
-msgid "Custom"
-msgstr ""
-
-#: src/gui.c:234
-msgid "Address"
-msgstr ""
-
-#: src/gui.c:282 src/gui.c:683
-msgid "Birthday"
-msgstr ""
-
-#: src/gui.c:323 src/gui.c:665
-msgid "Telephone number"
-msgstr ""
-
-#: src/gui.c:338
-msgid "Number"
-msgstr ""
-
-#: src/gui.c:388 src/gui.c:656
-msgid "Postal address"
-msgstr ""
-
-#: src/gui.c:403
-msgid "Street"
-msgstr ""
-
-#: src/gui.c:414
-msgid "City"
-msgstr ""
-
-#: src/gui.c:425
-msgid "State"
-msgstr ""
-
-#: src/gui.c:436
-msgid "ZIP code"
-msgstr ""
-
-#: src/gui.c:520
-msgid "First and last name is missing"
-msgstr ""
-
-#: src/gui.c:523
-msgid "First name is missing"
-msgstr ""
-
-#: src/gui.c:526
-msgid "Last name is missing"
-msgstr ""
-
-#: src/gui.c:589
-msgid "There is no address book selected."
-msgstr ""
-
-#: src/gui.c:596 src/gui.c:1722
-msgid "Add new contact"
-msgstr ""
-
-#: src/gui.c:614
-msgid "First name"
-msgstr ""
-
-#: src/gui.c:625
-msgid "Last name"
-msgstr ""
-
-#: src/gui.c:642
-msgid "Discard"
-msgstr ""
-
-#: src/gui.c:644
-msgid "Save"
-msgstr ""
-
-#: src/gui.c:658
-msgid "Add postal address"
-msgstr ""
-
-#: src/gui.c:667
-msgid "Add telephone number"
-msgstr ""
-
-#: src/gui.c:674
-msgid "E-mail address"
-msgstr ""
-
-#: src/gui.c:676
-msgid "Add e-mail address"
-msgstr ""
-
-#: src/gui.c:685
-msgid "Add birthday"
-msgstr ""
-
-#: src/gui.c:738
+#: ../src/gui.c:176
 msgid "Do you really want to delete this contact?"
 msgstr ""
 
-#: src/gui.c:778
+#: ../src/gui.c:203
 msgid "There is no contact selected."
 msgstr ""
 
-#: src/gui.c:900
-msgid "syncing "
+#: ../src/gui.c:257
+msgid "post office box"
 msgstr ""
 
-#: src/gui.c:938
-msgid "Export Contacts"
+#: ../src/gui.c:265
+msgid "extended address"
 msgstr ""
 
-#: src/gui.c:938
-msgid "_Open"
+#: ../src/gui.c:273
+msgid "street"
 msgstr ""
 
-#: src/gui.c:1095
-msgid "_Save"
+#: ../src/gui.c:281
+msgid "city"
 msgstr ""
 
-#: src/gui.c:1101 src/gui.c:1439
-msgid "Request Grant"
+#: ../src/gui.c:289
+msgid "region"
 msgstr ""
 
-#: src/gui.c:1103
-msgid "Access Grant"
+#: ../src/gui.c:297
+msgid "zip"
 msgstr ""
 
-#: src/gui.c:1184 src/gui.c:1652 src/gui.c:1653
-msgid "Preferences"
+#: ../src/gui.c:305
+msgid "country"
 msgstr ""
 
-#: src/gui.c:1194
-msgid "Settings"
+#. Phone
+#: ../src/gui.c:341 ../src/gui.c:849 ../src/gui.c:1313
+msgid "Phone"
 msgstr ""
 
-#: src/gui.c:1199 src/gui.c:1513
-msgid "Description"
+#. EMAIL
+#: ../src/gui.c:344 ../src/gui.c:922 ../src/gui.c:1364
+msgid "EMail"
 msgstr ""
 
-#: src/gui.c:1206 src/gui.c:1522
+#. URL
+#: ../src/gui.c:347 ../src/gui.c:952 ../src/gui.c:1391
 msgid "URL"
 msgstr ""
 
-#: src/gui.c:1213 src/gui.c:1431 src/gui.c:1473
-msgid "User"
+#. IM
+#: ../src/gui.c:350 ../src/gui.c:1418
+msgid "IM"
 msgstr ""
 
-#: src/gui.c:1220 src/gui.c:1482
-msgid "Password"
+#. Note
+#: ../src/gui.c:395 ../src/gui.c:982 ../src/gui.c:1445
+msgid "Note"
 msgstr ""
 
-#: src/gui.c:1236
-msgid "Certificate is issued for "
+#: ../src/gui.c:515
+msgid "Unable to create an address book without a name"
 msgstr ""
 
-#: src/gui.c:1244
-msgid "Certificate issued by "
+#: ../src/gui.c:586 ../src/gui.c:1265
+msgid "Discard"
 msgstr ""
 
-#: src/gui.c:1252
-msgid "Trust Certificate?"
+#: ../src/gui.c:587 ../src/gui.c:1266
+msgid "Save"
 msgstr ""
 
-#: src/gui.c:1262
-msgid "Delete Server"
+#: ../src/gui.c:602
+msgid "Address book name"
 msgstr ""
 
-#: src/gui.c:1264
-msgid "Save changes"
+#: ../src/gui.c:627 ../src/gui.c:2428
+msgid "Export Contacts"
 msgstr ""
 
-#: src/gui.c:1404 src/gui.c:1411
-msgid "Confirm"
+#: ../src/gui.c:627 ../src/gui.c:1591 ../src/gui.c:1834 ../src/gui.c:2428
+msgid "_Cancel"
 msgstr ""
 
-#: src/gui.c:1443
-msgid "Grant"
+#: ../src/gui.c:627 ../src/gui.c:1591 ../src/gui.c:2428
+msgid "_Open"
 msgstr ""
 
-#: src/gui.c:1453
-msgid "OAuth"
+#: ../src/gui.c:707
+msgid "Home "
 msgstr ""
 
-#: src/gui.c:1493
-msgid "Credentials"
+#: ../src/gui.c:710
+msgid "Work "
 msgstr ""
 
-#: src/gui.c:1532
-msgid "Serversettings"
+#. Address
+#: ../src/gui.c:879 ../src/gui.c:1340
+msgid "Address"
 msgstr ""
 
-#: src/gui.c:1570
-msgid "fruux"
+#: ../src/gui.c:1013
+msgid "Key"
 msgstr ""
 
-#: src/gui.c:1571
-msgid "google"
+#: ../src/gui.c:1044
+msgid "Public Calendar URL"
 msgstr ""
 
-#: src/gui.c:1572
-msgid "others"
+#: ../src/gui.c:1117 ../src/gui.c:1170
+msgid "Unable to save changes"
 msgstr ""
 
-#: src/gui.c:1586
-msgid "Select Server"
+#. Naming
+#: ../src/gui.c:1272
+msgid "Prefix"
 msgstr ""
 
-#: src/gui.c:1647 src/gui.c:1648
-msgid "New"
+#: ../src/gui.c:1280
+msgid "First name"
 msgstr ""
 
-#: src/gui.c:1657 src/gui.c:1658
+#: ../src/gui.c:1288
+msgid "Middle name"
+msgstr ""
+
+#: ../src/gui.c:1296
+msgid "Last name"
+msgstr ""
+
+#: ../src/gui.c:1304
+msgid "Suffix"
+msgstr ""
+
+#: ../src/gui.c:1316
+msgid "Add a phone"
+msgstr ""
+
+#: ../src/gui.c:1343
+msgid "Add a postal address"
+msgstr ""
+
+#: ../src/gui.c:1367
+msgid "Add a EMail"
+msgstr ""
+
+#: ../src/gui.c:1394
+msgid "Add a Url"
+msgstr ""
+
+#: ../src/gui.c:1421
+msgid "Add a IM"
+msgstr ""
+
+#: ../src/gui.c:1448
+msgid "Add a Note"
+msgstr ""
+
+#: ../src/gui.c:1506
+msgid "There is no address book selected."
+msgstr ""
+
+#: ../src/gui.c:1540
+msgid "There is no vCard selected to edit."
+msgstr ""
+
+#: ../src/gui.c:1587
+msgid "There is no vCard selected to export."
+msgstr ""
+
+#: ../src/gui.c:1591
+msgid "Export One Contact"
+msgstr ""
+
+#: ../src/gui.c:1752
+msgid "syncing "
+msgstr ""
+
+#: ../src/gui.c:1831
+msgid "Open *.vcf"
+msgstr ""
+
+#: ../src/gui.c:1836
+msgid "_Import"
+msgstr ""
+
+#: ../src/gui.c:1903
+msgid "Do you really want to delete this address book?"
+msgstr ""
+
+#. server
+#: ../src/gui.c:1965 ../src/gui.c:1987
+msgid "Export Birthdays"
+msgstr ""
+
+#: ../src/gui.c:1979
+msgid "Create new address book"
+msgstr ""
+
+#: ../src/gui.c:1993
+msgid "Delete address book"
+msgstr ""
+
+#: ../src/gui.c:1996 ../src/gui.c:2648
+msgid "Add new contact"
+msgstr ""
+
+#: ../src/gui.c:1999
+msgid "Import *.vcf"
+msgstr ""
+
+#: ../src/gui.c:2034
+msgid "All"
+msgstr ""
+
+#: ../src/gui.c:2163
+msgid "Delete"
+msgstr ""
+
+#: ../src/gui.c:2166
+msgid "Edit"
+msgstr ""
+
+#: ../src/gui.c:2170 ../src/gui.c:2577 ../src/gui.c:2578
 msgid "Export"
 msgstr ""
 
-#: src/gui.c:1662 src/gui.c:1663
+#: ../src/gui.c:2503
+msgid "There is no server to sync."
+msgstr ""
+
+#: ../src/gui.c:2567 ../src/gui.c:2568
+msgid "New"
+msgstr ""
+
+#: ../src/gui.c:2572 ../src/gui.c:2573
+msgid "Preferences"
+msgstr ""
+
+#: ../src/gui.c:2582 ../src/gui.c:2583
+msgid "Birthday Calendar"
+msgstr ""
+
+#: ../src/gui.c:2587 ../src/gui.c:2591
 msgid "Refresh"
 msgstr ""
 
-#: src/gui.c:1676 src/gui.c:1677
+#: ../src/gui.c:2599 ../src/gui.c:2600
 msgid "About"
 msgstr ""
 
-#: src/gui.c:1713
+#: ../src/gui.c:2639
 msgid "Sort contacts in ascending order"
 msgstr ""
 
-#: src/gui.c:1716
+#: ../src/gui.c:2642
 msgid "Sort contacts in descending order"
 msgstr ""
 
-#: src/gui.c:1719
+#: ../src/gui.c:2645
 msgid "Delete selected contact"
+msgstr ""
+
+#: ../src/gui.c:2651
+msgid "Edit contact"
 msgstr ""
