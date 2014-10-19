@@ -2015,6 +2015,7 @@ void addressbookTreeUpdate(void){
 	GtkTreeStore	*store;
 	GSList			*servers, *addressBooks;
 	GtkTreeIter		toplevel, child;
+	GtkTreeSelection	*selection;
 
 	while(g_mutex_trylock(&aBookTreeMutex) != TRUE){}
 
@@ -2025,6 +2026,9 @@ void addressbookTreeUpdate(void){
 		g_mutex_unlock(&aBookTreeMutex);
 		return;
 	}
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW (appBase.addressbookList));
+	gtk_tree_selection_unselect_all(selection);
 
 	gtk_tree_store_clear(store);
 
@@ -2216,6 +2220,10 @@ void contactsTreeAppend(char *card, int id){
 	debugCC("[%s] first: %s\tlast: %s\n", __func__, first, last);
 
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
+	if(store == NULL){
+		debugCC("[%s] there is no store\n");
+		return;
+	}
 
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, FN_COLUMN, show, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, SEP_COLUMN, FALSE, -1);
@@ -2234,6 +2242,7 @@ void contactsTreeUpdate(int type, int id){
 
 	GtkTreeStore	*store;
 	GSList			*contacts = NULL;
+	GtkTreeSelection	*selection;
 
 	while(g_mutex_trylock(&contactsTreeMutex) != TRUE){}
 
@@ -2244,6 +2253,10 @@ void contactsTreeUpdate(int type, int id){
 		g_mutex_unlock(&contactsTreeMutex);
 		return;
 	}
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW (appBase.contactList));
+	gtk_tree_selection_unselect_all(selection);
+
 	gtk_tree_store_clear(store);
 	/* Insert new elements	*/
 	switch(type){
