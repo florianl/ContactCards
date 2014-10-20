@@ -2682,6 +2682,9 @@ void guiInit(void){
 	gtk_container_add(GTK_CONTAINER(contactsEdit), searchbar);
 	gtk_container_add(GTK_CONTAINER(contactsEdit), contactButtons);
 
+	gtk_tree_view_set_search_column(GTK_TREE_VIEW(appBase.contactList), LAST_COLUMN);
+	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(appBase.contactList), TRUE);
+
 	/*		Connect Signales		*/
 	bookSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList));
 	gtk_tree_selection_set_mode (bookSel, GTK_SELECTION_SINGLE);
