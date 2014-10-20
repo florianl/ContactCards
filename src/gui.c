@@ -103,8 +103,8 @@ static void selBook(GtkWidget *widget, gpointer trans){
 
 	GtkTreeModel			*model;
 	GtkTreeIter				iter;
-	int						selID;
-	int						selTyp;
+	int						selID = -1;
+	int						selTyp = -1;
 
 	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
 		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
@@ -120,6 +120,9 @@ static void selBook(GtkWidget *widget, gpointer trans){
 				break;
 			case 1:		/* Just one address book selected	*/
 				contactsTreeUpdate(1, selID);
+				break;
+			default:
+				verboseCC("[%s] something is strange around here\n", __func__);
 				break;
 		}
 	}
@@ -2394,7 +2397,9 @@ static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, g
 
 	gboolean		ret = FALSE;
 
+	while(g_mutex_trylock(&contactsTreeMutex) != TRUE){}
 	gtk_tree_model_get (model, iter, SEP_COLUMN, &ret, -1);
+	g_mutex_unlock(&contactsTreeMutex);
 
 	return ret;
 }
