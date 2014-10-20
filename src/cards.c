@@ -243,7 +243,7 @@ char *buildCard(GSList *list){
 
 	char				*card = NULL;
 	char				*firstN , *lastN, *middleN, *prefixN, *suffixN;
-	int					bDay, bMonth, bYear;
+	unsigned int		bDay, bMonth, bYear;
 	char				*bDate;
 	GSList				*next;
 	GString				*cardString;

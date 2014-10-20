@@ -138,7 +138,7 @@ int serverConnectionTest(int serverID){
 	char				*davServer = NULL;
 	ne_uri				uri;
 	ne_session			*sess = NULL;
-	int					caps = 0;
+	unsigned int		caps = 0;
 	int					ret = NE_FAILED;
 	int					failed = 0;
 

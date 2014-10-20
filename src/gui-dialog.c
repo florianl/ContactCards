@@ -1074,8 +1074,8 @@ void markDay(GSList *contacts, ContactCards_cal_t *data){
 
 		bday = getSingleCardAttribut(CARDTYPE_BDAY, card);
 		if(bday != NULL){
-			GDate		*date;
-			int			month;
+			GDate				*date;
+			unsigned int		month;
 			date = g_date_new();
 			g_date_set_parse(date, bday);
 			if(g_date_valid(date) == TRUE){
