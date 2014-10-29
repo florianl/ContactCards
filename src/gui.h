@@ -80,7 +80,7 @@ extern void *syncOneServer(void *trans);
 extern void addressbookTreeUpdate(void);
 extern void contactsTreeUpdate(int type, int id);
 extern void contactsTreeAppend(char *card, int id);
-extern void contactsTreeSetSeperators(void);
+//extern void contactsTreeSetSeperators(void);
 extern GtkWidget *addressbookTreeCreate(void);
 extern void cbAddrBookExportBirthdays(GtkMenuItem *menuitem, gpointer data);
 extern void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data);

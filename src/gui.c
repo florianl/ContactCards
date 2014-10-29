@@ -2296,8 +2296,10 @@ void contactsTreeUpdate(int type, int id){
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
+/*
 				if(appBase.flags & USE_SEPARATOR)
 					contactsTreeSetSeperators();
+*/
 				g_mutex_unlock(&contactsTreeMutex);
 				return;
 			}
@@ -2311,14 +2313,18 @@ void contactsTreeUpdate(int type, int id){
 	if(g_slist_length(contacts) <= 1){
 		debugCC("There are no contacts actually\n");
 		g_slist_free(contacts);
+/*
 		if(appBase.flags & USE_SEPARATOR)
 			contactsTreeSetSeperators();
+*/
 		g_mutex_unlock(&contactsTreeMutex);
 	} else {
 		contactsTreeFill(contacts);
 		g_slist_free(contacts);
+/*
 		if(appBase.flags & USE_SEPARATOR)
 			contactsTreeSetSeperators();
+*/
 		g_mutex_unlock(&contactsTreeMutex);
 	}
 }
@@ -2339,6 +2345,7 @@ static GtkTreeModel *contactsModelCreate(void){
 /**
  * contactsTreeSetSeperators - sets the seperators between the contacts
  */
+/*
 void contactsTreeSetSeperators(void){
 	printfunc(__func__);
 
@@ -2371,7 +2378,7 @@ void contactsTreeSetSeperators(void){
 		cmpNext = g_utf8_strdown(next, -1);
 
 		if(cmpCur[0] != cmpNext[0]){
-			/* It's quite dirty. Isn't it?	*/
+			// It's quite dirty. Isn't it?
 			cmpCur = g_strconcat(cmpCur, "z", NULL);
 			gtk_tree_store_append(store, &new, NULL);
 			gtk_tree_store_set(store, &new, FN_COLUMN, "", FIRST_COLUMN, "", LAST_COLUMN, cmpCur, SELECTION_COLUMN, 0, SEP_COLUMN, TRUE, -1);
@@ -2388,10 +2395,12 @@ void contactsTreeSetSeperators(void){
 	if(next)
 		g_free(next);
 }
+*/
 
 /**
  * contactsTreeSeparator - returns TRUE, if row is a seperator
  */
+/*
 static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, gpointer data){
 	printfunc(__func__);
 
@@ -2403,6 +2412,7 @@ static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, g
 
 	return ret;
 }
+*/
 
 /**
  * contactsTreeCreate - creates the model and view for the contacts list
@@ -2422,7 +2432,9 @@ static GtkWidget *contactsTreeCreate(void){
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 
+/*
 	gtk_tree_view_set_row_separator_func (GTK_TREE_VIEW(view), contactsTreeSeparator, NULL, NULL);
+*/
 
 	model = contactsModelCreate();
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);

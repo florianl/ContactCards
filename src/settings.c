@@ -132,7 +132,7 @@ static void config_load_ui(GKeyFile *config){
 		flags |= tmp;
 	}
 	tmp = 0;
-
+/*
 	tmp |= g_key_file_get_integer(config, PACKAGE, "separator", &error);
 	if (error){
 			verboseCC("%s\n", error->message);
@@ -145,7 +145,7 @@ static void config_load_ui(GKeyFile *config){
 		}
 	}
 	tmp = 0;
-
+*/
 	appBase.flags = flags;
 
 }
