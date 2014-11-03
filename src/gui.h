@@ -84,6 +84,7 @@ extern void contactsTreeAppend(char *card, int id);
 extern GtkWidget *addressbookTreeCreate(void);
 extern void cbAddrBookExportBirthdays(GtkMenuItem *menuitem, gpointer data);
 extern void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data);
+extern void syncServer(GtkWidget *widget, gpointer trans);
 
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);

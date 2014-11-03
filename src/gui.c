@@ -2520,7 +2520,7 @@ next:
 /**
  * syncServer - check all available server for new data
  */
-static void syncServer(GtkWidget *widget, gpointer trans){
+void syncServer(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
 	GSList						*retList;

@@ -14,6 +14,17 @@
 #include "contactcards.h"
 
 /**
+ * syncTimer - Callback for the sync timer
+ */
+gboolean syncTimer(gpointer data){
+	printfunc(__func__);
+
+	syncServer(NULL, NULL);
+
+	return TRUE;
+}
+
+/**
  * main - do I need to say more?
  */
 int main(int argc, char **argv){
@@ -68,6 +79,7 @@ int main(int argc, char **argv){
 		showContacts(db_handler);
 	}
 
+	g_timeout_add_seconds (1800, syncTimer, NULL);
 	guiRun(db_handler);
 
 	dbClose(db_handler);
