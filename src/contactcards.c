@@ -79,9 +79,8 @@ int main(int argc, char **argv){
 		showContacts(db_handler);
 	}
 
-	g_timeout_add_seconds (1800, syncTimer, NULL);
+	g_timeout_add_seconds (appBase.syncIntervall, syncTimer, NULL);
 	guiRun(db_handler);
-
 	dbClose(db_handler);
 
 	g_free(db);

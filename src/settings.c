@@ -123,6 +123,7 @@ static void config_load_ui(GKeyFile *config){
 	GError			*error = NULL;
 	int				tmp = 0;
 	int				flags = 0;
+	int				syncIntervall = 0;
 
 	tmp |= g_key_file_get_integer(config, PACKAGE, "formation", &error);
 	if (error){
@@ -148,6 +149,18 @@ static void config_load_ui(GKeyFile *config){
 */
 	appBase.flags = flags;
 
+	syncIntervall = g_key_file_get_integer(config, PACKAGE, "syncIntervall", &error);
+	if (error){
+			verboseCC("%s\n", error->message);
+			g_clear_error(&error);
+	}
+	if(syncIntervall != 0){
+		debugCC("Intervalltime: %d\n", syncIntervall);
+		appBase.syncIntervall = syncIntervall;
+	} else {
+		appBase.syncIntervall = 1800;
+	}
+
 }
 
 void config_load(ContactCards_app_t *app){
@@ -158,6 +171,8 @@ void config_load(ContactCards_app_t *app){
 
 	if (! g_file_test(configfile, G_FILE_TEST_IS_REGULAR)){
 		verboseCC("[%s] configuration file doesn't exist yet\n", __func__);
+		/*	Set default value	*/
+		appBase.syncIntervall = 1800;
 		return;
 	}
 	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE, NULL);
