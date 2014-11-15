@@ -499,6 +499,7 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 	printfunc(__func__);
 
 	ContactCards_pref_t		*buffers = trans;
+	GdkRGBA					rgba;
 
 	if(buffers->srvID == 0){
 		verboseCC("[%s] this isn't a server\n", __func__);
@@ -510,11 +511,14 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
+	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
+
 	updateAddressbooks(appBase.db, buffers->aBooks);
 	updateServerDetails(appBase.db, buffers->srvID,
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)),
-						gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)));
+						gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)),
+						gdk_rgba_to_string(&rgba));
 	addressbookTreeUpdate();
 }
 
@@ -631,9 +635,10 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 	GSList				*abList;
 	ContactCards_pref_t		*buffers = trans;
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
-	char				*issued = NULL, *issuer = NULL, *url = NULL;
+	char				*issued = NULL, *issuer = NULL, *url = NULL, *color = NULL;
 	int					isOAuth;
 	gboolean			res = 0;
+	GdkRGBA				rgba;
 
 	prefFrame = buffers->prefFrame;
 
@@ -664,6 +669,11 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
 
 		gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+
+		color = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(gdk_rgba_parse(&rgba, color) == TRUE)
+			gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
+		free(color);
 
 		if(countElements(appBase.db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
 
@@ -762,7 +772,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	GtkWidget			*prefWindow, *prefView, *prefFrame, *prefList;
 	GtkWidget			*serverPrefList;
-	GtkWidget			*vbox, *hbox, *abbox;
+	GtkWidget			*vbox, *hbox, *abbox, *colorBtn;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
 	GtkWidget			*digSwitch, *uploadSwitch;
@@ -840,6 +850,19 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_entry_set_visibility(GTK_ENTRY(input), FALSE);
 	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	label = gtk_label_new(_("Color"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	colorBtn = gtk_color_button_new();
+	gtk_box_pack_start(GTK_BOX(hbox), colorBtn, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
 
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
@@ -928,6 +951,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->syncSel = uploadSwitch;
 	buffers->listbox = ablist;
 	buffers->aBooks = aBooks;
+	buffers->colorChooser = colorBtn;
 
 	/*		Connect Signales		*/
 	serverSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(serverPrefList));

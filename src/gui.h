@@ -108,6 +108,7 @@ typedef struct ContactCards_pref {
 	GtkWidget			*certSel;
 	GtkWidget			*syncSel;
 	GtkWidget			*listbox;
+	GtkWidget			*colorChooser;
 	GSList				*aBooks;
 	int					srvID;
 } ContactCards_pref_t;

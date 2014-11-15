@@ -55,7 +55,7 @@ extern void updateContactUri(sqlite3 *ptr, int contactID, char *uri);
 extern void updateOAuthCredentials(sqlite3 *ptr, int serverID, int tokenType, char *value);
 extern void updatePostURI(sqlite3 *ptr, int addressbookID, char *href);
 extern void updateUri(sqlite3 *ptr, int serverID, char *newPath, gboolean force);
-extern void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel);
+extern void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel, char *newColor);
 extern void updateSyncToken(sqlite3 *ptr, int addressbookID, char *syncToken);
 
 /*		sqlite_frontend.c		*/

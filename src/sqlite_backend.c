@@ -171,6 +171,7 @@ void dbCreate(sqlite3 *ptr){
 	user TEXT, \
 	passwd TEXT, \
 	srvUrl TEXT,\
+	color TEXT, \
 	authority TEXT,\
 	resources INTEGER default 1,\
 	isOAuth INTEGER default 0,\
@@ -1042,16 +1043,17 @@ stepForward:
 /**
  * updateServerDetails - update changes to the server settings
  */
-void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel){
+void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel, char *newColor){
 	printfunc(__func__);
 
-	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL;
+	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL, *oldColor = NULL;
 	int					flag = 0;
 
 	oldDesc = getSingleChar(ptr, "cardServer", "desc", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUrl = getSingleChar(ptr, "cardServer", "srvUrl", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldUser = getSingleChar(ptr, "cardServer", "user", 1, "serverID", srvID, "", "", "", "", "", 0);
 	oldPw =  getSingleChar(ptr, "cardServer", "passwd", 1, "serverID", srvID, "", "", "", "", "", 0);
+	oldColor = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", srvID, "", "", "", "", "", 0);
 
 	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
 
@@ -1070,6 +1072,8 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		setSingleChar(ptr, "cardServer", "user", (char *) newUser, "serverID", srvID);
 	if(g_strcmp0(oldPw, newPw))
 		setSingleChar(ptr, "cardServer", "passwd", (char *) newPw, "serverID", srvID);
+	if(g_strcmp0(oldColor, newColor))
+		setSingleChar(ptr, "cardServer", "color", (char *) newColor, "serverID", srvID);
 	if(certSel == TRUE){
 		setSingleInt(ptr, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", srvID);
 	} else {
