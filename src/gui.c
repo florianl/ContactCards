@@ -2415,17 +2415,49 @@ static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, g
 */
 
 /**
+ * contactsTreeColor - give the cells of the contacts tree some color
+ */
+void contactsTreeColor(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer data){
+	printfunc(__func__);
+
+	int			cId = 0,
+				aId = 0,
+				sId = 0;
+	char		*dbColor = NULL;
+	GdkRGBA		rgba;
+
+	gtk_tree_model_get(model, iter, SELECTION_COLUMN, &cId,-1);
+	aId = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", cId, "", "", "", "");
+	sId = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aId, "", "", "", "");
+	debugCC("%d > %d > %d\n", cId, aId, sId);
+
+	dbColor = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", sId, "", "", "", "", "", 0);
+
+	if(gdk_rgba_parse(&rgba, dbColor) == TRUE)
+		g_object_set(renderer, "cell-background-rgba", &rgba, NULL);
+
+	g_free(dbColor);
+}
+
+/**
  * contactsTreeCreate - creates the model and view for the contacts list
  */
 static GtkWidget *contactsTreeCreate(void){
 	printfunc(__func__);
 
 	GtkWidget				*view;
-	GtkTreeViewColumn		*column;
+	GtkTreeViewColumn		*column, *column2;
 	GtkTreeModel			*model;
-	GtkCellRenderer			*renderer;
+	GtkCellRenderer			*renderer, *renderer2;
 
 	view = gtk_tree_view_new();
+
+	column2 = gtk_tree_view_column_new();
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column2);
+	renderer2 = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(column2, renderer2, TRUE);
+
+	gtk_tree_view_column_set_cell_data_func(column2, renderer2, contactsTreeColor, NULL, NULL);
 
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
