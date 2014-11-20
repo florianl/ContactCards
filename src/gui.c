@@ -2429,7 +2429,6 @@ void contactsTreeColor(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTre
 	gtk_tree_model_get(model, iter, SELECTION_COLUMN, &cId,-1);
 	aId = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", cId, "", "", "", "");
 	sId = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aId, "", "", "", "");
-	debugCC("%d > %d > %d\n", cId, aId, sId);
 
 	dbColor = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", sId, "", "", "", "", "", 0);
 
