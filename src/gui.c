@@ -2683,6 +2683,7 @@ void guiInit(void){
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_kinetic_scrolling(GTK_SCROLLED_WINDOW(contactWindow), TRUE);
 	gtk_widget_set_size_request(contactWindow, 186, -1);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
