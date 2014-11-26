@@ -2451,17 +2451,18 @@ static GtkWidget *contactsTreeCreate(void){
 
 	view = gtk_tree_view_new();
 
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+
+
 	column2 = gtk_tree_view_column_new();
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column2);
 	renderer2 = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column2, renderer2, TRUE);
 
 	gtk_tree_view_column_set_cell_data_func(column2, renderer2, contactsTreeColor, NULL, NULL);
-
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 
 /*
 	gtk_tree_view_set_row_separator_func (GTK_TREE_VIEW(view), contactsTreeSeparator, NULL, NULL);
@@ -2675,14 +2676,14 @@ void guiInit(void){
 	/*		Addressbookstuff		*/
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(addressbookWindow, 160, -1);
+	gtk_widget_set_size_request(addressbookWindow, 156, -1);
 	appBase.addressbookList = addressbookTreeCreate();
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(contactWindow, 160, -1);
+	gtk_widget_set_size_request(contactWindow, 186, -1);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	emptyCard = gtk_grid_new();
