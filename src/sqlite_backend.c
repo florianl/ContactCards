@@ -135,7 +135,7 @@ void dbCreate(sqlite3 *ptr){
 	printfunc(__func__);
 
 	char				**errmsg = NULL;
-	int 				ret;
+	int 				ret = -1;
 
 	ret = sqlite3_exec(ptr, "CREATE TABLE IF NOT EXISTS contacts( \
 	contactID INTEGER PRIMARY KEY AUTOINCREMENT,\
@@ -210,6 +210,252 @@ void dbCreate(sqlite3 *ptr){
 sqlError:
 	verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	return;
+}
+
+/**
+ * dbCheck - check the local database for updates
+ */
+int dbCheck(sqlite3 *ptr){
+	printfunc(__func__);
+
+	sqlite3_stmt 		*vm;
+	char				*sql_query = NULL;
+	int 				ret = -1;
+	int					count = 0;
+
+	sql_query = sqlite3_mprintf("PRAGMA table_info (contacts)");
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret==SQLITE_OK){
+		while(sqlite3_step(vm) == SQLITE_ROW)
+			count++;
+	}
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	switch(count){
+		case 0:
+			verboseCC("[%s] no clumns in 'contacts'\n", __func__);
+			return -1;
+		case 1:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN addressbookID INTEGER;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 2:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN flags INTEGER default 0;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 3:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN etag TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 4:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN href TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 5:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN vCard TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 6:
+			sql_query = sqlite3_mprintf("ALTER TABLE contacts ADD COLUMN displayname TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 7:
+		default:
+			verboseCC("[%s] 'contacts' is up to date\n", __func__);
+			break;
+	}
+	count = 0;
+
+
+	sql_query = sqlite3_mprintf("PRAGMA table_info (oAuthServer)");
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret==SQLITE_OK){
+		while(sqlite3_step(vm) == SQLITE_ROW)
+			count++;
+	}
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	switch(count){
+		case 0:
+			verboseCC("[%s] no clumns in 'oAuthServer'\n", __func__);
+			return -1;
+		case 1:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN flags INTEGER default 0;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 2:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN desc TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 3:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN clientID TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 4:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN clientSecret TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 5:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN davURI TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 6:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN scope TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 7:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN grantURI TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 8:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN tokenURI TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 9:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN responseType TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 10:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN redirURI TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 11:
+			sql_query = sqlite3_mprintf("ALTER TABLE oAuthServer ADD COLUMN grantType TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 12:
+		default:
+			verboseCC("[%s] 'oAuthServer' is up to date\n", __func__);
+			break;
+	}
+	count = 0;
+
+
+	sql_query = sqlite3_mprintf("PRAGMA table_info (cardServer)");
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret==SQLITE_OK){
+		while(sqlite3_step(vm) == SQLITE_ROW)
+			count++;
+	}
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	switch(count){
+		case 0:
+			verboseCC("[%s] no clumns in 'cardServer'\n", __func__);
+			return -1;
+		case 1:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN flags INTEGER default 2;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 2:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN desc TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 3:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN user TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 4:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN passwd TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 5:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN srvUrl TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 6:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN color TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 7:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN authority TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 8:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN resources INTEGER default 1;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 9:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN isOAuth INTEGER default 0;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 10:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN oAuthType INTEGER;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 11:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN oAuthAccessGrant TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 12:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN oAuthAccessToken TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 13:
+			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN oAuthRefreshToken TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 14:
+		default:
+			verboseCC("[%s] 'cardServer' is up to date\n", __func__);
+			break;
+	}
+	count = 0;
+
+
+	sql_query = sqlite3_mprintf("PRAGMA table_info (addressbooks)");
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret==SQLITE_OK){
+		while(sqlite3_step(vm) == SQLITE_ROW)
+			count++;
+	}
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	switch(count){
+		case 0:
+			verboseCC("[%s] no clumns in 'addressbooks'\n", __func__);
+			return -1;
+		case 1:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN flags INTEGER default 0;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 2:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN cardServer INTEGER;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 3:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN displayname TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 4:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN path TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 5:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN postURI TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 6:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks ADD COLUMN syncToken TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 7:
+			sql_query = sqlite3_mprintf("ALTER TABLE addressbooks syncMethod INTEGER;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 8:
+		default:
+			verboseCC("[%s] 'addressbooks' is up to date\n", __func__);
+			break;
+	}
+	count = 0;
+
+
+	sql_query = sqlite3_mprintf("PRAGMA table_info (certs)");
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret==SQLITE_OK){
+		while(sqlite3_step(vm) == SQLITE_ROW)
+			count++;
+	}
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	switch(count){
+		case 0:
+			verboseCC("[%s] no clumns in 'certs'\n", __func__);
+			return -1;
+		case 1:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN serverID INTEGER;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 2:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN trustFlag INTEGER default 2;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 3:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN digest TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 4:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN issued TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 5:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN issuer TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 6:
+			sql_query = sqlite3_mprintf("ALTER TABLE certs ADD COLUMN cert TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 7:
+		default:
+			verboseCC("[%s] 'certs' is up to date\n", __func__);
+			break;
+	}
+
+	return 0;
 }
 
 /**

@@ -29,6 +29,7 @@ extern int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, in
 extern void checkAddressbooks(sqlite3 *ptr, int serverID, int type, ne_session *sess);
 extern void cleanUpRequest(sqlite3 *ptr, int id, int type);
 extern void dbCreate(sqlite3 *ptr);
+extern int dbCheck(sqlite3 *ptr);
 extern void dbClose(sqlite3 *ptr);
 extern char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3, char *row4, int value4);
 extern int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3);
