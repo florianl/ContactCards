@@ -540,6 +540,31 @@ void setSingleChar(sqlite3 *ptr, char *tableName, char *setValue, char *newValue
 }
 
 /**
+ * dbFlagSet - set a flag
+ */
+void dbFlagSet(sqlite3 *ptr, char *table, char *flagCol, char *selCol, int selId, int flag){
+	printfunc(__func__);
+
+	int			old = 0;
+	int			diff = 0;
+
+	old = getSingleInt(appBase.db, table, flagCol, 1, selCol, selId, "", "", "", "");
+
+	verboseCC("[%s] old: %d\n\n\n\n", __func__, old);
+
+	diff = old & flag;
+	if(diff == flag){
+		/* Nothing has changed	*/
+		verboseCC("[%s] flag is already set\n", __func__);
+		return;
+	}
+
+	/* Set the new flag	*/
+	old |= flag;
+	setSingleInt(appBase.db, table, flagCol, old, selCol, selId);
+}
+
+/**
  * getListInt - returns a list of integers of a table of the local database
  */
 GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3){
