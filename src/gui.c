@@ -1693,6 +1693,26 @@ static void contactAddFavcb(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * contactDelFavcb - Callback to add one Contact to Favorites
+ */
+static void contactDelFavcb(GtkMenuItem *menuitem, gpointer data){
+	printfunc(__func__);
+
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID;
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
+		verboseCC("[%s] %d\n",__func__, selID);
+	} else {
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected."));
+		return;
+	}
+	dbFlagDel(appBase.db, "contacts", "flags", "contactID", selID, CONTACTCARDS_FAVORIT);
+}
+
+/**
  * completionContact - select a vCard from the searchbar
  */
 static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, GtkTreeIter *iter, gpointer trans){
@@ -2233,7 +2253,8 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 	int					selID;
 	int					abID	= 0,
 						srvID	= 0,
-						flag	= 0;
+						flag	= 0,
+						userflag = 0;
 
 	/*	right mouse button	*/
 	if(event->button.button != 3)
@@ -2264,9 +2285,15 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 		exportItem = gtk_menu_item_new_with_label(_("Export"));
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), exportItem);
 		g_signal_connect(exportItem, "activate", (GCallback)contactExportcb, NULL);
-		favItem = gtk_menu_item_new_with_label(_("Add to Favorits"));
+		userflag = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", selID, "", "", "", "");
+		if(userflag & CONTACTCARDS_FAVORIT){
+			favItem = gtk_menu_item_new_with_label(_("Delete from Favorits"));
+			g_signal_connect(favItem, "activate", (GCallback)contactDelFavcb, NULL);
+		} else {
+			favItem = gtk_menu_item_new_with_label(_("Add to Favorits"));
+			g_signal_connect(favItem, "activate", (GCallback)contactAddFavcb, NULL);
+		}
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), favItem);
-		g_signal_connect(favItem, "activate", (GCallback)contactAddFavcb, NULL);
 		gtk_widget_show_all(menu);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
 	}

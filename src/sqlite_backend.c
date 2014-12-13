@@ -550,8 +550,6 @@ void dbFlagSet(sqlite3 *ptr, char *table, char *flagCol, char *selCol, int selId
 
 	old = getSingleInt(appBase.db, table, flagCol, 1, selCol, selId, "", "", "", "");
 
-	verboseCC("[%s] old: %d\n\n\n\n", __func__, old);
-
 	diff = old & flag;
 	if(diff == flag){
 		/* Nothing has changed	*/
@@ -561,6 +559,21 @@ void dbFlagSet(sqlite3 *ptr, char *table, char *flagCol, char *selCol, int selId
 
 	/* Set the new flag	*/
 	old |= flag;
+	setSingleInt(appBase.db, table, flagCol, old, selCol, selId);
+}
+
+/**
+ * dbFlagDel - delete a flag
+ */
+void dbFlagDel(sqlite3 *ptr, char *table, char *flagCol, char *selCol, int selId, int flag){
+	printfunc(__func__);
+
+	int			old = 0;
+
+	old = getSingleInt(appBase.db, table, flagCol, 1, selCol, selId, "", "", "", "");
+
+	/* Set the new flag	*/
+	old &= ~(flag);
 	setSingleInt(appBase.db, table, flagCol, old, selCol, selId);
 }
 
