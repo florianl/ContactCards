@@ -2,7 +2,6 @@ AC_INIT([contactcards], [0.14], [https://github.com/florianl/ContactCards/issues
 AC_CONFIG_SRCDIR([src/contactcards.c])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-AC_PROG_CC_C99
 
 # Checks for programs.
 AC_PROG_CC([gcc])
@@ -23,6 +22,16 @@ AC_CHECK_HEADERS([libintl.h locale.h stdlib.h stdio.h string.h])
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
+
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [enable debugging, default: no]),
+	[case "${enableval}" in
+		yes) debug=true ;;
+		no)  debug=false ;;
+		*)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+	esac], [debug=false])
+AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+
+AM_COND_IF(DEBUG, AC_MSG_NOTICE([Debugging enabled]),AC_MSG_NOTICE([Debugging disabled]))
 
 PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.10, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
 AC_SUBST(GTK3_CFLAGS)
