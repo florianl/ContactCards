@@ -2648,28 +2648,42 @@ static gboolean completionCB(GtkEntryCompletion *completion, const gchar *key, G
 	model = gtk_entry_completion_get_model(completion);
 	gtk_tree_model_get(model, iter, FIRST_COLUMN, &first, LAST_COLUMN, &last, -1);
 
-	cKey = g_utf8_casefold(key, -1);
-	cFirst = g_utf8_casefold(first, -1);
-	cLast = g_utf8_casefold(last, -1);
+	if(key)
+		cKey = g_utf8_casefold(key, -1);
+	if(!cKey)
+		goto next;
+	if(first)
+		cFirst = g_utf8_casefold(first, -1);
+	if(last)
+		cLast = g_utf8_casefold(last, -1);
 
 	len = strlen(cKey);
 
-	if (!strncmp(cKey, cFirst, len)){
-		match = TRUE;
-		goto next;
+	if(cFirst){
+		if (!strncmp(cKey, cFirst, len)){
+			match = TRUE;
+			goto next;
+		}
 	}
 
-	if (!strncmp(cKey, cLast, len)){
-		match = TRUE;
-		goto next;
+	if(cLast){
+		if (!strncmp(cKey, cLast, len)){
+			match = TRUE;
+			goto next;
+		}
 	}
 
 next:
-	free(first);
-	free(last);
-	free(cKey);
-	free(cFirst);
-	free(cLast);
+	if(first)
+		g_free(first);
+	if(last)
+		g_free(last);
+	if(cKey)
+		g_free(cKey);
+	if(cFirst)
+		g_free(cFirst);
+	if(cLast)
+		g_free(cLast);
 
 	return match;
 }
