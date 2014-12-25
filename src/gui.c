@@ -106,9 +106,14 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	int						selID = -1;
 	int						selTyp = -1;
 
+	if(g_mutex_trylock(&aBookTreeMutex) != TRUE){
+		return;
+	}
+
 	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
 		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
 		verboseCC("[%s] Typ: %d\tID:%d\n", __func__, selTyp, selID);
+		g_mutex_unlock(&aBookTreeMutex);
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
@@ -2694,12 +2699,13 @@ void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		while(g_mutex_trylock(&mutex) != TRUE){}
+		if(g_mutex_trylock(&mutex) != TRUE){
+			break;
+		}
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
 			verboseCC("%s\n", error->message);
-			g_mutex_unlock(&mutex);
 		}
 		g_thread_unref(thread);
 		retList = next;
