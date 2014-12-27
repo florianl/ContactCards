@@ -383,11 +383,12 @@ static void syncMenuSel(GtkWidget *widget, gpointer trans){
 	GThread						*thread;
 
 	verboseCC("[%s] you selected %d\n", __func__, GPOINTER_TO_INT(trans));
-
+	while(g_mutex_trylock(&mutex) != TRUE){}
 	thread = g_thread_try_new("syncingServer", syncOneServer, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
 		verboseCC("%s\n", error->message);
+		g_mutex_unlock(&mutex);
 	}
 	g_thread_unref(thread);
 

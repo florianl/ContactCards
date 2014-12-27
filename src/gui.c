@@ -204,7 +204,6 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		sess = serverConnect(srvID);
 		serverDelContact(appBase.db, sess, srvID, selID);
 		serverDisconnect(sess, appBase.db, srvID);
-
 		store = GTK_TREE_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
 		gtk_tree_store_remove(store, &iter);
 
@@ -2026,7 +2025,8 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 		int 		ret = 0;
 		ret = oAuthUpdate(appBase.db, srvID);
 		if(ret != OAUTH_UP2DATE)
-			goto failure;
+			g_mutex_unlock(&mutex);
+			return;
 	}
 
 	sess = serverConnect(srvID);
@@ -2034,8 +2034,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	serverDisconnect(sess, appBase.db, srvID);
 	addressbookTreeUpdate();
 
-failure:
-		g_mutex_unlock(&mutex);
+	g_mutex_unlock(&mutex);
 }
 
 /**
@@ -2713,13 +2712,12 @@ void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		if(g_mutex_trylock(&mutex) != TRUE){
-			break;
-		}
+		while(g_mutex_trylock(&mutex) != TRUE){}
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
 			verboseCC("%s\n", error->message);
+			g_mutex_unlock(&mutex);
 		}
 		g_thread_unref(thread);
 		retList = next;
