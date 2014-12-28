@@ -684,6 +684,11 @@ sendAgain:
 		switch(ne_request_dispatch(req)){
 			case NE_OK:
 				break;
+			case NE_LOOKUP:
+			case NE_CONNECT:
+				debugCC("Could not resolv or connect to destination\n");
+				goto failedRequest;
+				break;
 			default:
 				verboseCC("[%s] %s\n", __func__, ne_get_error(sess));
 				if(failed++ > 3) goto failedRequest;
