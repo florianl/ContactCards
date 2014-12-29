@@ -17,7 +17,7 @@
  * branchDestroy - delete a branch of a xml-response
  */
 void branchDestroy(GNode *node){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	while(node){
 		GNode *next = node->next;
@@ -36,7 +36,7 @@ void branchDestroy(GNode *node){
  * elementCheck - check if a branch contains a specific element
  */
 gboolean elementCheck(GNode *branch, int elementType){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gboolean			state = FALSE;
 
@@ -116,7 +116,7 @@ gboolean elementCheck(GNode *branch, int elementType){
  * elementGet - returns a specific element of a branch
  */
 char *elementGet(GNode *branch, int elementType){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*retElement = NULL;
 
@@ -162,7 +162,7 @@ char *elementGet(GNode *branch, int elementType){
  * locateCurUserPrincipal - search for a current user principal in a xml-response
  */
 void locateCurUserPrincipal(GNode *tree, int serverID, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if(!strncmp(((ContactCards_node_t *)tree->data)->name, "href", 4)){
 		updateUri(ptr, serverID, ((ContactCards_node_t *)tree->data)->content, FALSE);
@@ -181,7 +181,7 @@ void locateCurUserPrincipal(GNode *tree, int serverID, sqlite3 *ptr){
  * getAddressbookHomeSet - returns the address book home set in a branch
  */
 char *getAddressbookHomeSet(GNode *branch){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char		*ret = NULL;
 
@@ -204,7 +204,7 @@ char *getAddressbookHomeSet(GNode *branch){
  * locateAddressbookHomeSet - search for the address book home set in a branch
  */
 void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*href;
 
@@ -234,7 +234,7 @@ void locateAddressbookHomeSet(GNode *branch, int serverID, sqlite3 *ptr){
  * locatePropstatBase - search for the propstat base in a branch
  */
 void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if(!strncmp(((ContactCards_node_t *)branch->data)->name, "propstat", 8)){
 		switch(reqMethod){
@@ -265,7 +265,7 @@ void locatePropstatBase(GNode *branch, int serverID, sqlite3 *ptr, int reqMethod
  * locateAddMember - search for a new member element in a branch
  */
 void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char		*href = NULL;
 
@@ -288,7 +288,7 @@ void locateAddMember(GNode *branch, int addressbookID, sqlite3 *ptr){
  * locateAddressbooks - search for address books in a branch
  */
 void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char		*href = NULL;
 	char		*displayname = NULL;
@@ -311,7 +311,7 @@ void locateAddressbooks(GNode *branch, int serverID, sqlite3 *ptr){
  * setAddrbookSync - sets the type of syncing for a address book
  */
 void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int			synMethod = 0;
 	int			synDB = 0;
@@ -342,7 +342,7 @@ void setAddrbookSync(GNode *branch, int addressbookID, sqlite3 *ptr){
  * reportHandle - handle the response to a REPORT-request
  */
 void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char		*href = NULL;
 	char		*etag = NULL;
@@ -379,7 +379,7 @@ void reportHandle(GNode *branch, int addressbookID, int serverID, ne_session *se
  * branchHandle - handle a branch by sended requests
  */
 void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	branch->parent = NULL;
 	branch->next = NULL;
@@ -423,7 +423,7 @@ void branchHandle(GNode *branch, int serverID, int addressbookID, int reqMethod,
  * responseHandle - split a response into branches
  */
 void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GNode				*child;
 
@@ -453,7 +453,7 @@ void responseHandle(ContactCards_stack_t *stack, ne_session *sess, sqlite3 *ptr)
  * responseElementOAuthHandle - handle a OAuth response element
  */
 void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gchar			**ptr = NULL;
 	int				i = 0;
@@ -500,7 +500,7 @@ void responseElementOAuthHandle(sqlite3 *db, int serverID, char *element){
  * responseOAuthHandle - handle a OAuth response
  */
 int responseOAuthHandle(void *trans, const char *block, size_t len){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gchar			**tokens = NULL;
 	gchar			**ptr = NULL;

@@ -31,3 +31,4 @@ missing
 src/.deps
 Makefile
 Makefile.in
+m4/*.m4

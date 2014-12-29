@@ -17,7 +17,7 @@
  * syncTimer - Callback for the sync timer
  */
 gboolean syncTimer(gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	syncServer(NULL, NULL);
 
@@ -28,7 +28,7 @@ gboolean syncTimer(gpointer data){
  * main - do I need to say more?
  */
 int main(int argc, char **argv){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int					ret;
 	sqlite3				*db_handler;

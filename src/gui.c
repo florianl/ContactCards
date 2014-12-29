@@ -17,7 +17,7 @@
  * guiRun - run the basic GUI
  */
 void guiRun(sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	addressbookTreeUpdate();
 	contactsTreeUpdate(0,0);
@@ -28,7 +28,7 @@ void guiRun(sqlite3 *ptr){
  * exitOnSignal - simple try, to exit properly on a signal
  */
 gboolean exitOnSignal(gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gtk_main_quit();
 	g_slist_free_full(data, g_free);
@@ -40,7 +40,7 @@ gboolean exitOnSignal(gpointer data){
  * guiExit - exit the basic GUI and clean up
  */
 void guiExit(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gtk_main_quit();
 	g_slist_free_full(data, g_free);
@@ -50,7 +50,7 @@ void guiExit(GtkWidget *widget, gpointer data){
  * guiKeyHandler - control some kind of the basic GUI by keyboard
  */
 void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
 		guiExit(gui, data);
@@ -60,7 +60,7 @@ void guiKeyHandler(GtkWidget *gui, GdkEventKey *event, gpointer data){
  * dialogKeyHandler - control some kind of a dialog by keyboard
  */
 void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
 		gtk_dialog_response(widget, GTK_RESPONSE_DELETE_EVENT);
@@ -71,7 +71,7 @@ void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data){
  * dialogAbout - display some basic stuff about this software
  */
 static void dialogAbout(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError			*error = NULL;
 	GdkPixbuf		*pixbuf;
@@ -99,16 +99,21 @@ static void dialogAbout(void){
  * selBook - select a single address book
  */
 static void selBook(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeModel			*model;
 	GtkTreeIter				iter;
 	int						selID = -1;
 	int						selTyp = -1;
 
+	if(g_mutex_trylock(&aBookTreeMutex) != TRUE){
+		return;
+	}
+
 	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
 		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
 		verboseCC("[%s] Typ: %d\tID:%d\n", __func__, selTyp, selID);
+		g_mutex_unlock(&aBookTreeMutex);
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
@@ -140,7 +145,7 @@ static void selBook(GtkWidget *widget, gpointer trans){
  *	This function gives the user a feedback via a dialog
  */
 void feedbackDialog(int type, char *msg){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget		*infoDia;
 
@@ -153,7 +158,7 @@ void feedbackDialog(int type, char *msg){
  * contactDel - delete a selected vCard
  */
 static void contactDel(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -199,7 +204,6 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		sess = serverConnect(srvID);
 		serverDelContact(appBase.db, sess, srvID, selID);
 		serverDisconnect(sess, appBase.db, srvID);
-
 		store = GTK_TREE_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(appBase.contactList)));
 		gtk_tree_store_remove(store, &iter);
 
@@ -214,7 +218,7 @@ failure:
  * contactDelcb - Callback for contactDel()
  */
 static void contactDelcb(GtkMenuItem *menuitem, gpointer     user_data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	contactDel(NULL, NULL);
 }
@@ -223,7 +227,7 @@ static void contactDelcb(GtkMenuItem *menuitem, gpointer     user_data){
  * contactEditPostalItem - Add a postal address to edit a vCard
  */
 static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *value){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gchar				**postalPtr = NULL;
 	GtkWidget				*input, *label;
@@ -329,7 +333,7 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
  * implement TYP-stuff in the future
  */
 static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*input, *label;
 	GtkEntryBuffer			*buf;
@@ -383,7 +387,7 @@ static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
  * implement TYP-stuff in the future
  */
 static void contactNewSingleMultilineItem(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*input, *label;
 	GtkTextBuffer			*buf;
@@ -428,7 +432,7 @@ static void contactNewSingleMultilineItem(GtkWidget *widget, gpointer trans){
  * implement TYP-stuff in the future
  */
 static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int line, char *value){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*input;
 	GtkEntryBuffer			*buf;
@@ -462,7 +466,7 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
  * implement TYP-stuff in the future
  */
 static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int type, int line, char *value){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*input;
 	GtkTextBuffer			*buf;
@@ -494,7 +498,7 @@ static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int typ
  * cleanCard - clean up the area to display a new vCard
  */
 static void cleanCard(GtkWidget *widget){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GList				*children, *child;
 
@@ -508,7 +512,7 @@ static void cleanCard(GtkWidget *widget){
  * collectionCreate - Signalcallback to create a new collection
  */
 static void collectionCreate(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_item_t		*data = trans;
 	char					*colName = NULL;
@@ -554,7 +558,7 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
  * collectionDiscard - Signalcallback to delete obsolete stuff
  */
 static void collectionDiscard(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_item_t		*data = trans;
 
@@ -568,7 +572,7 @@ static void collectionDiscard(GtkWidget *widget, gpointer trans){
  * createNewCollectionCard - Frontend for the user to create a new collection
  */
 static GtkWidget *createNewCollectionCard(int srvID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*collection;
 	GtkWidget				*discardBtn, *saveBtn, *row;
@@ -624,7 +628,7 @@ static GtkWidget *createNewCollectionCard(int srvID){
  * dialogExportBirthdays - dialog to export vCards
  */
 static void dialogExportBirthdays(int type, int id){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget					*dirChooser;
 	int							result;
@@ -652,7 +656,7 @@ static void dialogExportBirthdays(int type, int id){
  * cbAddrBookExportBirthdays - Callback from popup-menu to export birthdays
  */
 void cbAddrBookExportBirthdays(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int				abID = 0;
 
@@ -664,7 +668,7 @@ void cbAddrBookExportBirthdays(GtkMenuItem *menuitem, gpointer data){
  * cbSrvExportBirthdays - Callback from popup-menu to export birthdays
  */
 void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int				srvID = 0;
 
@@ -676,7 +680,7 @@ void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
  * createNewCollection - Callback from popup-menu to create a new collection
  */
 void createNewCollection(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int				srvID = 0;
 	GtkWidget		*collection;
@@ -702,7 +706,7 @@ void createNewCollection(GtkMenuItem *menuitem, gpointer data){
  * getWidgetFromID - returns the type parameter
  */
 static GtkWidget *getWidgetFromID(int id){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget		*new;
 	GString			*value;
@@ -725,7 +729,7 @@ static GtkWidget *getWidgetFromID(int id){
  * edgy2roundCB - Callback to round off the corners
  */
 static gboolean edgy2roundCB(GtkWidget *widget, GdkEventConfigure *event, gpointer *data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	cairo_t			*cr;
 	GError			*error = NULL;
@@ -779,7 +783,7 @@ static gboolean edgy2roundCB(GtkWidget *widget, GdkEventConfigure *event, gpoint
  * buildNewCard - display the data of a selected vCard
  */
 static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*card;
 	GtkWidget			*photo, *fn, *bday;
@@ -1143,7 +1147,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
  * contactEditDiscard - discard the changes on a vCard
  */
 static void contactEditDiscard(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget		*card;
 
@@ -1160,7 +1164,7 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
  * pushingCard - Threadfunction to push a vCard
  */
 static void *pushingCard(void *trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_add_t			*value = trans;
 	char						*vCard = NULL;
@@ -1196,7 +1200,7 @@ static void *pushingCard(void *trans){
  * checkInput - very simple input check
  */
 gboolean checkInput(GSList *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList			*next;
 	while(list){
@@ -1226,7 +1230,7 @@ stepForward:
  * contactEditSave - save the changes on a vCard
  */
 static void contactEditSave(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError						*error = NULL;
 	GThread						*thread;
@@ -1250,7 +1254,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
  * buildEditCard - display the data of a selected vCard for editing
  */
 static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*card, *label, *sep, *input;
 	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal, *addIM, *addNote;
@@ -1551,7 +1555,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
  * contactNew - add a new vCard
  */
 static void contactNew(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*newCard;
 	int					abID = 0,
@@ -1589,7 +1593,7 @@ static void contactNew(GtkWidget *widget, gpointer trans){
  * contactEdit - edit the content of a vCard
  */
 static void contactEdit(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1628,7 +1632,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
  * contactEditdb - Callback for contactEdit()
  */
 static void contactEditcb(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	contactEdit(NULL, NULL);
 }
@@ -1637,7 +1641,7 @@ static void contactEditcb(GtkMenuItem *menuitem, gpointer data){
  * contactExportcb - Callback to export one Contact
  */
 static void contactExportcb(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1676,7 +1680,7 @@ static void contactExportcb(GtkMenuItem *menuitem, gpointer data){
  * contactAddFavcb - Callback to add one Contact to Favorites
  */
 static void contactAddFavcb(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1696,7 +1700,7 @@ static void contactAddFavcb(GtkMenuItem *menuitem, gpointer data){
  * contactDelFavcb - Callback to add one Contact to Favorites
  */
 static void contactDelFavcb(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1716,7 +1720,7 @@ static void contactDelFavcb(GtkMenuItem *menuitem, gpointer data){
  * completionContact - select a vCard from the searchbar
  */
 static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, GtkTreeIter *iter, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget					*card;
 	int							selID;
@@ -1734,7 +1738,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
  * selContact - select a vCard from the list
  */
 static void selContact(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1755,7 +1759,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
  * listFlush - remove all items from a list
  */
 void listFlush(GtkWidget *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkListStore *store;
 	GtkTreeModel *model;
@@ -1774,7 +1778,7 @@ void listFlush(GtkWidget *list){
  * listAppend - append a new item to a list
  */
 void listAppend(GtkWidget *list, gchar *text, guint id) {
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkListStore		*store;
 	GtkTreeIter 		iter;
@@ -1789,7 +1793,7 @@ void listAppend(GtkWidget *list, gchar *text, guint id) {
  * listInit - create a new list
  */
 void listInit(GtkWidget *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkListStore		*store;
 	GtkTreeViewColumn	*column;
@@ -1816,7 +1820,7 @@ void listInit(GtkWidget *list){
  * listSortorderAsc - sort a list ascending
  */
 static void listSortorderAsc(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore		*store;
 
@@ -1830,7 +1834,7 @@ static void listSortorderAsc(void){
  * listSortorderDesc - sort a list descending
  */
 static void listSortorderDesc(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore		*store;
 
@@ -1844,7 +1848,7 @@ static void listSortorderDesc(void){
  * syncOneServer - check one single server for new data
  */
 void *syncOneServer(void *trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int					serverID = GPOINTER_TO_INT(trans);
 	int					isOAuth = 0;
@@ -1888,7 +1892,7 @@ void *syncOneServer(void *trans){
 }
 
 void *importCards(void *trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_item_t		*data = trans;
 	int						aID = data->itemID;
@@ -1915,7 +1919,7 @@ void *importCards(void *trans){
  * importVCF - context menu callback to import vCards
  */
 static void importVCF(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*chooser;
 	GError				*error = NULL;
@@ -1986,7 +1990,7 @@ static void importVCF(GtkMenuItem *menuitem, gpointer data){
  * addressbookDel - delete an address book from the server
  */
 static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*dialog;
 	int					srvID, aID;
@@ -2021,7 +2025,8 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 		int 		ret = 0;
 		ret = oAuthUpdate(appBase.db, srvID);
 		if(ret != OAUTH_UP2DATE)
-			goto failure;
+			g_mutex_unlock(&mutex);
+			return;
 	}
 
 	sess = serverConnect(srvID);
@@ -2029,15 +2034,14 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	serverDisconnect(sess, appBase.db, srvID);
 	addressbookTreeUpdate();
 
-failure:
-		g_mutex_unlock(&mutex);
+	g_mutex_unlock(&mutex);
 }
 
 /**
  * addressbookTreeContextMenu - a simple context menu for the address books view
  */
 void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -2115,7 +2119,7 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
  * addressbookTreeUpdate - updates the address books view
  */
 void addressbookTreeUpdate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore	*store;
 	GSList			*servers, *addressBooks;
@@ -2206,7 +2210,7 @@ void addressbookTreeUpdate(void){
  * addressbookModelCreate - create the model for the address books view
  */
 static GtkTreeModel *addressbookModelCreate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore  *treestore;
 
@@ -2219,7 +2223,7 @@ static GtkTreeModel *addressbookModelCreate(void){
  * addressbookTreeCreate - creates the model and view for the adress books
  */
 GtkWidget *addressbookTreeCreate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*view;
 	GtkTreeViewColumn		*column;
@@ -2246,7 +2250,7 @@ GtkWidget *addressbookTreeCreate(void){
  * contactsTreeContextMenu - a simple context menu for the list view
  */
 void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -2303,7 +2307,7 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
  * contactsTreeAppend - append a new item to a contacts list view
  */
 void contactsTreeAppend(char *card, int id){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore		*store;
 	GtkTreeIter 		iter;
@@ -2358,7 +2362,7 @@ void contactsTreeAppend(char *card, int id){
  * contactsTreeUpdate - updates the contacts list view
  */
 void contactsTreeUpdate(int type, int id){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore	*store;
 	GSList			*contacts = NULL;
@@ -2453,7 +2457,7 @@ void contactsTreeUpdate(int type, int id){
  * contactsModelCreate - create the model for the contacts list view
  */
 static GtkTreeModel *contactsModelCreate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore  *treestore;
 
@@ -2467,7 +2471,7 @@ static GtkTreeModel *contactsModelCreate(void){
  */
 /*
 void contactsTreeSetSeperators(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeIter			new;
@@ -2522,7 +2526,7 @@ void contactsTreeSetSeperators(void){
  */
 /*
 static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gboolean		ret = FALSE;
 
@@ -2538,7 +2542,7 @@ static gboolean contactsTreeSeparator (GtkTreeModel *model, GtkTreeIter *iter, g
  * contactsTreeColor - give the cells of the contacts tree some color
  */
 void contactsTreeColor(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int			cId = 0,
 				aId = 0,
@@ -2562,7 +2566,7 @@ void contactsTreeColor(GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTre
  * contactsTreeCreate - creates the model and view for the contacts list
  */
 static GtkWidget *contactsTreeCreate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*view;
 	GtkTreeViewColumn		*column, *column2;
@@ -2601,7 +2605,7 @@ static GtkWidget *contactsTreeCreate(void){
  * dialogExportContacts - dialog to export vCards
  */
 static void dialogExportContacts(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget					*dirChooser;
 	int							result;
@@ -2629,7 +2633,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
  * completionCB - very simple Callback to check whether a entry fits
  */
 static gboolean completionCB(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer user_data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gboolean			match = FALSE;
 	GtkTreeModel		*model;
@@ -2643,28 +2647,42 @@ static gboolean completionCB(GtkEntryCompletion *completion, const gchar *key, G
 	model = gtk_entry_completion_get_model(completion);
 	gtk_tree_model_get(model, iter, FIRST_COLUMN, &first, LAST_COLUMN, &last, -1);
 
-	cKey = g_utf8_casefold(key, -1);
-	cFirst = g_utf8_casefold(first, -1);
-	cLast = g_utf8_casefold(last, -1);
+	if(key)
+		cKey = g_utf8_casefold(key, -1);
+	if(!cKey)
+		goto next;
+	if(first)
+		cFirst = g_utf8_casefold(first, -1);
+	if(last)
+		cLast = g_utf8_casefold(last, -1);
 
 	len = strlen(cKey);
 
-	if (!strncmp(cKey, cFirst, len)){
-		match = TRUE;
-		goto next;
+	if(cFirst){
+		if (!strncmp(cKey, cFirst, len)){
+			match = TRUE;
+			goto next;
+		}
 	}
 
-	if (!strncmp(cKey, cLast, len)){
-		match = TRUE;
-		goto next;
+	if(cLast){
+		if (!strncmp(cKey, cLast, len)){
+			match = TRUE;
+			goto next;
+		}
 	}
 
 next:
-	free(first);
-	free(last);
-	free(cKey);
-	free(cFirst);
-	free(cLast);
+	if(first)
+		g_free(first);
+	if(last)
+		g_free(last);
+	if(cKey)
+		g_free(cKey);
+	if(cFirst)
+		g_free(cFirst);
+	if(cLast)
+		g_free(cLast);
 
 	return match;
 }
@@ -2673,7 +2691,7 @@ next:
  * syncServer - check all available server for new data
  */
 void syncServer(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList						*retList;
 	GError		 				*error = NULL;
@@ -2694,7 +2712,10 @@ void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		while(g_mutex_trylock(&mutex) != TRUE){}
+		if(g_mutex_trylock(&mutex) != TRUE){
+			debugCC("There is already a sync running\n");
+			break;
+		}
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
@@ -2711,7 +2732,7 @@ void syncServer(GtkWidget *widget, gpointer trans){
  * guiInit - build the basic GUI
  */
 void guiInit(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;

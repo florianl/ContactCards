@@ -14,7 +14,7 @@
 #include "contactcards.h"
 
 void contactsTreeFill(GSList *contacts){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	while(contacts){
 		GSList				*next =  contacts->next;
@@ -44,7 +44,7 @@ void contactsTreeFill(GSList *contacts){
  * fillList - fill a list
  */
 void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	sqlite3_stmt	 	*vm;
 	char 				*sql_query = NULL;
@@ -143,7 +143,7 @@ void printGError(GError *error){
  * exportCert - export the certificate from a server
  */
 void exportCert(sqlite3 *ptr, char *base, int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*fileName = NULL;
 	char				*serverDesc = NULL;
@@ -185,7 +185,7 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
  * exportOneContact - exports one contact
  */
 void exportOneContact(int selID, char *base){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*path = NULL;
 	char				*contactName = NULL;
@@ -214,7 +214,7 @@ void exportOneContact(int selID, char *base){
  * exportContacts - exports all contacts of a server
  */
 void exportContacts(sqlite3 *ptr, char *base){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList				*serverList;
 	GSList				*addressbookList;
@@ -294,7 +294,7 @@ void exportContacts(sqlite3 *ptr, char *base){
  * writeCalendarHead - write the header for the .ics file
  */
 void writeCalendarHead(int fd){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GString				*content;
 
@@ -314,7 +314,7 @@ void writeCalendarHead(int fd){
  * writeEvent - write a single event into a .ics file
  */
 void writeEvent(int fd, GDate *date, char *card){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GString				*content;
 	char				*stamp = NULL,
@@ -359,7 +359,7 @@ void writeEvent(int fd, GDate *date, char *card){
  * writeEvents - write the events into the .ics file
  */
 void writeEvents(int fd, GSList *contacts){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	while(contacts){
 		GSList				*next =  contacts->next;
@@ -403,12 +403,12 @@ void writeEvents(int fd, GSList *contacts){
  * writeCalendarFoot - write the footer for the .ics file
  */
 void writeCalendarFoot(int fd){
-	printfunc(__func__);
+	__PRINTFUNC__;
 	write(fd, "END:VCALENDAR\r\n", sizeof("END:VCALENDAR\r\n"));
 }
 
 void exportBirthdays(int type, int id, char *base){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError			*error = NULL;
 	GSList			*contacts = NULL;

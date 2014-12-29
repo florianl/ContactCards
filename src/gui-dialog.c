@@ -17,7 +17,7 @@
  * newDialogEntryChanged - check for changes of a server in the preferences dialog
  */
 static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkAssistant			*assistant = GTK_ASSISTANT (data);
 	GtkWidget				*box;
@@ -61,7 +61,7 @@ static void newDialogEntryChanged(GtkWidget *widget, gpointer data){
  * newDialogClose - close the dialog for a new server
  */
 static void newDialogClose(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gtk_widget_destroy(widget);
 }
@@ -70,7 +70,7 @@ static void newDialogClose(GtkWidget *widget, gpointer data){
  * newDialogApply - apply the user credentials to a new server
  */
 static void newDialogApply(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget					*assistant, *box;
 	GtkWidget					*controller;
@@ -125,7 +125,7 @@ google:
  * newDialogConfirm - finally confirm to add a new server
  */
 static void newDialogConfirm(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*box, *hbox;
 	GtkWidget				*label;
@@ -148,7 +148,7 @@ static void newDialogConfirm(GtkWidget *widget, gpointer data){
  * newDialogOAuthCredentials - credentials for OAuth
  */
 static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*box, *hbox;
 	GtkWidget				*label, *inputoAuth, *inputGrant, *button;
@@ -198,7 +198,7 @@ static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
  * newDialogUserCredentials - basic credentials for a new server
  */
 static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*box, *hbox;
 	GtkWidget				*label, *inputUser, *inputPasswd;
@@ -241,7 +241,7 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
  * newDialogServerSettings - ask for basic informaion of the new server
  */
 static void newDialogServerSettings(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*box, *hbox;
 	GtkWidget				*label, *inputDesc, *inputUrl;
@@ -283,7 +283,7 @@ static void newDialogServerSettings(GtkWidget *widget, gpointer data){
  * newDialogSelectPage - guide the user through the new server dialog
  */
 gint newDialogSelectPage(gint curPage, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*widget;
 	GtkWidget			*box;
@@ -311,7 +311,7 @@ gint newDialogSelectPage(gint curPage, gpointer data){
  * newDialogSelectType - select the type of the new server
  */
 static void newDialogSelectType(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*box;
 	GtkWidget				*fruux, *google, *others;
@@ -340,7 +340,7 @@ static void newDialogSelectType(GtkWidget *widget, gpointer data){
  * newDialog - dialog to add a new server
  */
 void newDialog(GtkWidget *do_widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget 			*assistant = NULL;
 	GError				*error = NULL;
@@ -377,17 +377,18 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
  * syncMenuSel - Callback for sync menu
  */
 static void syncMenuSel(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError		 				*error = NULL;
 	GThread						*thread;
 
 	verboseCC("[%s] you selected %d\n", __func__, GPOINTER_TO_INT(trans));
-
+	while(g_mutex_trylock(&mutex) != TRUE){}
 	thread = g_thread_try_new("syncingServer", syncOneServer, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
 		verboseCC("%s\n", error->message);
+		g_mutex_unlock(&mutex);
 	}
 	g_thread_unref(thread);
 
@@ -397,7 +398,7 @@ static void syncMenuSel(GtkWidget *widget, gpointer trans){
  * syncMenuItem - one item of the sync menu
  */
 static GtkWidget *syncMenuItem(int sID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget				*item;
 	char					*desc = NULL;
@@ -416,7 +417,7 @@ static GtkWidget *syncMenuItem(int sID){
  * buildRow - creates a row for the list of address books
  */
 static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget		*row, *box, *check, *label;
 	char			*abName = NULL;
@@ -455,7 +456,7 @@ static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
  * prefServerDelete - delete a server in the preferences dialog
  */
 void prefServerDelete(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_pref_t		*buffers = trans;
 	GList					*children, *iter;
@@ -496,7 +497,7 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
  * prefServerSave - save changes to a server in the preferences dialog
  */
 void prefServerSave(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_pref_t		*buffers = trans;
 	GdkRGBA					rgba;
@@ -526,7 +527,7 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
  * prefServerCheck - checking for address books
  */
 void prefServerCheck(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_pref_t			*buffers = trans;
 	int							isOAuth = 0;
@@ -596,7 +597,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
  * prefExportCert - export the certificate of a server
  */
 void prefExportCert(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_pref_t		*buffers = trans;
 	GtkWidget					*dirChooser;
@@ -626,7 +627,7 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
  * prefServerSelect - select a server in the preferences dialog
  */
 void prefServerSelect(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -748,7 +749,7 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
  * prefExit - exit the preferences dialog
  */
 void prefExit(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	g_free(data);
 }
@@ -757,7 +758,7 @@ void prefExit(GtkWidget *widget, gpointer data){
  * prefKeyHandler - control some kind of the preferences dialog by keyboard
  */
 void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if (event->keyval == GDK_KEY_w && (event->state & GDK_CONTROL_MASK)) {
 		gtk_widget_destroy(window);
@@ -768,7 +769,7 @@ void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
  * prefWindow - build the preferences dialog
  */
 void prefWindow(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*prefWindow, *prefView, *prefFrame, *prefList;
 	GtkWidget			*serverPrefList;
@@ -976,7 +977,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
  * syncMenuFill - fills the menu with items
  */
 static void syncMenuFill(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList		*list;
 	GtkWidget	*item;
@@ -1000,7 +1001,7 @@ static void syncMenuFill(void){
  * syncMenuFlush - delete all items from menu
  */
 static void syncMenuFlush(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GList			*children, *iter;
 
@@ -1015,7 +1016,7 @@ static void syncMenuFlush(void){
  * syncMenuUpdate - updates the menu
  */
 void syncMenuUpdate(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	syncMenuFlush();
 	syncMenuFill();
@@ -1025,7 +1026,7 @@ void syncMenuUpdate(void){
  * birthdayListAppend - appends the birthday to the list for the tooltips
  */
 void birthdayListAppend(ContactCards_cal_t *data, int day, char *card){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_cal_item_t			*item;
 	char							*displayname;
@@ -1071,7 +1072,7 @@ insertDirect:
  * markDay - mark the birthday of each contact in the calendar
  */
 void markDay(GSList *contacts, ContactCards_cal_t *data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget		*cal = data->cal;
 
@@ -1122,7 +1123,7 @@ void markDay(GSList *contacts, ContactCards_cal_t *data){
  * calendarUpdate - Update the birthday calendar
  */
 void calendarUpdate(ContactCards_cal_t *data, int type, int id){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList			*contacts = NULL;
 
@@ -1182,7 +1183,7 @@ void calendarUpdate(ContactCards_cal_t *data, int type, int id){
  * selABook - select a server or address book to show the birthdays
  */
 static void selABook(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeModel			*model;
 	GtkTreeIter				iter;
@@ -1214,7 +1215,7 @@ static void selABook(GtkWidget *widget, gpointer trans){
  * addressbooksUpdate - it's a own function to not mix it up with the main
  */
 void addressbooksUpdate(GtkWidget *widget){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeStore	*store;
 	GSList			*servers, *addressBooks;
@@ -1288,7 +1289,7 @@ void addressbooksUpdate(GtkWidget *widget){
  * bdExit - exit the birthday dialog
  */
 void birthdayDialogExit(GtkWidget *widget, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	g_free(data);
 }
@@ -1297,7 +1298,7 @@ void birthdayDialogExit(GtkWidget *widget, gpointer data){
  * birthdayDialogTreeContextMenu - a simple context menu
  */
 void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
@@ -1341,7 +1342,7 @@ void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer 
 }
 
 gchar *birthdayTooltip(GtkCalendar *cal, guint year, guint month, guint day, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_cal_t				*data = trans;
 	GSList							*list = data->list;
@@ -1370,7 +1371,7 @@ stepForward:
  * birthdayDialog - a simple calendar showing birthdays
  */
 void birthdayDialog(GtkWidget *widget, gpointer trans){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GtkWidget			*bdWindow, *cal, *splitView, *treeView;
 	GtkWidget			*addressbookList;
