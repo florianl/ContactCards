@@ -2577,11 +2577,13 @@ static GtkWidget *contactsTreeCreate(void){
 
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("", renderer, "text", DESC_COL, NULL);
+	gtk_tree_view_column_set_expand(column, TRUE);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 
 
 	column2 = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_fixed_width (column2, 5);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column2);
 	renderer2 = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column2, renderer2, TRUE);
@@ -2752,7 +2754,7 @@ void guiInit(void){
 
 	appBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(appBase.window), "ContactCards");
-	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 760,496);
+	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 987,610);
 	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong\n", __func__);
@@ -2816,7 +2818,7 @@ void guiInit(void){
 	/*		Addressbookstuff		*/
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(addressbookWindow, 156, -1);
+	gtk_widget_set_size_request(addressbookWindow, 144, -1);
 	appBase.addressbookList = addressbookTreeCreate();
 
 	/*		Contactstuff			*/
@@ -2824,7 +2826,7 @@ void guiInit(void){
 	contactWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(contactWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_kinetic_scrolling(GTK_SCROLLED_WINDOW(contactWindow), TRUE);
-	gtk_widget_set_size_request(contactWindow, 186, -1);
+	gtk_widget_set_size_request(contactWindow, 199, -1);
 	scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	emptyCard = gtk_grid_new();
