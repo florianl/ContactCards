@@ -36,9 +36,11 @@ Try it on Fedora
 ----------------
 
 Install the dependencies:
+
     $ yum install autoconf gettext-devel automake intltool gcc git gtk3-devel neon-devel sqlite-devel
 
 Now get it, build it and run it:
+
     $ git clone https://github.com/florianl/ContactCards.git
     $ cd ContactCards
     $ ./autogen.sh
