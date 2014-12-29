@@ -20,7 +20,7 @@
  * http://www.php.net/manual/en/function.uniqid.php#94959
  */
 char *getUID(void){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char		*uid = NULL;
 	GRand		*rand = g_rand_new();
@@ -53,7 +53,7 @@ char *getUID(void){
  * the country name.
  */
 static char *buildAdr(GSList *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*adr = "";
 	char				*poBox = NULL;
@@ -169,7 +169,7 @@ stepEmpty:
  * buildSingleLine - builds a single line for a vCard
  */
 static char *buildSingleLine(int type, GSList *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*line = "";
 	GSList				*next;
@@ -239,7 +239,7 @@ stepEmpty:
  * buildCard - create a RFC conform vCard from the user input
  */
 char *buildCard(GSList *list){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*card = NULL;
 	char				*firstN , *lastN, *middleN, *prefixN, *suffixN;
@@ -369,7 +369,7 @@ stepForward:
  * getTypeValue(element[0])
  */
 static unsigned long getAttributType(char *line){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				**attributes = g_strsplit(line, ";", 0);
 	char				**attribute = attributes;
@@ -452,7 +452,7 @@ static unsigned long getAttributType(char *line){
  * getAttributValueWithType - split the line of a vCard in its elements and return the value with its type
  */
 static ContactCards_item_t *getAttributValueWithType(char *line){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char						**elements = g_strsplit(line, ":", 2);
 	char						**element = elements;
@@ -477,7 +477,7 @@ static ContactCards_item_t *getAttributValueWithType(char *line){
  * getAttributValue - split the line of a vCard in its elements and return the value
  */
 static char *getAttributValue(char *line){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				**elements = g_strsplit(line, ":", 2);
 	char				**element = elements;
@@ -494,7 +494,7 @@ static char *getAttributValue(char *line){
  * getMultipleCardAttribut - return a vCard element which can occur multiple times
  */
 GSList *getMultipleCardAttribut(int key, char *card, gboolean attribute){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList				*list = g_slist_alloc();
 	char				**lines = g_strsplit(card, "\n", 0);
@@ -620,7 +620,7 @@ GSList *getMultipleCardAttribut(int key, char *card, gboolean attribute){
  * getCardPhoto - return the photo of a vCard
  */
 ContactCards_pix_t *getCardPhoto(char *card){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*start = g_strrstr(card, "PHOTO");
 	GString				*buf;
@@ -692,7 +692,7 @@ ContactCards_pix_t *getCardPhoto(char *card){
  * getSingleCardAttribut - return a vCard element which can occur only once
  */
 char *getSingleCardAttribut(int type, char *card){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char						**lines = g_strsplit(card, "\n", 0);
 	char						**line = lines;
@@ -759,7 +759,7 @@ char *getSingleCardAttribut(int type, char *card){
  * This function only works for values which occur only once
  */
 static char *replaceAntiquatedLine(char *vCard, char *pattern, char *newLine){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GString		*data;
 	const char	*end;
@@ -814,7 +814,7 @@ nextLoop:
  * removeGroupMember - remove private group member of a value
  */
 GString *removeGroupMember(GString *data, GString *group){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*p = NULL;
 	char			*end = NULL;
@@ -848,7 +848,7 @@ GString *removeGroupMember(GString *data, GString *group){
  * removeValue - remove a value from vCard
  */
 static char *removeValue(char *card, char *value){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*new = NULL;
 	char			*p;
@@ -917,13 +917,13 @@ static char *removeValue(char *card, char *value){
  * valueCmp - compares the values of two lists
  */
 int valueCmp(gconstpointer a, gconstpointer b){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	return g_strcmp0((char *)a, (char *)b);
 }
 
 static inline int findData(GSList *list, char *data){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int			ret = 0;
 
@@ -946,7 +946,7 @@ static inline int findData(GSList *list, char *data){
  * the vCard
  */
 char *mergeMultipleItems(char *old, char *new){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList				*present;
 	GSList				*future;
@@ -1069,7 +1069,7 @@ char *mergeMultipleItems(char *old, char *new){
  * displayed and editable so far
  */
 char *mergeCards(GSList *new, char *old){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*firstN , *lastN, *middleN, *prefixN, *suffixN;
 	GSList			*next;
@@ -1180,7 +1180,7 @@ stepForward:
  * validateCard - validates a single vCard
  */
 char *validateCard(char *card){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*vcf = NULL;
 	char			**lines = g_strsplit(card, "\n", -1);
@@ -1239,7 +1239,7 @@ next:
  * validateFile - returns a list of valid vCards
  */
 GSList *validateFile(char *content){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GSList				*list = g_slist_alloc();
 	char				**cards = g_strsplit(content, "END:VCARD\n", -1);

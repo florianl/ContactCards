@@ -28,7 +28,7 @@ static GOptionEntry entries[] =
 };
 
 ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError				*error = NULL;
 	GOptionContext		*context;
@@ -64,7 +64,7 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 }
 
 static void checkConfigDir(char *dir){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if (!g_file_test(dir, G_FILE_TEST_EXISTS)){
 		int			ret = 0;
@@ -98,7 +98,7 @@ static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *m
 }
 
 static void configOutput(ContactCards_app_t *app){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if(app->verbose){
 		g_log_set_handler("ContactCards", G_LOG_LEVEL_INFO, logHandler, NULL);
@@ -111,14 +111,14 @@ static void configOutput(ContactCards_app_t *app){
 }
 
 void checkAndSetConfig(ContactCards_app_t *app){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	checkConfigDir(app->configdir);
 	configOutput(app);
 }
 
 static void config_load_ui(GKeyFile *config){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	GError			*error = NULL;
 	int				tmp = 0;
@@ -164,7 +164,7 @@ static void config_load_ui(GKeyFile *config){
 }
 
 void config_load(ContactCards_app_t *app){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	gchar			*configfile = g_build_filename(app->configdir, "contactcards.conf", NULL);
 	GKeyFile		*config = g_key_file_new();

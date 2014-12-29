@@ -17,7 +17,7 @@
  * getUserAuth - returns the user credentials for a server
  */
 static int getUserAuth(void *trans, const char *realm, int attempts, char *username, char *password) {
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	credits_t			key;
 	int					id;
@@ -47,7 +47,7 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
  * but I'm ok with it. So far.
  */
 gboolean validateUrl(char *url){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	return g_regex_match_simple("^(https://|carddavs://|webdavs://)?([A-Za-z0-9-]+\\.)+[A-Za-z-]{1,22}(:[0-9]{1,5})?(/|(/[A-Za-z0-9-\\.@]+)*(/)?)?$", url, G_REGEX_EXTENDED, 0);
 }
@@ -56,7 +56,7 @@ gboolean validateUrl(char *url){
  * verifyCert - verify a certificate of a server
  */
 static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char						*digest = calloc(1, NE_SSL_DIGESTLEN);
 	int							trust = ContactCards_DIGEST_UNTRUSTED;
@@ -133,7 +133,7 @@ fastExit:
  * serverConnectionTest - tests the connection to a server
  */
 int serverConnectionTest(int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*davServer = NULL;
 	ne_uri				uri;
@@ -188,7 +188,7 @@ tryAgain:
  * serverConnect - connect to a server
  */
 ne_session *serverConnect(int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*davServer = NULL;
 	ne_uri				uri;
@@ -224,7 +224,7 @@ ne_session *serverConnect(int serverID){
  * cookieSet - set a cookie to a session connected to a server
  */
 const char *cookieSet(const char *srvTx){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char			*cookie;
 
@@ -240,7 +240,7 @@ const char *cookieSet(const char *srvTx){
  * elementStart - start of an response element
  */
 static int elementStart(void *userdata, int parent, const char *nspace, const char *name, const char **atts){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int					i = 0;
 	ContactCards_stack_t		*stack = userdata;
@@ -276,7 +276,7 @@ static int elementStart(void *userdata, int parent, const char *nspace, const ch
  * elementData - data of a reponse element
  */
 static int elementData(void *userdata, int state, const char *cdata, size_t len){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*newCtx = NULL;
 	char				*existingCtx = NULL;
@@ -306,7 +306,7 @@ static int elementData(void *userdata, int state, const char *cdata, size_t len)
  * elementEnd - end of a response element
  */
 static int elementEnd(void *userdata, int state, const char *nspace, const char *name){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_stack_t		*stack = userdata;
 	GNode				*pNode;
@@ -321,7 +321,7 @@ static int elementEnd(void *userdata, int state, const char *nspace, const char 
  * cbReader - callback function for the xml parser
  */
 int cbReader(void *userdata, const char *buf, size_t len){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ne_xml_parser *parser = (ne_xml_parser *)userdata;
 	ne_xml_parse(parser, buf, len);
@@ -341,7 +341,7 @@ int cbReader(void *userdata, const char *buf, size_t len){
  *	This function forms and sends the requests to the server
  */
 ContactCards_stack_t *serverRequest(int method, int serverID, int itemID, ne_session *sess, sqlite3 *ptr){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ne_request			*req = NULL;
 	ne_buffer			*req_buffer = ne_buffer_create();
@@ -802,7 +802,7 @@ failedRequest:
  * serverDisconnect - end a session to a server
  */
 void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	int			isOAuth = 0;
 
@@ -823,7 +823,7 @@ void serverDisconnect(ne_session *sess, sqlite3 *ptr, int serverID){
  * oAuthUpdate - update the OAuth credentials of a server
  */
 int oAuthUpdate(sqlite3 *ptr, int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*oAuthGrant = NULL;
 	char				*oAuthToken = NULL;
@@ -868,7 +868,7 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
  * oAuthAccess - handle OAuth for a server
  */
 void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char				*srvURI = NULL;
 	char				*grant = NULL;
@@ -930,7 +930,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
  * serverDelContact - delete a vCard from a server
  */
 int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_stack_t		*stack;
 	int							ret = 0;
@@ -955,7 +955,7 @@ int serverDelContact(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
  * serverCreateCollection - create a new address book
  */
 int serverCreateCollection(ne_session *sess, int srvID, char *colName){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_stack_t		*stack;
 	int 						ret = 0;
@@ -990,7 +990,7 @@ int serverCreateCollection(ne_session *sess, int srvID, char *colName){
  * serverDelCollection - delete a address book from a server
  */
 int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_stack_t		*stack;
 	int							ret = 0;
@@ -1017,7 +1017,7 @@ int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int selID)
  * postPushCard - send a new vCard using RFC 5995
  */
 int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int newID, int oldID, int existing){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	char					*postURI = NULL;
 	ContactCards_stack_t	*stack;
@@ -1062,7 +1062,7 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
  * pushCard - send a new vCard to a server
  */
 int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ne_session	 			*sess = NULL;
 	int						srvID;
@@ -1133,7 +1133,7 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
  * syncInitial - starts a initial synchronisation of a server
  */
 void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	ContactCards_stack_t		*stack;
 	int							failed = 0;
@@ -1173,7 +1173,7 @@ sendAgain:
  * syncContacts - get all contacts in all address books
  */
 void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
-	printfunc(__func__);
+	__PRINTFUNC__;
 
 	if(countElements(ptr, "addressbooks", 1, "cardServer", serverID, "", "", "", "") == 0){
 		/*
