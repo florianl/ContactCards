@@ -35,13 +35,18 @@ Features
 Try it on Fedora
 ----------------
 
-Enable the repo:
+Install the dependencies:
+    $ yum install autoconf gettext-devel automake intltool gcc git gtk3-devel neon-devel sqlite-devel
 
-	dnf copr enable flo/contactcards
+Now get it, build it and run it:
+    $ git clone https://github.com/florianl/ContactCards.git
+    $ cd ContactCards
+    $ ./autogen.sh
+    $ ./configure
+    $ make
+    $ ./src/contactcards
 
-And install contactcards
-
-	dnf install contactcards
+Alternatively ContactCards may be also installed from copr using [flo/contactcards/](https://copr.fedoraproject.org/coprs/flo/contactcards/).
 
 
 License: GPLv2
