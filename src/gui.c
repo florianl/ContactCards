@@ -2785,7 +2785,6 @@ void guiInit(void){
 
 	/*		Statusbar				*/
 	mainStatusbar = gtk_statusbar_new();
-	appBase.statusbar = mainStatusbar;
 
 	/*	Sync Menu					*/
 	syncMenuUpdate();
