@@ -479,7 +479,7 @@ static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int typ
 
 	elements = g_slist_alloc();
 
-	gtk_text_buffer_set_text(buf, g_strcompress(value), -1);
+	gtk_text_buffer_set_text(buf, g_strcompress(g_strstrip(value)), -1);
 
 	input = gtk_text_view_new_with_buffer(buf);
 	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
@@ -873,7 +873,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 233, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -903,7 +903,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 233, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -934,9 +934,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 					GtkWidget		*attrType;
 					attrType = getWidgetFromID(item->itemID);
 					gtk_widget_set_margin_end(attrType, 6);
-					gtk_widget_set_margin_top(typ, 6);
+					gtk_widget_set_margin_top(attrType, 6);
 					gtk_grid_attach(GTK_GRID(card), attrType, 0, line, 1, 1);
 					gtk_widget_set_halign(GTK_WIDGET(attrType), GTK_ALIGN_END);
+					gtk_widget_set_valign(GTK_WIDGET(attrType), GTK_ALIGN_START);
 					gtk_text_buffer_set_text(val, g_strstrip(g_strdelimit(value, ";", '\n')), -1);
 					content = gtk_text_view_new_with_buffer(val);
 					gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
@@ -945,7 +946,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 					gtk_widget_set_margin_start(content, 12);
 					gtk_widget_set_margin_end(content, 12);
 					gtk_widget_set_margin_top(content, 6);
-					gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+					gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 					gtk_widget_set_hexpand(content, TRUE);
 					gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -976,7 +977,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -1006,7 +1007,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -1030,17 +1031,21 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			char					*value = (char *) list->data;
 			if(value != NULL){
 				GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
-				gtk_text_buffer_set_text(val, g_strstrip(value), -1);
+				GtkWidget		*scroller = NULL;
+				scroller = gtk_scrolled_window_new(NULL, NULL);
+				gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+				gtk_text_buffer_set_text(val, g_strcompress(g_strstrip(value)), -1);
 				content = gtk_text_view_new_with_buffer(val);
 				gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
 				gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(content), GTK_WRAP_WORD);
-				gtk_widget_set_margin_start(content, 12);
-				gtk_widget_set_margin_end(content, 12);
-				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
-				gtk_widget_set_hexpand(content, TRUE);
-				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
-				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+				gtk_widget_set_margin_start(scroller, 12);
+				gtk_widget_set_margin_end(scroller, 12);
+				gtk_widget_set_margin_top(scroller, 6);
+				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, -1);
+				gtk_widget_set_hexpand(scroller, TRUE);
+				gtk_widget_set_halign(GTK_WIDGET(scroller), GTK_ALIGN_START);
+				gtk_container_add(GTK_CONTAINER(scroller), content);
+				gtk_grid_attach(GTK_GRID(card), scroller, 1, line++, 1, 1);
 			}
 			list = next;
 		}
@@ -1061,17 +1066,21 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			char					*value = (char *) list->data;
 			if(value != NULL){
 				GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
-				gtk_text_buffer_set_text(val, g_strstrip(value), -1);
+				GtkWidget		*scroller = NULL;
+				scroller = gtk_scrolled_window_new(NULL, NULL);
+				gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+				gtk_text_buffer_set_text(val, g_strcompress(g_strstrip(value)), -1);
 				content = gtk_text_view_new_with_buffer(val);
 				gtk_text_view_set_editable(GTK_TEXT_VIEW(content), FALSE);
 				gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(content), GTK_WRAP_WORD);
-				gtk_widget_set_margin_start(content, 12);
-				gtk_widget_set_margin_end(content, 12);
-				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
-				gtk_widget_set_hexpand(content, TRUE);
-				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
-				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+				gtk_widget_set_margin_start(scroller, 12);
+				gtk_widget_set_margin_end(scroller, 12);
+				gtk_widget_set_margin_top(scroller, 6);
+				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, -1);
+				gtk_widget_set_hexpand(scroller, TRUE);
+				gtk_widget_set_halign(GTK_WIDGET(scroller), GTK_ALIGN_START);
+				gtk_container_add(GTK_CONTAINER(scroller), content);
+				gtk_grid_attach(GTK_GRID(card), scroller, 1, line++, 1, 1);
 			}
 			list = next;
 		}
@@ -1098,7 +1107,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -1128,7 +1137,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 224, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
