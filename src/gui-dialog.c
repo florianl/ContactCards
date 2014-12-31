@@ -512,6 +512,9 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
+	if(gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)) == FALSE){
+		feedbackDialog(GTK_MESSAGE_INFO, _("Be careful when handling the uploads of contact!"));
+	}
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
 
 	updateAddressbooks(appBase.db, buffers->aBooks);
