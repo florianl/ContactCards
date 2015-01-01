@@ -47,3 +47,11 @@ AC_SUBST(SQLITE3_LIBS)
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile po/Makefile.in])
 AC_OUTPUT
+
+echo "  C compiler    = $CC"
+echo "  GTK flags     = $GTK3_CFLAGS"
+echo "  GTK libs      = $GTK3_LIBS"
+echo "  NEON flags    = $NEON_CFLAGS"
+echo "  NEON libs     = $NEON_LIBS"
+echo "  SQLITE3 flags = $SQLITE3_CFLAGS"
+echo "  SQLITE4 libs  = $SQLITE3_LIBS"
