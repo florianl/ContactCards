@@ -12,9 +12,10 @@ Requirements
 ------------
 
 The following packages are required:
-- libgtk-3-dev
-- libsqlite3-dev
-- libneon27-dev
+
+- [GTK+](http://www.gtk.org)
+- [SQLite](http://www.sqlite.org)
+- [neon](http://www.webdav.org/neon)
 
 Build
 -----
