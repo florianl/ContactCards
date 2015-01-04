@@ -14,12 +14,11 @@
 #ifndef sqlite_H
 #define sqlite_H
 
-#ifndef SQLITE3_LIB_H
-#define SQLITE3_LIB_H
 #include <sqlite3.h>
-#endif	/*	SQLITE3_LIB_H	*/
 
+#ifndef neon_H
 #include "neon.h"
+#endif	/*	neon_H		*/
 
 /*		sqlite_backend.c		*/
 extern void showAddressbooks(sqlite3 *ptr);

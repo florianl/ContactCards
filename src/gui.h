@@ -14,16 +14,11 @@
 #ifndef	gui_H
 #define gui_H
 
-#ifndef	GTK_LIB_H
 #include <gtk/gtk.h>
-#include <glib/gstdio.h>
-#define GTK_LIB_H
-#endif	/*	GTK_LIB_H	*/
 
-#ifndef SQLITE3_LIB_H
-#define SQLITE3_LIB_H
-#include <sqlite3.h>
-#endif	/*	SQLITE3_LIB_H	*/
+#ifndef sqlite_H
+#include "sqlite_db.h"
+#endif	/*	sqlite_H	*/
 
 typedef struct ContactCardsGuiBase{
 	sqlite3		*db;

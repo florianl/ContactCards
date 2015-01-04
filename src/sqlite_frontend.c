@@ -11,6 +11,7 @@
  * GNU General Public License for more details.
  */
 
+#include <glib/gstdio.h>
 #include "contactcards.h"
 
 void contactsTreeFill(GSList *contacts){

@@ -14,21 +14,7 @@
 #ifndef	neon_H
 #define neon_H
 
-#ifndef NEON_LIB_H
 #include <ne_session.h>
-#include <ne_socket.h>
-#include <ne_utils.h>
-#include <ne_request.h>
-#include <ne_auth.h>
-#include <ne_xml.h>
-#include <ne_xmlreq.h>
-#include <ne_207.h>
-#include <ne_uri.h>
-#include <ne_string.h>
-#include <ne_basic.h>
-#include <ne_props.h>
-#define NEON_LIB_H
-#endif	/*	NEON_LIB_H	*/
 
 /*
  * Sync-Methods

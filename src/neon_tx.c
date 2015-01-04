@@ -11,6 +11,10 @@
  * GNU General Public License for more details.
  */
 
+#include <ne_auth.h>
+#include <ne_207.h>
+#include <ne_basic.h>
+
 #include "contactcards.h"
 
 /**

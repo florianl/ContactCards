@@ -11,6 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#include <gtk/gtk.h>
+
 #include "contactcards.h"
 
 /**
