@@ -2734,10 +2734,7 @@ void syncServer(GtkWidget *widget, gpointer trans){
 			retList = next;
 			continue;
 		}
-		if(g_mutex_trylock(&mutex) != TRUE){
-			debugCC("There is already a sync running\n");
-			break;
-		}
+		while(g_mutex_trylock(&mutex) != TRUE){ }
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
