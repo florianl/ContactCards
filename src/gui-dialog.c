@@ -501,6 +501,8 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 
 	ContactCards_pref_t		*buffers = trans;
 	GdkRGBA					rgba;
+	int						old = -1;
+	int						state = -1;
 
 	if(buffers->srvID == 0){
 		verboseCC("[%s] this isn't a server\n", __func__);
@@ -512,9 +514,13 @@ void prefServerSave(GtkWidget *widget, gpointer trans){
 		return;
 	}
 
-	if(gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)) == FALSE){
+	old = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", buffers->srvID, "", "", "", "");
+	state = gtk_switch_get_active(GTK_SWITCH(buffers->syncSel));
+
+	if((state == FALSE) && (old & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 		feedbackDialog(GTK_MESSAGE_INFO, _("Be careful when handling the uploads of contact!"));
 	}
+
 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
 
 	updateAddressbooks(appBase.db, buffers->aBooks);
