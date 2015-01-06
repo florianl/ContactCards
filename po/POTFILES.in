@@ -1,1 +1,5 @@
 src/gui.c
+src/gui-dialog.c
+src/neon_tx.c
+src/settings.c
+src/sqlite_frontend.c
