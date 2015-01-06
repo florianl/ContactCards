@@ -2,7 +2,7 @@ AM_CFLAGS = -Wall -Wno-pointer-sign -std=gnu99 -lpthread
 AM_CFLAGS += -DLOCALEDIR=\"$(localedir)\"
 
 if DEBUG
-AM_CFLAGS += -ggdb -O0
+AM_CFLAGS += -g3 -O0
 else
 AM_CFLAGS += -O3
 endif

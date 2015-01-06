@@ -33,17 +33,20 @@ AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 
 AM_COND_IF(DEBUG, AC_MSG_NOTICE([Debugging enabled]),AC_MSG_NOTICE([Debugging disabled]))
 
-PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.10, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
-AC_SUBST(GTK3_CFLAGS)
-AC_SUBST(GTK3_LIBS)
+PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.10 glib-2.0 gdk-3.0 gdk-pixbuf-2.0 gio-2.0 gobject-2.0 cairo, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
+AC_CHECK_LIB(gtk-3, gtk_main)
+AC_CHECK_LIB(glib-2.0, g_free)
+AC_CHECK_LIB(gdk-3, gdk_rgba_to_string)
+AC_CHECK_LIB(gdk_pixbuf-2.0, gdk_pixbuf_new_from_stream)
+AC_CHECK_LIB(gio-2.0, g_memory_input_stream_new_from_data)
+AC_CHECK_LIB(gobject-2.0, g_object_set)
+AC_CHECK_LIB(cairo, cairo_destroy)
 
 PKG_CHECK_MODULES(NEON, neon, NEON_SUFFIX=neon, AC_MSG_ERROR([neon is required to compile ContactCards]))
-AC_SUBST(NEON_CFLAGS)
-AC_SUBST(NEON_LIBS)
+AC_CHECK_LIB(neon, ne_session_create)
 
 PKG_CHECK_MODULES(SQLITE3, sqlite3, SQLITE3_SUFFIX=sqlite3, AC_MSG_ERROR([sqlite3 is required to compile ContactCards]))
-AC_SUBST(SQLITE3_CFLAGS)
-AC_SUBST(SQLITE3_LIBS)
+AC_CHECK_LIB(sqlite3, sqlite3_exec)
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile po/Makefile.in])
 AC_OUTPUT
@@ -54,4 +57,4 @@ echo "  GTK libs      = $GTK3_LIBS"
 echo "  NEON flags    = $NEON_CFLAGS"
 echo "  NEON libs     = $NEON_LIBS"
 echo "  SQLITE3 flags = $SQLITE3_CFLAGS"
-echo "  SQLITE4 libs  = $SQLITE3_LIBS"
+echo "  SQLITE3 libs  = $SQLITE3_LIBS"
