@@ -33,7 +33,7 @@ AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 
 AM_COND_IF(DEBUG, AC_MSG_NOTICE([Debugging enabled]),AC_MSG_NOTICE([Debugging disabled]))
 
-PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.10 glib-2.0 gdk-3.0 gdk-pixbuf-2.0 gio-2.0 gobject-2.0 cairo, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
+PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.12 glib-2.0 gdk-3.0 gdk-pixbuf-2.0 gio-2.0 gobject-2.0 cairo, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
 AC_CHECK_LIB(gtk-3, gtk_main)
 AC_CHECK_LIB(glib-2.0, g_free)
 AC_CHECK_LIB(gdk-3, gdk_rgba_to_string)
