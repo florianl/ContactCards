@@ -48,6 +48,14 @@ AC_CHECK_LIB(neon, ne_session_create)
 PKG_CHECK_MODULES(SQLITE3, sqlite3, SQLITE3_SUFFIX=sqlite3, AC_MSG_ERROR([sqlite3 is required to compile ContactCards]))
 AC_CHECK_LIB(sqlite3, sqlite3_exec)
 
+PKG_CHECK_MODULES(LDNS, ldns, AC_DEFINE(_USE_DANE), AC_CHECK_LIB(ldns, ldns_dane_verify, [LDNS_LIBS=-lldns; AC_DEFINE(_USE_DANE)], AC_MSG_ERROR([ldns is not found])))
+
+if test _USE_DANE; then
+	PKG_CHECK_MODULES(OPENSSL, openssl, OPENSSL_SUFFIX=openssl, AC_MSG_ERROR([openssl is required for ldns]))
+	AC_CHECK_LIB(ssl, SSL_new)
+	AC_CHECK_LIB(crypto, X509_STORE_new)
+fi
+
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile po/Makefile.in])
 AC_OUTPUT
 
@@ -58,3 +66,9 @@ echo "  NEON flags    = $NEON_CFLAGS"
 echo "  NEON libs     = $NEON_LIBS"
 echo "  SQLITE3 flags = $SQLITE3_CFLAGS"
 echo "  SQLITE3 libs  = $SQLITE3_LIBS"
+echo "  LDNS flags    = $LDNS_CFLAGS"
+echo "  LDNS libs     = $LDNS_LIBS"
+if test _USE_DANE; then
+	echo "  OPENSSL flags = $OPENSSL_CFLAGS"
+	echo "  OPENSSL libs  = $OPENSSL_LIBS"
+fi

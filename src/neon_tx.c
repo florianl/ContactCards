@@ -17,6 +17,16 @@
 
 #include "contactcards.h"
 
+#ifdef _USE_DANE
+#include <ldns/ldns.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/x509v3.h>
+#include <openssl/x509.h>
+#endif
+
 /**
  * getUserAuth - returns the user credentials for a server
  */
@@ -54,6 +64,204 @@ gboolean validateUrl(char *url){
 	__PRINTFUNC__;
 
 	return g_regex_match_simple("^(https://|carddavs://|webdavs://)?([A-Za-z0-9-]+\\.)+[A-Za-z-]{1,22}(:[0-9]{1,5})?(/|(/[A-Za-z0-9-\\.@]+)*(/)?)?$", url, G_REGEX_EXTENDED, 0);
+}
+
+/**
+ * ssl_connect_and_get_cert_chain - get and check
+ */
+ldns_status ssl_connect_and_get_cert_chain(X509** cert, STACK_OF(X509)** extra_certs, SSL* ssl, ldns_rdf* address, uint16_t port){
+	__PRINTFUNC__;
+
+	struct sockaddr_storage *a = NULL;
+	size_t a_len = 0;
+	int sock;
+	int r;
+
+	assert(cert != NULL);
+	assert(extra_certs != NULL);
+
+	a = ldns_rdf2native_sockaddr_storage(address, port, &a_len);
+
+	/*	We only use TCP		*/
+	sock = socket((int)((struct sockaddr*)a)->sa_family, SOCK_STREAM, IPPROTO_TCP);
+
+	if (sock == -1) {
+		LDNS_FREE(a);
+		return LDNS_STATUS_NETWORK_ERR;
+	}
+	if (connect(sock, (struct sockaddr*)a, (socklen_t)a_len) == -1) {
+		LDNS_FREE(a);
+		return LDNS_STATUS_NETWORK_ERR;
+	}
+	LDNS_FREE(a);
+	if (! SSL_clear(ssl)) {
+		close(sock);
+		fprintf(stderr, "SSL_clear\n");
+		return LDNS_STATUS_SSL_ERR;
+	}
+
+	SSL_set_connect_state(ssl);
+	(void) SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+	if (! SSL_set_fd(ssl, sock)) {
+		close(sock);
+		fprintf(stderr, "SSL_set_fd\n");
+		return LDNS_STATUS_SSL_ERR;
+	}
+	for (;;) {
+		ERR_clear_error();
+		if ((r = SSL_do_handshake(ssl)) == 1) {
+			break;
+		}
+		r = SSL_get_error(ssl, r);
+		if (r != SSL_ERROR_WANT_READ && r != SSL_ERROR_WANT_WRITE) {
+			fprintf(stderr, "handshaking SSL_get_error: %d\n", r);
+			return LDNS_STATUS_SSL_ERR;
+		}
+	}
+	*cert = SSL_get_peer_certificate(ssl);
+	*extra_certs = SSL_get_peer_cert_chain(ssl);
+
+	return LDNS_STATUS_OK;
+}
+
+/**
+ * validateDANE - simple way to check the certificate
+ */
+gboolean validateDANE(int serverID){
+	__PRINTFUNC__;
+
+	gboolean		result = FALSE;
+	char			*tmp = NULL;
+	ne_uri			uri;
+	ne_sock_addr	*sock_addr;
+	ne_inet_addr	*ip_addr;
+	char			buf[256];
+	ldns_resolver	*res = NULL;
+	ldns_pkt		*p = NULL;
+	ldns_rr_list	*tlsas = NULL;
+	ldns_status		s = LDNS_STATUS_ERR;
+	X509			*cert;
+	STACK_OF(X509)	*extra_certs;
+	X509_STORE		*store = NULL;
+	SSL				*ssl = NULL;
+	SSL_CTX			*ctx = NULL;
+	ldns_rdf		*address;
+	ldns_rdf		*dname;
+
+	SSL_load_error_strings();
+	SSL_library_init();
+
+	ctx = SSL_CTX_new(SSLv23_client_method());
+	if (!ctx) {
+		debugCC("%s():%d\n", __func__, __LINE__);
+		goto fastExit;
+	}
+
+	ssl = SSL_new(ctx);
+	if (!ssl) {
+		debugCC("%s():%d\n", __func__, __LINE__);
+		goto fastExit;
+	}
+
+	store = X509_STORE_new();
+	if(!store){
+		debugCC("%s():%d\n", __func__, __LINE__);
+		goto fastExit;
+	}
+
+	tmp = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", serverID, "", "", "", "", "", 0);
+
+	ne_uri_parse(tmp, &uri);
+	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
+	debugCC("%s(): %s:%d\n", __func__, uri.host, uri.port);
+
+	sock_addr = ne_addr_resolve(uri.host, 0);
+	if (ne_addr_result(sock_addr)) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ne_addr_error(sock_addr, buf, sizeof(buf)));
+		goto fastExit;
+	}
+
+	ip_addr = (ne_inet_addr *) ne_addr_first(sock_addr);
+	ne_iaddr_print(ip_addr, buf, sizeof(buf));
+
+	debugCC("%s(): %s\n", __func__, buf);
+
+	s = ldns_str2rdf_aaaa(&address, buf);
+	if (s != LDNS_STATUS_OK) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		/*	Second try on old protocoll	*/
+		s = ldns_str2rdf_a(&address, buf);
+		if (s != LDNS_STATUS_OK) {
+			debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+			goto fastExit;
+		}
+	}
+
+	s = ssl_connect_and_get_cert_chain(&cert, &extra_certs,
+					ssl, address, uri.port);
+	if (s != LDNS_STATUS_OK) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	s = ldns_resolver_new_frm_file(&res, NULL);
+	if (s == LDNS_STATUS_OK) {
+		ldns_resolver_set_dnssec(res, ! FALSE);
+	} else {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	s = ldns_str2rdf_dname(&dname, uri.host);
+	if (s != LDNS_STATUS_OK) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	s = ldns_dane_create_tlsa_owner(&dname, dname, uri.port, LDNS_DANE_TRANSPORT_TCP);
+	if (s != LDNS_STATUS_OK) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	s = ldns_resolver_query_status(&p, res, dname, LDNS_RR_TYPE_TLSA, LDNS_RR_CLASS_IN,LDNS_RD);
+	if (s != LDNS_STATUS_OK) {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	tlsas = ldns_pkt_rr_list_by_type(p, LDNS_RR_TYPE_TLSA, LDNS_SECTION_ANSWER);
+	if(ldns_rr_list_rr_count(tlsas) == 0){
+		debugCC("%s():%d\trr_count == 0\n", __func__, __LINE__);
+		goto fastExit;
+	}
+
+	s = ldns_dane_verify(tlsas, cert, extra_certs, store);
+	if (s == LDNS_STATUS_OK) {
+		result = TRUE;
+	} else {
+		debugCC("%s():%d\t%s\n", __func__, __LINE__, ldns_get_errorstr_by_id(s));
+		goto fastExit;
+	}
+
+	ldns_rr_list_sort(tlsas);
+	ldns_rr_list_print(stdout, tlsas);
+	ldns_rr_list_deep_free(tlsas);
+
+
+fastExit:
+	if(ctx)
+		SSL_CTX_free(ctx);
+	if(tmp)
+		g_free(tmp);
+	if(store)
+		X509_STORE_free(store);
+	if(p)
+		ldns_pkt_free(p);
+	if(res)
+		ldns_resolver_deep_free(res);
+
+	return result;
 }
 
 /**

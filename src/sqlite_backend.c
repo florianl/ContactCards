@@ -879,6 +879,11 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	serverConnectionTest(serverID);
 
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
+#ifdef _USE_DANE
+	if(validateDANE(serverID) == TRUE){
+		setSingleInt(appBase.db, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", serverID);
+	}
+#endif
 	g_mutex_unlock(&mutex);
 
 	g_free(davBase);
@@ -940,6 +945,11 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 
 	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
+#ifdef _USE_DANE
+	if(validateDANE(serverID) == TRUE){
+		setSingleInt(appBase.db, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED, "serverID", serverID);
+	}
+#endif
 	g_mutex_unlock(&mutex);
 	ne_uri_free(&uri);
 

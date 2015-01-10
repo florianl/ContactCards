@@ -203,4 +203,8 @@ extern int serverDelCollection(sqlite3 *ptr, ne_session *sess, int serverID, int
 extern void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID);
 extern void syncInitial(sqlite3 *ptr, ne_session *sess, int serverID);
 
+#ifdef _USE_DANE
+extern gboolean validateDANE(int serverID);
+#endif
+
 #endif	/*	neon_H	*/
