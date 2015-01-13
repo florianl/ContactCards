@@ -30,8 +30,17 @@ AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [enable debugging, default
 		*)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
 	esac], [debug=false])
 AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
-
 AM_COND_IF(DEBUG, AC_MSG_NOTICE([Debugging enabled]),AC_MSG_NOTICE([Debugging disabled]))
+
+
+AC_ARG_ENABLE(dane, AS_HELP_STRING([--enable-dane], [enable DANE, default: no]),
+	[case "${enableval}" in
+		yes) dane=true ;;
+		no)  dane=false ;;
+		*)   AC_MSG_ERROR([bad value ${enableval} for --enable-dane]) ;;
+	esac], [dane=false])
+AM_CONDITIONAL(DANE, test x"$dane" = x"true")
+AM_COND_IF(DANE, AC_MSG_NOTICE([DANE enabled]),AC_MSG_NOTICE([DANE disabled]))
 
 PKG_CHECK_MODULES(GTK3, gtk+-3.0 >= 3.12 glib-2.0 gdk-3.0 gdk-pixbuf-2.0 gio-2.0 gobject-2.0 cairo, GTK3_SUFFIX=gtk3, AC_MSG_ERROR([gtk3 is required to compile ContactCards]))
 AC_CHECK_LIB(gtk-3, gtk_main)
@@ -48,9 +57,8 @@ AC_CHECK_LIB(neon, ne_session_create)
 PKG_CHECK_MODULES(SQLITE3, sqlite3, SQLITE3_SUFFIX=sqlite3, AC_MSG_ERROR([sqlite3 is required to compile ContactCards]))
 AC_CHECK_LIB(sqlite3, sqlite3_exec)
 
-PKG_CHECK_MODULES(LDNS, ldns, AC_DEFINE(_USE_DANE), AC_CHECK_LIB(ldns, ldns_dane_verify, [LDNS_LIBS=-lldns; AC_DEFINE(_USE_DANE)], AC_MSG_ERROR([ldns is not found])))
-
-if test _USE_DANE; then
+if test "$dane" = "true"; then
+	PKG_CHECK_MODULES(LDNS, ldns, AC_DEFINE(_USE_DANE), AC_CHECK_LIB(ldns, ldns_dane_verify, [LDNS_LIBS=-lldns; AC_DEFINE(_USE_DANE)], AC_MSG_ERROR([ldns is not found])))
 	PKG_CHECK_MODULES(OPENSSL, openssl, OPENSSL_SUFFIX=openssl, AC_MSG_ERROR([openssl is required for ldns]))
 	AC_CHECK_LIB(ssl, SSL_new)
 	AC_CHECK_LIB(crypto, X509_STORE_new)
@@ -66,9 +74,9 @@ echo "  NEON flags    = $NEON_CFLAGS"
 echo "  NEON libs     = $NEON_LIBS"
 echo "  SQLITE3 flags = $SQLITE3_CFLAGS"
 echo "  SQLITE3 libs  = $SQLITE3_LIBS"
-echo "  LDNS flags    = $LDNS_CFLAGS"
-echo "  LDNS libs     = $LDNS_LIBS"
-if test _USE_DANE; then
+if test "$dane" = "true"; then
+	echo "  LDNS flags    = $LDNS_CFLAGS"
+	echo "  LDNS libs     = $LDNS_LIBS"
 	echo "  OPENSSL flags = $OPENSSL_CFLAGS"
 	echo "  OPENSSL libs  = $OPENSSL_LIBS"
 fi

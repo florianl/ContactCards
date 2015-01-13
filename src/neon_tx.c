@@ -66,6 +66,8 @@ gboolean validateUrl(char *url){
 	return g_regex_match_simple("^(https://|carddavs://|webdavs://)?([A-Za-z0-9-]+\\.)+[A-Za-z-]{1,22}(:[0-9]{1,5})?(/|(/[A-Za-z0-9-\\.@]+)*(/)?)?$", url, G_REGEX_EXTENDED, 0);
 }
 
+
+#ifdef _USE_DANE
 /**
  * ssl_connect_and_get_cert_chain - get and check
  */
@@ -263,7 +265,7 @@ fastExit:
 
 	return result;
 }
-
+#endif	/*	_USE_DANE	*/
 /**
  * verifyCert - verify a certificate of a server
  */
