@@ -788,6 +788,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	__PRINTFUNC__;
 
 	GtkWidget			*card;
+	GtkWidget			*frame;
 	GtkWidget			*photo, *fn, *bday;
 	GtkWidget			*typ, *content;
 	GSList				*list;
@@ -796,6 +797,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	char				*markup;
 	ContactCards_pix_t	*tmp = NULL;
 
+	frame = gtk_frame_new(NULL);
 	card = gtk_grid_new();
 	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
 	if(vData == NULL)
@@ -1162,7 +1164,12 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 
 	g_free(vData);
 
-	return card;
+	content = gtk_label_new(NULL);
+	gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+
+	gtk_container_add(GTK_CONTAINER(frame), card);
+
+	return frame;
 }
 
 /**
@@ -2773,7 +2780,7 @@ void guiInit(void){
 
 	appBase.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(appBase.window), "ContactCards");
-	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 987,610);
+	gtk_window_set_default_size(GTK_WINDOW(appBase.window), 902,610);
 	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong\n", __func__);
