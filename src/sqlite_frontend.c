@@ -425,12 +425,16 @@ void exportBirthdays(int type, int id, char *base){
 		case 1:		/*	address book	*/
 			desc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", id, "", "", "", "", "", 0);
 			break;
+		case 2:		/*	favorites		*/
+			desc = g_strdup("Favorites");
+			break;
 		default:
 			return;
 	}
 
 	file = g_strconcat(desc, "_", _("Birthdays"), ".ics", NULL);
 	dst = g_build_filename(base, file, NULL);
+	g_free(desc);
 
 	if(g_file_test(dst, G_FILE_TEST_EXISTS) == TRUE){
 		verboseCC("%s exists already\n", dst);
@@ -485,6 +489,9 @@ void exportBirthdays(int type, int id, char *base){
 			break;
 		case 1:		/*	address book selected	*/
 			contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", id, "", "", "", "");
+			break;
+		case 2:		/*	favorites		*/
+			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
 			break;
 		default:
 			break;

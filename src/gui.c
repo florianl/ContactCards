@@ -679,6 +679,15 @@ void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * cbFavoritesExportBirthdays - Callback from popup-menu to export birthdays
+ */
+void cbFavoritesExportBirthdays(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	dialogExportBirthdays(2, 0);
+}
+
+/**
  * createNewCollection - Callback from popup-menu to create a new collection
  */
 void createNewCollection(GtkMenuItem *menuitem, gpointer data){
@@ -2138,6 +2147,13 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				g_signal_connect(menuItem3, "activate", (GCallback)importVCF, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
 				break;
+			case 2:		/*	favorites	*/
+				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem2, "activate", (GCallback)cbFavoritesExportBirthdays, NULL);
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
+				break;
+			default:
+				return;
 		}
 		gtk_widget_show_all(menu);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
