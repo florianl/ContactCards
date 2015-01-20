@@ -2827,7 +2827,7 @@ void guiInit(void){
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
 	calItem = gtk_tool_button_new(NULL, _("Birthday Calendar"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(exportItem), _("Birthday Calendar"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(calItem), _("Birthday Calendar"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (calItem), "x-office-calendar");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), calItem, -1);
 
