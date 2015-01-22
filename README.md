@@ -33,12 +33,18 @@ Features
 - Using POST to Add Members to Web Distributed Authoring and Versioning (WebDAV) Collections [RFC 5995](http://tools.ietf.org/html/rfc5995)
 - vCard Format Specification (Version 4) [RFC 6350](http://tools.ietf.org/html/rfc6350)
 
-Try it on Fedora
-----------------
+Try it!
+-------
 
-Install the dependencies:
+Install the dependencies.
+
+On Fedora run:
 
     $ yum install autoconf gettext-devel automake intltool gcc git gtk3-devel neon-devel sqlite-devel
+
+On Ubuntu run:
+
+    $ apt-get install autoconf autopoint intltool gcc git libgtk-3-dev libsqlite3-dev libneon27-dev
 
 Now get it, build it and run it:
 
