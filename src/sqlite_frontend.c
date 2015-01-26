@@ -198,7 +198,6 @@ void exportOneContact(int selID, char *base){
 	if(g_chdir(path)){
 		return;
 	}
-
 	contactName = getSingleChar(appBase.db, "contacts", "displayname", 1, "contactID", selID, "", "", "", "", "", 0);
 	contactFile = g_strconcat(contactName, ".vcf", NULL);
 	contactCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
@@ -209,86 +208,139 @@ void exportOneContact(int selID, char *base){
 	g_free(contactName);
 	g_free(contactFile);
 	g_free(contactCard);
+	g_free(path);
 }
 
 /**
- * exportContacts - exports all contacts of a server
+ * exportContactsAddrBook - Export contacts from address book
  */
-void exportContacts(sqlite3 *ptr, char *base){
+void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
+	__PRINTFUNC__;
+
+	GSList				*contactList;
+	char				*path = NULL;
+	char				*addrbookLoc = NULL;
+
+	addrbookLoc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", addrbook, "", "", "", "", "", 0);
+	if (!g_file_test(addrbookLoc, G_FILE_TEST_EXISTS)){
+		g_mkdir(addrbookLoc, 0775);
+	}
+
+	path = g_strconcat(base, "/", addrbookLoc, NULL);
+
+	contactList = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addrbook, "", "", "", "");
+	while(contactList){
+		GSList				*next = contactList->next;
+		int					contactID = GPOINTER_TO_INT(contactList->data);
+
+		if(contactID == 0){
+			contactList = next;
+			continue;
+		}
+		if(g_chdir(path)){
+			return;
+		}
+		exportOneContact(contactID, path);
+		contactList = next;
+	}
+	g_free(addrbookLoc);
+	g_free(path);
+	g_slist_free(contactList);
+}
+
+/**
+ * exportContactsSrv - Export contacts from server
+ */
+void exportContactsSrv(sqlite3 *ptr, char *base, int srv){
+	__PRINTFUNC__;
+
+	GSList				*addressbookList;
+	char				*path = NULL;
+	char				*serverLoc = NULL;
+
+	serverLoc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", srv, "", "", "", "", "", 0);
+	if (!g_file_test(serverLoc, G_FILE_TEST_EXISTS)){
+			g_mkdir(serverLoc, 0775);
+	}
+	path = g_strconcat(base, "/", serverLoc, NULL);
+	if(g_chdir(path)){
+		return;
+	}
+
+	addressbookList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", srv, "", "", "", "");
+
+	while(addressbookList){
+		GSList				*next = addressbookList->next;
+		int					addrbookID = GPOINTER_TO_INT(addressbookList->data);
+		if(addrbookID == 0){
+			addressbookList = next;
+			continue;
+		}
+		if(g_chdir(path)){
+			return;
+		}
+		exportContactsAddrBook(ptr, path, addrbookID);
+		addressbookList = next;
+	}
+	g_free(path);
+	g_free(serverLoc);
+	g_slist_free(addressbookList);
+}
+
+/**
+ * exportContactsAll - exports all contacts
+ */
+void exportContactsAll(sqlite3 *ptr, char *base){
 	__PRINTFUNC__;
 
 	GSList				*serverList;
-	GSList				*addressbookList;
-	GSList				*contactList;
 	char				*path = NULL;
-	GError 				*error = NULL;
 
+	path = g_strconcat(base, NULL);
+	if(g_chdir(path)){
+		return;
+	}
 	serverList = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 	while(serverList){
 		GSList				*next = serverList->next;
 		int					serverID = GPOINTER_TO_INT(serverList->data);
-		char				*serverLoc;
+
 		if(serverID == 0){
 			serverList = next;
 			continue;
 		}
-		path = g_strconcat(base, NULL);
 		if(g_chdir(path)){
 			return;
 		}
-		serverLoc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
-		if (!g_file_test(serverLoc, G_FILE_TEST_EXISTS)){
-			g_mkdir(serverLoc, 0775);
-		}
-		addressbookList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "", "", "");
-		while(addressbookList){
-			GSList				*next = addressbookList->next;
-			int					addrbookID = GPOINTER_TO_INT(addressbookList->data);
-			char				*addrbookLoc;
-			if(addrbookID == 0){
-				addressbookList = next;
-				continue;
-			}
-			path = g_strconcat(base, "/", serverLoc, NULL);
-			if(g_chdir(path)){
-				return;
-			}
-			addrbookLoc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", addrbookID, "", "", "", "", "", 0);
-			if (!g_file_test(addrbookLoc, G_FILE_TEST_EXISTS)){
-				g_mkdir(addrbookLoc, 0775);
-			}
-			contactList = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addrbookID, "", "", "", "");
-			while(contactList){
-				GSList				*next = contactList->next;
-				int					contactID = GPOINTER_TO_INT(contactList->data);
-				char				*contactName = NULL;
-				char				*contactFile = NULL;
-				char				*contactCard = NULL;
-				if(contactID == 0){
-					contactList = next;
-					continue;
-				}
-				path = g_strconcat(base, "/", serverLoc, "/", addrbookLoc, NULL);
-				if(g_chdir(path)){
-					return;
-				}
-				contactName = getSingleChar(ptr, "contacts", "displayname", 1, "contactID", contactID, "", "", "", "", "", 0);
-				contactFile = g_strconcat(contactName, ".vcf", NULL);
-				contactCard = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", contactID, "", "", "", "", "", 0);
-				g_build_filename(contactFile, NULL);
-				g_file_set_contents(contactFile, contactCard, strlen(contactCard), &error);
-				printGError(error);
-				contactList = next;
-			}
-			g_slist_free(contactList);
-			addressbookList = next;
-		}
-		g_slist_free(addressbookList);
+		exportContactsSrv(ptr, path, serverID);
 		serverList = next;
-		g_free(serverLoc);
 	}
-	g_slist_free(serverList);
 	g_free(path);
+	g_slist_free(serverList);
+}
+
+/**
+ * exportContactsCB - Callback to export contacts
+ */
+void exportContactsCB(sqlite3 *ptr, char *base, int type, int sel){
+	__PRINTFUNC__;
+
+	switch(type){
+		case 0:			/*	All				*/
+			exportContactsAll(ptr, base);
+			break;
+		case 1:			/*	Server			*/
+			exportContactsSrv(ptr, base, sel);
+			break;
+		case 2:			/*	Address book	*/
+			exportContactsAddrBook(ptr, base, sel);
+			break;
+		case 3:
+			exportOneContact(sel, base);
+		default:
+			break;
+	}
+
 }
 
 /**

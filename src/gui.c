@@ -1705,7 +1705,7 @@ static void contactExportcb(GtkMenuItem *menuitem, gpointer data){
 	switch(result){
 		case GTK_RESPONSE_ACCEPT:
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportOneContact(selID, path);
+			exportContactsCB(appBase.db, path, 3, selID);
 			g_free(path);
 			break;
 		default:
@@ -2667,7 +2667,7 @@ static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	switch(result){
 		case GTK_RESPONSE_ACCEPT:
 			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportContacts(appBase.db, path);
+			exportContactsCB(appBase.db, path, 0, 0);
 			g_free(path);
 			break;
 		default:
