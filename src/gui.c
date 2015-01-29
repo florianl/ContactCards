@@ -627,6 +627,34 @@ static GtkWidget *createNewCollectionCard(int srvID){
 }
 
 /**
+ * cbExportContacts - Callback to export contacts
+ */
+static void cbExportContacts(int type, int sel){
+	__PRINTFUNC__;
+
+	GtkWidget					*dirChooser;
+	int							result;
+	char						*path = NULL;
+
+	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+
+	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
+
+	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
+
+	switch(result){
+		case GTK_RESPONSE_ACCEPT:
+			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
+			exportContactsCB(appBase.db, path, type, sel);
+			g_free(path);
+			break;
+		default:
+			break;
+	}
+	gtk_widget_destroy(dirChooser);
+}
+
+/**
  * dialogExportBirthdays - dialog to export vCards
  */
 static void dialogExportBirthdays(int type, int id){
@@ -676,6 +704,30 @@ void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
 
 	srvID = GPOINTER_TO_INT(data);
 	dialogExportBirthdays(0, srvID);
+}
+
+/**
+ * cbExportContactSrv - Callback to export contacts from server
+ */
+void cbExportContactSrv(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	int				srvID = 0;
+
+	srvID = GPOINTER_TO_INT(data);
+	cbExportContacts(1, srvID);
+}
+
+/**
+ * cbExportContactABook - Callback to export contacts from address book
+ */
+void cbExportContactABook(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	int				aID = 0;
+
+	aID = GPOINTER_TO_INT(data);
+	cbExportContacts(2, aID);
 }
 
 /**
@@ -1684,9 +1736,6 @@ static void contactExportcb(GtkMenuItem *menuitem, gpointer data){
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 	int					selID;
-	GtkWidget			*dirChooser;
-	int					result;
-	char				*path = NULL;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
@@ -1696,22 +1745,8 @@ static void contactExportcb(GtkMenuItem *menuitem, gpointer data){
 		return;
 	}
 
-	dirChooser = gtk_file_chooser_dialog_new(_("Export One Contact"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+	cbExportContacts(3, selID);
 
-	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
-
-	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
-
-	switch(result){
-		case GTK_RESPONSE_ACCEPT:
-			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportContactsCB(appBase.db, path, 3, selID);
-			g_free(path);
-			break;
-		default:
-			break;
-	}
-	gtk_widget_destroy(dirChooser);
 }
 
 /**
@@ -2097,7 +2132,8 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 							*menuItem = NULL,
 							*menuItem2 = NULL,
 							*menuItem3 = NULL,
-							*menuItem4 = NULL;
+							*menuItem4 = NULL,
+							*menuItem5 = NULL;
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
@@ -2112,6 +2148,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
 				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
+				menuItem3 = gtk_menu_item_new_with_label(_("Export Contacts"));
+				g_signal_connect(menuItem3, "activate", (GCallback)cbExportContactSrv, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
 				if(flags & DAV_OPT_MKCOL){
 					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
@@ -2134,6 +2173,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem4 = gtk_menu_item_new_with_label(_("Export Birthdays"));
 				g_signal_connect(menuItem4, "activate", (GCallback)cbAddrBookExportBirthdays, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem4);
+				menuItem5 = gtk_menu_item_new_with_label(_("Export Contacts"));
+				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactABook, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
 				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
 					break;
 				}
@@ -2654,26 +2696,8 @@ static GtkWidget *contactsTreeCreate(void){
 static void dialogExportContacts(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
-	GtkWidget					*dirChooser;
-	int							result;
-	char						*path = NULL;
+	cbExportContacts(0, 0);
 
-	dirChooser = gtk_file_chooser_dialog_new(_("Export Contacts"), NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
-
-	g_signal_connect(G_OBJECT(dirChooser), "key_press_event", G_CALLBACK(dialogKeyHandler), NULL);
-
-	result = gtk_dialog_run(GTK_DIALOG(dirChooser));
-
-	switch(result){
-		case GTK_RESPONSE_ACCEPT:
-			path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dirChooser));
-			exportContactsCB(appBase.db, path, 0, 0);
-			g_free(path);
-			break;
-		default:
-			break;
-	}
-	gtk_widget_destroy(dirChooser);
 }
 
 /**

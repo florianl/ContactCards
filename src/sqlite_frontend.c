@@ -194,6 +194,8 @@ void exportOneContact(int selID, char *base){
 	char				*contactCard = NULL;
 	GError 				*error = NULL;
 
+	debugCC("[%s] %d > %s\n", __func__, selID, base);
+
 	path = g_strconcat(base, NULL);
 	if(g_chdir(path)){
 		return;
@@ -227,7 +229,6 @@ void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
 	}
 
 	path = g_strconcat(base, "/", addrbookLoc, NULL);
-
 	contactList = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addrbook, "", "", "", "");
 	while(contactList){
 		GSList				*next = contactList->next;
@@ -238,7 +239,11 @@ void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
 			continue;
 		}
 		if(g_chdir(path)){
-			return;
+			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
+				g_mkdir(path, 0775);
+			} else {
+				return;
+			}
 		}
 		exportOneContact(contactID, path);
 		contactList = next;
@@ -264,7 +269,9 @@ void exportContactsSrv(sqlite3 *ptr, char *base, int srv){
 	}
 	path = g_strconcat(base, "/", serverLoc, NULL);
 	if(g_chdir(path)){
-		return;
+		if (!g_file_test(path, G_FILE_TEST_EXISTS)){
+			g_mkdir(path, 0775);
+		}
 	}
 
 	addressbookList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", srv, "", "", "", "");
@@ -324,6 +331,8 @@ void exportContactsAll(sqlite3 *ptr, char *base){
  */
 void exportContactsCB(sqlite3 *ptr, char *base, int type, int sel){
 	__PRINTFUNC__;
+
+	debugCC("[%s] %d|%d to %s\n", __func__, type, sel, base);
 
 	switch(type){
 		case 0:			/*	All				*/
