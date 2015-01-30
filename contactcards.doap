@@ -1,0 +1,18 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+    <name xml:lang="en">contactcards</name>
+    <shortdesc xml:lang="en">Simple address book</shortdesc>
+    <homepage rdf:resource="https://der-flo.net/contactcards" />
+    <bug-database rdf:resource="https://github.com/florianl/ContactCards/issues" />
+    <programming-language>C</programming-language>
+
+    <maintainer>
+        <foaf:Person>
+            <foaf:name>Florian Lehner</foaf:name>
+        /foaf:Person>
+    </maintainer>
+
+</Project>
