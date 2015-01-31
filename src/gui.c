@@ -719,6 +719,15 @@ void cbExportContactSrv(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * cbExportContactFav - Callback to export contacts marked as favorites
+ */
+void cbExportContactFav(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	cbExportContacts(4, 0);
+}
+
+/**
  * cbExportContactABook - Callback to export contacts from address book
  */
 void cbExportContactABook(GtkMenuItem *menuitem, gpointer data){
@@ -2193,6 +2202,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
 				g_signal_connect(menuItem2, "activate", (GCallback)cbFavoritesExportBirthdays, NULL);
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
+				menuItem5 = gtk_menu_item_new_with_label(_("Export Contacts"));
+				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactFav, NULL);
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
 				break;
 			default:
 				return;

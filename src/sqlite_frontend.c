@@ -185,7 +185,7 @@ void exportCert(sqlite3 *ptr, char *base, int serverID){
 /**
  * exportOneContact - exports one contact
  */
-void exportOneContact(int selID, char *base){
+void exportOneContact(sqlite3 *ptr, int selID, char *base){
 	__PRINTFUNC__;
 
 	char				*path = NULL;
@@ -245,10 +245,43 @@ void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
 				return;
 			}
 		}
-		exportOneContact(contactID, path);
+		exportOneContact(appBase.db, contactID, path);
 		contactList = next;
 	}
 	g_free(addrbookLoc);
+	g_free(path);
+	g_slist_free(contactList);
+}
+
+/**
+ * exportContactsFav - Export contacts marked as favorit
+ */
+void exportContactsFav(sqlite3 *ptr, char *base){
+	__PRINTFUNC__;
+
+	GSList				*contactList;
+	char				*path = NULL;
+
+	path = g_strconcat(base, "/Favorites", NULL);
+	contactList = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
+	while(contactList){
+		GSList				*next = contactList->next;
+		int					contactID = GPOINTER_TO_INT(contactList->data);
+
+		if(contactID == 0){
+			contactList = next;
+			continue;
+		}
+		if(g_chdir(path)){
+			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
+				g_mkdir(path, 0775);
+			} else {
+				return;
+			}
+		}
+		exportOneContact(appBase.db, contactID, path);
+		contactList = next;
+	}
 	g_free(path);
 	g_slist_free(contactList);
 }
@@ -345,7 +378,11 @@ void exportContactsCB(sqlite3 *ptr, char *base, int type, int sel){
 			exportContactsAddrBook(ptr, base, sel);
 			break;
 		case 3:
-			exportOneContact(sel, base);
+			exportOneContact(ptr, sel, base);
+			break;
+		case 4:
+			exportContactsFav(ptr, base);
+			break;
 		default:
 			break;
 	}
