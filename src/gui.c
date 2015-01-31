@@ -2703,16 +2703,6 @@ static GtkWidget *contactsTreeCreate(void){
 }
 
 /**
- * dialogExportContacts - dialog to export vCards
- */
-static void dialogExportContacts(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-
-	cbExportContacts(0, 0);
-
-}
-
-/**
  * completionCB - very simple Callback to check whether a entry fits
  */
 static gboolean completionCB(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer user_data){
@@ -2821,7 +2811,7 @@ void guiInit(void){
 	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkWidget			*emptyCard, *noContact;
 	GtkWidget			*syncMenu;
-	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *exportItem, *calItem;
+	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *calItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
@@ -2856,11 +2846,6 @@ void guiInit(void){
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prefItem), _("Preferences"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (prefItem), "preferences-system");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), prefItem, -1);
-
-	exportItem = gtk_tool_button_new(NULL, _("Export"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(exportItem), _("Export"));
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (exportItem), "document-save");
-	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), exportItem, -1);
 
 	calItem = gtk_tool_button_new(NULL, _("Birthday Calendar"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(calItem), _("Birthday Calendar"));
@@ -2976,7 +2961,6 @@ void guiInit(void){
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), NULL);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), NULL);
-	g_signal_connect(G_OBJECT(exportItem), "clicked", G_CALLBACK(dialogExportContacts), NULL);
 	g_signal_connect(G_OBJECT(calItem), "clicked", G_CALLBACK(birthdayDialog), NULL);
 
 	/*	Build the base structure 	*/
