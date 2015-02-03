@@ -707,6 +707,15 @@ void cbSrvExportBirthdays(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * cbExportContactAll - Callback to export contacts all contacts
+ */
+void cbExportContactAll(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	cbExportContacts(0, 0);
+}
+
+/**
  * cbExportContactSrv - Callback to export contacts from server
  */
 void cbExportContactSrv(GtkMenuItem *menuitem, gpointer data){
@@ -2146,20 +2155,21 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 		gtk_tree_model_get(model, &iter, TYP_COL, &typ, ID_COL, &selID,  -1);
 		verboseCC("[%s] typ: %d\tselID: %d\n",__func__, typ, selID);
 
-		if(typ == 0 && selID == 0){
-			verboseCC("[%s] generic item selected\n", __func__);
-			return;
-		}
-
 		menu = gtk_menu_new();
+
 		switch(typ){
 			case 0:		/*	server	*/
+				menuItem3 = gtk_menu_item_new_with_label(_("Export Contacts"));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
+				if(selID == 0){
+					g_signal_connect(menuItem3, "activate", (GCallback)cbExportContactAll, GINT_TO_POINTER(selID));
+					break;
+				} else {
+					g_signal_connect(menuItem3, "activate", (GCallback)cbExportContactSrv, GINT_TO_POINTER(selID));
+				}
 				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
 				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
-				menuItem3 = gtk_menu_item_new_with_label(_("Export Contacts"));
-				g_signal_connect(menuItem3, "activate", (GCallback)cbExportContactSrv, GINT_TO_POINTER(selID));
-				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
 				if(flags & DAV_OPT_MKCOL){
 					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
@@ -2207,7 +2217,7 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
 				break;
 			default:
-				return;
+				break;
 		}
 		gtk_widget_show_all(menu);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
