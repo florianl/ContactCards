@@ -106,6 +106,9 @@ typedef struct ContactCards_pref {
 	GtkWidget			*colorChooser;
 	GSList				*aBooks;
 	int					srvID;
+#ifdef _USE_DANE
+	GtkWidget			*dane;
+#endif	/*	_USE_DANE	*/
 } ContactCards_pref_t;
 
 /**

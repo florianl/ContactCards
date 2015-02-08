@@ -696,11 +696,18 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
 
 			res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "", "", "");
-			if(res == ContactCards_DIGEST_TRUSTED){
+			if((res & ContactCards_DIGEST_TRUSTED) == ContactCards_DIGEST_TRUSTED){
 				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
 			} else {
 				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 			}
+#ifdef _USE_DANE
+			if((res & ContactCards_DANE) == ContactCards_DANE){
+				gtk_label_set_text(GTK_LABEL(buffers->dane), _("Based on DANE the certificate is considered trustworthy."));
+			} else {
+				gtk_label_set_text(GTK_LABEL(buffers->dane), _("No information available via DANE."));
+			}
+#endif
 		} else {
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
@@ -794,6 +801,9 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GSList				*aBooks = g_slist_alloc();
 	GError				*error = NULL;
 	GdkPixbuf			*pixbuf;
+#ifdef _USE_DANE
+	GtkWidget			*daneResult;
+#endif	/*	_USE_DANE	*/
 
 	ContactCards_pref_t		*buffers = NULL;
 
@@ -905,6 +915,15 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
 
+#ifdef _USE_DANE
+
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	daneResult = gtk_label_new("");
+	gtk_box_pack_start(GTK_BOX(hbox), daneResult, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+
+#endif	/*	_USE_DANE	*/
+
 	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
@@ -962,6 +981,9 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	buffers->listbox = ablist;
 	buffers->aBooks = aBooks;
 	buffers->colorChooser = colorBtn;
+#ifdef _USE_DANE
+	buffers->dane = daneResult;
+#endif	/*	_USE_DANE	*/
 
 	/*		Connect Signales		*/
 	serverSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(serverPrefList));

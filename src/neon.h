@@ -148,7 +148,9 @@
 #define	ContactCards_DIGEST_TRUSTED		0
 #define	ContactCards_DIGEST_NEW			1
 #define	ContactCards_DIGEST_UNTRUSTED	2
-
+#ifdef _USE_DANE
+#define	ContactCards_DANE				4
+#endif	/*	_USE_DANE	*/
 /**
  * struct ContactCards_stack - contains the response to an request
  */
