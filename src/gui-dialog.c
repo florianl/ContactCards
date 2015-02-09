@@ -958,7 +958,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	deleteBtn = gtk_button_new_with_label(_("Delete Server"));
+	deleteBtn = gtk_button_new_with_label(_("Remove server from address book"));
 	gtk_box_pack_start(GTK_BOX(hbox), deleteBtn, FALSE, FALSE, 2);
 	saveBtn = gtk_button_new_with_label(_("Save changes"));
 	gtk_box_pack_start(GTK_BOX(hbox), saveBtn, FALSE, FALSE, 2);
