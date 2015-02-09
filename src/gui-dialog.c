@@ -750,9 +750,10 @@ void prefServerSelect(GtkWidget *widget, gpointer trans){
 			gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
 			abList = next;
 		}
+
+		g_slist_free(abList);
 	}
 
-	g_slist_free(abList);
 	g_free(frameTitle);
 	g_free(user);
 	g_free(passwd);

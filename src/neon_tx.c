@@ -321,10 +321,12 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 			}
 			break;
 		case ContactCards_DIGEST_UNTRUSTED:
+			g_free(digest);
 			return ContactCards_DIGEST_UNTRUSTED;
 			break;
 		default:
 		case ContactCards_DIGEST_NEW:
+			g_free(digest);
 			return ContactCards_DIGEST_NEW;
 			break;
 	}
@@ -338,6 +340,7 @@ newCert:
 	setServerCert(appBase.db, serverID, exists, trust, newCer, digest, issued, issuer);
 
 fastExit:
+	g_free(digest);
 	g_free(dbDigest);
 
 	return trust;
@@ -1261,6 +1264,8 @@ int postPushCard(sqlite3 *ptr, ne_session *sess, int srvID, int addrBookID, int 
 				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
 			}
 			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
+			return 1;
+			break;
 		case 204:
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			return 1;
@@ -1315,8 +1320,10 @@ int pushCard(sqlite3 *ptr, char *card, int addrBookID, int existing, int oldID){
 				dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", oldID);
 			}
 			setSingleInt(ptr, "contacts", "flags", 0, "contactID", newID);
+			ret = 1;
+			break;
 		case 204:
-			verboseCC("[%s] going to get the new vCars\n", __func__);
+			verboseCC("[%s] going to get the new vCards\n", __func__);
 			serverRequest(DAV_REQ_GET, srvID, newID, sess, ptr);
 			ret = 1;
 			break;
