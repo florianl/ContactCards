@@ -940,6 +940,7 @@ sendAgain:
 				handleServerOptions((char *)ne_get_response_header(req, "Allow"), serverID);
 				handleServerOptions((char *)ne_get_response_header(req, "Dav"), serverID);
 			}
+			// falling through is fine here
 		case 202 ... 203:
 		case 205 ... 206:
 		case 208 ... 299:
