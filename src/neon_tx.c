@@ -116,12 +116,14 @@ ldns_status ssl_connect_and_get_cert_chain(X509** cert, STACK_OF(X509)** extra_c
 		}
 		r = SSL_get_error(ssl, r);
 		if (r != SSL_ERROR_WANT_READ && r != SSL_ERROR_WANT_WRITE) {
+			close(sock);
 			fprintf(stderr, "handshaking SSL_get_error: %d\n", r);
 			return LDNS_STATUS_SSL_ERR;
 		}
 	}
 	*cert = SSL_get_peer_certificate(ssl);
 	*extra_certs = SSL_get_peer_cert_chain(ssl);
+	close(sock);
 
 	return LDNS_STATUS_OK;
 }

@@ -602,4 +602,5 @@ void exportBirthdays(int type, int id, char *base){
 		verboseCC("%s\n", error->message);
 	}
 	g_slist_free(contacts);
+	return;
 }
