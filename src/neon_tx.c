@@ -93,6 +93,7 @@ ldns_status ssl_connect_and_get_cert_chain(X509** cert, STACK_OF(X509)** extra_c
 	}
 	if (connect(sock, (struct sockaddr*)a, (socklen_t)a_len) == -1) {
 		LDNS_FREE(a);
+		close(sock);
 		return LDNS_STATUS_NETWORK_ERR;
 	}
 	LDNS_FREE(a);
