@@ -131,6 +131,9 @@ static void selBook(GtkWidget *widget, gpointer trans){
 			case 2:		/*	Favorites are selected			*/
 				contactsTreeUpdate(2, 0);
 				break;
+			case 3:		/*	Locales are selected			*/
+				contactsTreeUpdate(3, 0);
+				break;
 			default:
 				verboseCC("[%s] something is strange around here\n", __func__);
 				break;
@@ -737,6 +740,15 @@ void cbExportContactFav(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * cbExportContactLoc - Callback to export local contacts
+ */
+void cbExportContactLoc(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	cbExportContacts(5, 0);
+}
+
+/**
  * cbExportContactABook - Callback to export contacts from address book
  */
 void cbExportContactABook(GtkMenuItem *menuitem, gpointer data){
@@ -755,6 +767,15 @@ void cbFavoritesExportBirthdays(GtkMenuItem *menuitem, gpointer data){
 	__PRINTFUNC__;
 
 	dialogExportBirthdays(2, 0);
+}
+
+/**
+ * cbLocalesExportBirthdays - Callback from popup-menu to export birthdays
+ */
+void cbLocalesExportBirthdays(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+
+	dialogExportBirthdays(3, 0);
 }
 
 /**
@@ -2216,6 +2237,13 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactFav, NULL);
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
 				break;
+			case 3:		/*	locales		*/
+				menuItem2 = gtk_menu_item_new_with_label(_("Export Birthdays"));
+				g_signal_connect(menuItem2, "activate", (GCallback)cbLocalesExportBirthdays, NULL);
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
+				menuItem5 = gtk_menu_item_new_with_label(_("Export Contacts"));
+				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactLoc, NULL);
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
 			default:
 				break;
 		}
@@ -2257,6 +2285,9 @@ void addressbookTreeUpdate(void){
 
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Favorites"), ID_COL, 0, TYP_COL, 2,  -1);
+
+	gtk_tree_store_append(store, &toplevel, NULL);
+	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Locales"), ID_COL, 0, TYP_COL, 3,  -1);
 
 	if(g_slist_length(servers) <= 1){
 		debugCC("There are no servers actually\n");
@@ -2539,6 +2570,9 @@ void contactsTreeUpdate(int type, int id){
 			break;
 		case 2:
 			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
+			break;
+		case 3:
+			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_LOCAL, "", "", "", "");
 			break;
 		default:
 			break;

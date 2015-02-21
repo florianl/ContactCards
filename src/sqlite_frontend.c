@@ -287,6 +287,39 @@ void exportContactsFav(sqlite3 *ptr, char *base){
 }
 
 /**
+ * exportContactsLoc - Export local contacts
+ */
+void exportContactsLoc(sqlite3 *ptr, char *base){
+	__PRINTFUNC__;
+
+	GSList				*contactList;
+	char				*path = NULL;
+
+	path = g_strconcat(base, "/Favorites", NULL);
+	contactList = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_LOCAL, "", "", "", "");
+	while(contactList){
+		GSList				*next = contactList->next;
+		int					contactID = GPOINTER_TO_INT(contactList->data);
+
+		if(contactID == 0){
+			contactList = next;
+			continue;
+		}
+		if(g_chdir(path)){
+			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
+				g_mkdir(path, 0775);
+			} else {
+				return;
+			}
+		}
+		exportOneContact(appBase.db, contactID, path);
+		contactList = next;
+	}
+	g_free(path);
+	g_slist_free(contactList);
+}
+
+/**
  * exportContactsSrv - Export contacts from server
  */
 void exportContactsSrv(sqlite3 *ptr, char *base, int srv){
@@ -382,6 +415,9 @@ void exportContactsCB(sqlite3 *ptr, char *base, int type, int sel){
 			break;
 		case 4:
 			exportContactsFav(ptr, base);
+			break;
+		case 5:
+			exportContactsLoc(ptr, base);
 			break;
 		default:
 			break;
@@ -524,8 +560,10 @@ void exportBirthdays(int type, int id, char *base){
 			desc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", id, "", "", "", "", "", 0);
 			break;
 		case 2:		/*	favorites		*/
-			desc = g_strdup("Favorites");
+			desc = g_strdup(_("Favorites"));
 			break;
+		case 3:
+			desc = g_strdup(_("Locales"));
 		default:
 			return;
 	}
@@ -590,6 +628,9 @@ void exportBirthdays(int type, int id, char *base){
 			break;
 		case 2:		/*	favorites		*/
 			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
+			break;
+		case 3:		/*	favorites		*/
+			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_LOCAL, "", "", "", "");
 			break;
 		default:
 			break;
