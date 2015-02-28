@@ -54,6 +54,7 @@ sqlite3_mutex			*dbMutex;
 #define	CONTACTCARDS_ONE_WAY_SYNC	0x2
 #define	CONTACTCARDS_FAVORIT		0x4
 #define	CONTACTCARDS_LOCAL			0x8
+#define	CONTACTCARDS_QUERY			0x10
 
 #define	__PRINTFUNC__	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", __func__);
 

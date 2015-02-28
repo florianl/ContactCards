@@ -615,6 +615,9 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 		case 123:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
 			break;
+		case 90:	/* SQL Query for query option	*/
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE instr(%q, '%q') > 0;", selValue, tableName, row2, value2);
+			break;
 		case 91:	/* SQL Query using bitwise operation	*/
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE (%q & %d) = %d;", selValue, tableName, row1, value1, value1);
 			break;
@@ -1693,4 +1696,59 @@ void handleServerOptions(char *val, int serverID){
 
 	if(flags != 0)
 		updateServerFlags(serverID, flags);
+}
+
+/**
+ * queryAddressbooks - query the address book
+ */
+void queryAddressbooks(const char *q){
+	__PRINTFUNC__;
+
+	/*
+	 * Query outputformat for mutt:
+	 * <email address> <tab> <long name> <tab> <other info> <newline>
+
+	 */
+
+	GSList		*temporary;
+
+	temporary = getListInt(appBase.db, "contacts", "contactID", 90, "",0, "vCard", (char *)q, "", "");
+
+	while(temporary){
+		GSList				*next = temporary->next;
+		int					id = GPOINTER_TO_INT(temporary->data);
+		char				*vCard;
+		GSList				*mail;
+		char				*fn;
+
+		if(id == 0){
+			temporary = next;
+			continue;
+		}
+		debugCC("[%s] found %d\n", __func__, id);
+		vCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", id, "", "", "", "", "", 0);
+		fn = getSingleCardAttribut(CARDTYPE_FN, vCard);
+		mail = getMultipleCardAttribut(CARDTYPE_EMAIL, vCard, FALSE);
+		if (g_slist_length(mail) > 1){
+			while(mail){
+				GSList					*next = mail->next;
+				int						tabs = 0;
+				int						i = 0;
+
+				if(mail->data){
+					tabs = ((int) strlen(mail->data))/8+1;
+					fprintf(stdout, "%s", (char *) mail->data);
+					for(i=0;i<tabs;i++)
+						fprintf(stdout, "\t");
+					fprintf(stdout, "%s\n", fn);
+				}
+				mail = next;
+			}
+		}
+		g_slist_free_full(mail, g_free);
+		g_free(fn);
+		g_free(vCard);
+		temporary = next;
+	}
+	g_slist_free(temporary);
 }

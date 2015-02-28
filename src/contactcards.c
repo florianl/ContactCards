@@ -69,21 +69,27 @@ int main(int argc, char **argv){
 	}
 	appBase.db = db_handler;
 
-	guiInit();
 	g_mutex_init(&mutex);
 	g_mutex_init(&aBookTreeMutex);
 	g_mutex_init(&contactsTreeMutex);
 
-	newOAuthEntity(db_handler, "google.com", "741969998490.apps.googleusercontent.com", "71adV1QbUKszvBV_xXliTD34", "https://www.googleapis.com/.well-known/carddav", "https://www.googleapis.com/auth/carddav", "https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", "code", "urn:ietf:wg:oauth:2.0:oob", "authorization_code");
+	if((app->flag & CONTACTCARDS_QUERY) == CONTACTCARDS_QUERY){
+		queryAddressbooks(app->query);
+		g_free(app->query);
+	} else {
+		guiInit();
 
-	if(app->debug){
-		showServer(db_handler);
-		showAddressbooks(db_handler);
-		showContacts(db_handler);
+		newOAuthEntity(db_handler, "google.com", "741969998490.apps.googleusercontent.com", "71adV1QbUKszvBV_xXliTD34", "https://www.googleapis.com/.well-known/carddav", "https://www.googleapis.com/auth/carddav", "https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", "code", "urn:ietf:wg:oauth:2.0:oob", "authorization_code");
+
+		if(app->debug){
+			showServer(db_handler);
+			showAddressbooks(db_handler);
+			showContacts(db_handler);
+		}
+
+		g_timeout_add_seconds (appBase.syncIntervall, syncTimer, NULL);
+		guiRun(db_handler);
 	}
-
-	g_timeout_add_seconds (appBase.syncIntervall, syncTimer, NULL);
-	guiRun(db_handler);
 	dbClose(db_handler);
 
 	g_free(db);

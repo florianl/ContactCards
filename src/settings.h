@@ -22,6 +22,8 @@ typedef struct ContactCards_app {
 	char		*configdir;
 	gboolean	debug;
 	gboolean	verbose;
+	int			flag;
+	char		*query;
 } ContactCards_app_t;
 
 extern void debugCC(gchar const *format, ...);

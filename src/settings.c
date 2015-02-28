@@ -15,6 +15,7 @@
 
 static char			*alternate_config = NULL;
 static char			*version = NULL;
+static char			*query = NULL;
 static gboolean		verbose = FALSE;
 static gboolean		debug = FALSE;
 
@@ -24,6 +25,7 @@ static GOptionEntry entries[] =
 	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "debugging output", NULL },
 	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "verbose output", NULL },
 	{ "version", 'V', 0, G_OPTION_ARG_NONE, &version, "Show version", NULL },
+	{ "query", 'q', 0, G_OPTION_ARG_STRING, &query, "Look for this query", NULL},
 	{ NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 
@@ -50,6 +52,7 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 	}
 
 	app = g_new(ContactCards_app_t, 1);
+	app->flag = 0;
 
 	app->verbose = verbose;
 	app->debug = debug;
@@ -58,6 +61,11 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 		app->configdir = alternate_config;
 	}else {
 		app->configdir = g_build_filename(g_get_user_config_dir(), "contactcards", NULL);
+	}
+
+	if(query){
+		app->query = g_strndup(query, strlen(query));
+		app->flag |= CONTACTCARDS_QUERY;
 	}
 
 	return app;
