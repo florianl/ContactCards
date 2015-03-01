@@ -54,8 +54,11 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 	app = g_new(ContactCards_app_t, 1);
 	app->flag = 0;
 
-	app->verbose = verbose;
-	app->debug = debug;
+	if(verbose)
+		app->flag |= CONTACTCARDS_VERBOSE;
+
+	if(debug)
+		app->flag |= CONTACTCARDS_DEBUG;
 
 	if(alternate_config){
 		app->configdir = alternate_config;
@@ -108,11 +111,11 @@ static void logHandler(const gchar *domain, GLogLevelFlags level, const gchar *m
 static void configOutput(ContactCards_app_t *app){
 	__PRINTFUNC__;
 
-	if(app->verbose){
+	if((app->flag & CONTACTCARDS_VERBOSE) == CONTACTCARDS_VERBOSE){
 		g_log_set_handler("ContactCards", G_LOG_LEVEL_INFO, logHandler, NULL);
 	}
 
-	if(app->debug){
+	if((app->flag & CONTACTCARDS_DEBUG) == CONTACTCARDS_DEBUG){
 		g_log_set_handler("ContactCards", G_LOG_LEVEL_DEBUG, logHandler, NULL);
 	}
 

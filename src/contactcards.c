@@ -81,7 +81,7 @@ int main(int argc, char **argv){
 
 		newOAuthEntity(db_handler, "google.com", "741969998490.apps.googleusercontent.com", "71adV1QbUKszvBV_xXliTD34", "https://www.googleapis.com/.well-known/carddav", "https://www.googleapis.com/auth/carddav", "https://accounts.google.com/o/oauth2/auth", "https://accounts.google.com/o/oauth2/token", "code", "urn:ietf:wg:oauth:2.0:oob", "authorization_code");
 
-		if(app->debug){
+		if((app->flag & CONTACTCARDS_DEBUG) == CONTACTCARDS_DEBUG){
 			showServer(db_handler);
 			showAddressbooks(db_handler);
 			showContacts(db_handler);
@@ -95,7 +95,8 @@ int main(int argc, char **argv){
 	g_free(db);
 	sqlite3_mutex_free(dbMutex);
 
-	g_free(app->configdir);
+	if(app->configdir)
+		g_free(app->configdir);
 	g_free(app);
 
 	g_mutex_clear(&mutex);
