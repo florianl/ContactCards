@@ -240,7 +240,10 @@ void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
 		}
 		if(g_chdir(path)){
 			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
-				g_mkdir(path, 0775);
+				if(g_mkdir(path, 0775)){
+					verboseCC("[%s] failed to create a directory\n", __func__);
+					return;
+				}
 			} else {
 				return;
 			}
@@ -274,7 +277,10 @@ void exportContactsFav(sqlite3 *ptr, char *base){
 		}
 		if(g_chdir(path)){
 			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
-				g_mkdir(path, 0775);
+				if(g_mkdir(path, 0775)){
+					verboseCC("[%s] failed to create a directory\n", __func__);
+					return;
+				}
 			} else {
 				return;
 			}
@@ -307,7 +313,10 @@ void exportContactsLoc(sqlite3 *ptr, char *base){
 		}
 		if(g_chdir(path)){
 			if (!g_file_test(path, G_FILE_TEST_EXISTS)){
-				g_mkdir(path, 0775);
+				if(g_mkdir(path, 0775)){
+					verboseCC("[%s] failed to create a directory\n", __func__);
+					return;
+				}
 			} else {
 				return;
 			}
@@ -336,7 +345,10 @@ void exportContactsSrv(sqlite3 *ptr, char *base, int srv){
 	path = g_strconcat(base, "/", serverLoc, NULL);
 	if(g_chdir(path)){
 		if (!g_file_test(path, G_FILE_TEST_EXISTS)){
-			g_mkdir(path, 0775);
+			if(g_mkdir(path, 0775)){
+				verboseCC("[%s] failed to create a directory\n", __func__);
+				return;
+			}
 		}
 	}
 
