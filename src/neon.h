@@ -145,11 +145,11 @@
 /*
  * Certificate stuff
  */
-#define	ContactCards_DIGEST_TRUSTED		0
-#define	ContactCards_DIGEST_NEW			1
-#define	ContactCards_DIGEST_UNTRUSTED	2
+#define	ContactCards_DIGEST_TRUSTED		0x01
+#define	ContactCards_DIGEST_NEW			0x02
+#define	ContactCards_DIGEST_UNTRUSTED	0x04
 #ifdef _USE_DANE
-#define	ContactCards_DANE				4
+#define	ContactCards_DANE				0x08
 #endif	/*	_USE_DANE	*/
 /**
  * struct ContactCards_stack - contains the response to an request
