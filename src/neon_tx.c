@@ -894,8 +894,11 @@ sendAgain:
 				}
 				vCard = g_strndup(tmpCard, strlen(tmpCard));
 			} while(ret);
-		if (ret == NE_OK)
-			ret = ne_end_request(req);
+			if (ret == NE_OK){
+				ret = ne_end_request(req);
+				if(ret== NE_RETRY)
+					goto sendAgain;
+			}
 		}
 		updateContact(ptr, itemID, vCard);
 		g_free(tmpCard);
