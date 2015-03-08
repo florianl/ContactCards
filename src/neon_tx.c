@@ -320,6 +320,11 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 				goto newCert;
 			}
 			if(g_strcmp0(digest, dbDigest) == 0){
+				/*
+				 * ne_ssl_verify_fn must return 0 to indicate the
+				 * certificate should be trusted.
+				 */
+				trust = 0;
 				goto fastExit;
 			}
 			break;
