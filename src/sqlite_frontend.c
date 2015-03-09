@@ -225,7 +225,10 @@ void exportContactsAddrBook(sqlite3 *ptr, char *base, int addrbook){
 
 	addrbookLoc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", addrbook, "", "", "", "", "", 0);
 	if (!g_file_test(addrbookLoc, G_FILE_TEST_EXISTS)){
-		g_mkdir(addrbookLoc, 0775);
+		if(g_mkdir(addrbookLoc, 0775)){
+			verboseCC("[%s] failed to create a directory\n", __func__);
+			return;
+		}
 	}
 
 	path = g_strconcat(base, "/", addrbookLoc, NULL);
@@ -340,7 +343,10 @@ void exportContactsSrv(sqlite3 *ptr, char *base, int srv){
 
 	serverLoc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", srv, "", "", "", "", "", 0);
 	if (!g_file_test(serverLoc, G_FILE_TEST_EXISTS)){
-			g_mkdir(serverLoc, 0775);
+			if(g_mkdir(serverLoc, 0775)){
+				verboseCC("[%s] failed to create a directory\n", __func__);
+				return;
+			}
 	}
 	path = g_strconcat(base, "/", serverLoc, NULL);
 	if(g_chdir(path)){
