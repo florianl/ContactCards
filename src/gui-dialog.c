@@ -150,37 +150,44 @@ static void newDialogConfirm(GtkWidget *widget, gpointer data){
 static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 	__PRINTFUNC__;
 
-	GtkWidget				*box, *hbox;
+	GtkWidget				*box;
 	GtkWidget				*label, *inputoAuth, *inputGrant, *button;
 	GtkEntryBuffer			*user, *grant;
 	char					*uri = NULL;
+	int						line = 0;
 
 	user = gtk_entry_buffer_new(NULL, -1);
 	grant = gtk_entry_buffer_new(NULL, -1);
 
 	uri = g_strdup("https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/carddav&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=741969998490.apps.googleusercontent.com");
 
-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	box = gtk_grid_new();
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("User"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputoAuth = gtk_entry_new_with_buffer(user);
+	gtk_widget_set_hexpand(inputoAuth, TRUE);
 	g_object_set_data(G_OBJECT(box),"oAuthEntry", user);
-	gtk_box_pack_start(GTK_BOX(hbox), inputoAuth, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputoAuth, 1, line++, 1, 1);
 
 
 	button = gtk_link_button_new_with_label(uri, _("Request Grant"));
-	gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 2);
+	gtk_grid_attach(GTK_GRID(box), button, 1, line++, 1, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Grant"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputGrant = gtk_entry_new_with_buffer(grant);
+	gtk_widget_set_hexpand(inputGrant, TRUE);
 	g_object_set_data(G_OBJECT(box),"grantEntry", grant);
-	gtk_box_pack_start(GTK_BOX(hbox), inputGrant, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputGrant, 1, line++, 1, 1);
 
 	gtk_widget_show_all(box);
 	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
@@ -200,32 +207,38 @@ static void newDialogOAuthCredentials(GtkWidget *widget, gpointer data){
 static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 	__PRINTFUNC__;
 
-	GtkWidget				*box, *hbox;
+	GtkWidget				*box;
 	GtkWidget				*label, *inputUser, *inputPasswd;
 	GtkEntryBuffer			*user, *passwd;
+	int						line = 0;
 
 	user = gtk_entry_buffer_new(NULL, -1);
 	passwd = gtk_entry_buffer_new(NULL, -1);
 
-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	box = gtk_grid_new();
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("User"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputUser = gtk_entry_new_with_buffer(user);
+	gtk_widget_set_hexpand(inputUser, TRUE);
 	g_object_set_data(G_OBJECT(box),"userEntry", user);
-	gtk_box_pack_start(GTK_BOX(hbox), inputUser, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputUser, 1, line++, 1, 1);
 
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Password"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputPasswd = gtk_entry_new_with_buffer(passwd);
 	gtk_entry_set_visibility(GTK_ENTRY(inputPasswd), FALSE);
 	g_object_set_data(G_OBJECT(box),"passwdEntry", passwd);
-	gtk_box_pack_start(GTK_BOX(hbox), inputPasswd, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputPasswd, 1, line++, 1, 1);
 
 	gtk_widget_show_all(box);
 	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
@@ -243,31 +256,37 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 static void newDialogServerSettings(GtkWidget *widget, gpointer data){
 	__PRINTFUNC__;
 
-	GtkWidget				*box, *hbox;
+	GtkWidget				*box;
 	GtkWidget				*label, *inputDesc, *inputUrl;
 	GtkEntryBuffer			*desc, *url;
+	int						line = 0;
 
 	desc = gtk_entry_buffer_new(NULL, -1);
 	url = gtk_entry_buffer_new(NULL, -1);
 
-	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	box = gtk_grid_new();
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Description"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputDesc = gtk_entry_new_with_buffer(desc);
+	gtk_widget_set_hexpand(inputDesc, TRUE);
 	g_object_set_data(G_OBJECT(box),"descEntry", desc);
-	gtk_box_pack_start(GTK_BOX(hbox), inputDesc, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputDesc, 1, line++, 1, 1);
 
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("URL"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_start(label, 12);
+	gtk_widget_set_margin_end(label, 12);
+	gtk_widget_set_margin_top(label, 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(box), label, 0, line, 1, 1);
 	inputUrl = gtk_entry_new_with_buffer(url);
+	gtk_widget_set_hexpand(inputUrl, TRUE);
 	g_object_set_data(G_OBJECT(box),"urlEntry", url);
-	gtk_box_pack_start(GTK_BOX(hbox), inputUrl, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, TRUE, 2);
+	gtk_grid_attach(GTK_GRID(box), inputUrl, 1, line++, 1, 1);
 
 	gtk_widget_show_all(box);
 	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);
@@ -348,7 +367,7 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
 
 	assistant = gtk_assistant_new ();
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(assistant), TRUE);
-	gtk_window_set_default_size (GTK_WINDOW (assistant), -1, 300);
+	gtk_window_set_default_size (GTK_WINDOW (assistant), 610, 377);
 
 	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
 	if(error){
