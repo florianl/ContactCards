@@ -970,9 +970,12 @@ void showServer(sqlite3 *ptr){
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
-	sqlite3_prepare_v2(ptr, "SELECT * FROM cardServer", -1, &vm, NULL);
-	while(sqlite3_step(vm) != SQLITE_DONE){
-		printf("[%i]\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_text(vm, 1), sqlite3_column_text(vm, 4));
+	if(sqlite3_prepare_v2(ptr, "SELECT * FROM cardServer", -1, &vm, NULL) == SQLITE_OK){
+		while(sqlite3_step(vm) != SQLITE_DONE){
+			printf("[%i]\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_text(vm, 1), sqlite3_column_text(vm, 4));
+		}
+	} else {
+		verboseCC("[%s] Errorcode: %d - %s\n", __func__,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	sqlite3_finalize(vm);
@@ -991,9 +994,12 @@ void showAddressbooks(sqlite3 *ptr){
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
-	sqlite3_prepare_v2(ptr, "SELECT * FROM addressbooks", -1, &vm, NULL);
-	while(sqlite3_step(vm) != SQLITE_DONE){
-		printf("[%i - %i]\t%s\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_int(vm, 1), sqlite3_column_text(vm, 2), sqlite3_column_text(vm, 3), sqlite3_column_text(vm, 4));
+	if(sqlite3_prepare_v2(ptr, "SELECT * FROM addressbooks", -1, &vm, NULL)== SQLITE_OK){
+		while(sqlite3_step(vm) != SQLITE_DONE){
+			printf("[%i - %i]\t%s\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_int(vm, 1), sqlite3_column_text(vm, 2), sqlite3_column_text(vm, 3), sqlite3_column_text(vm, 4));
+		}
+	} else {
+		verboseCC("[%s] Errorcode: %d - %s\n", __func__,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	sqlite3_finalize(vm);
@@ -1267,11 +1273,13 @@ void showContacts(sqlite3 *ptr){
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
-	sqlite3_prepare_v2(ptr, "SELECT * FROM contacts", -1, &vm, NULL);
-
-	while(sqlite3_step(vm) != SQLITE_DONE)
-	{
-		printf("cID:%i\taID: %d\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_int(vm, 1), sqlite3_column_text(vm, 3), sqlite3_column_text(vm, 2));
+	if(sqlite3_prepare_v2(ptr, "SELECT * FROM contacts", -1, &vm, NULL) == SQLITE_OK){
+		while(sqlite3_step(vm) != SQLITE_DONE)
+		{
+			printf("cID:%i\taID: %d\t%s\t%s\n", sqlite3_column_int(vm, 0), sqlite3_column_int(vm, 1), sqlite3_column_text(vm, 3), sqlite3_column_text(vm, 2));
+		}
+	}else {
+		verboseCC("[%s] Errorcode: %d - %s\n", __func__,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 	}
 
 	sqlite3_finalize(vm);
