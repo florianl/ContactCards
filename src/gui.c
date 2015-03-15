@@ -1047,10 +1047,25 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				if(value != NULL){
 					GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
 					GtkWidget		*attrType;
+					GtkWidget		*mapBtn;
+					GtkWidget		*image;
+					char			*mapUrl;
+					char			*valCpy;
+					valCpy = g_strndup(value, strlen(value));
+					image = gtk_image_new_from_icon_name("go-jump", GTK_ICON_SIZE_SMALL_TOOLBAR);
+					mapBtn = gtk_link_button_new("");
+					/*
+					 * For more take a look at:
+					 * http://wiki.openstreetmap.org/wiki/Nominatim
+					 */
+					mapUrl = g_strconcat("http://nominatim.openstreetmap.org/search?q=", g_uri_escape_string(g_strdelimit(valCpy, ";", ' '), NULL, TRUE), "&polygon=1", NULL);
+					gtk_link_button_set_uri(GTK_LINK_BUTTON(mapBtn), mapUrl);
+					gtk_button_set_image(GTK_BUTTON(mapBtn), image);
 					attrType = getWidgetFromID(item->itemID);
 					gtk_widget_set_margin_end(attrType, 6);
 					gtk_widget_set_margin_top(attrType, 6);
 					gtk_grid_attach(GTK_GRID(card), attrType, 0, line, 1, 1);
+					gtk_grid_attach(GTK_GRID(card), mapBtn, 2, line, 1, 1);
 					gtk_widget_set_halign(GTK_WIDGET(attrType), GTK_ALIGN_END);
 					gtk_widget_set_valign(GTK_WIDGET(attrType), GTK_ALIGN_START);
 					gtk_text_buffer_set_text(val, g_strstrip(g_strdelimit(value, ";", '\n')), -1);
@@ -1065,6 +1080,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 					gtk_widget_set_hexpand(content, TRUE);
 					gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
+					g_free(valCpy);
+					g_free(mapUrl);
 				}
 			}
 			list = next;
