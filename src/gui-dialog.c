@@ -809,11 +809,10 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	GtkWidget			*prefWindow, *prefView, *prefFrame, *prefList;
 	GtkWidget			*serverPrefList;
-	GtkWidget			*vbox, *hbox, *abbox, *colorBtn;
+	GtkWidget			*scroll, *box, *abbox, *colorBtn;
 	GtkWidget			*label, *input;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
 	GtkWidget			*digSwitch, *uploadSwitch;
-	GtkWidget			*sep;
 	GtkWidget			*ablist;
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkEntryBuffer		*issued, *issuer;
@@ -821,6 +820,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	GSList				*aBooks = g_slist_alloc();
 	GError				*error = NULL;
 	GdkPixbuf			*pixbuf;
+	int					line = 1;
 #ifdef _USE_DANE
 	GtkWidget			*daneResult;
 #endif	/*	_USE_DANE	*/
@@ -842,7 +842,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	prefWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(prefWindow), _("Preferences"));
-	gtk_window_resize(GTK_WINDOW(prefWindow), 640, 384);
+	gtk_window_resize(GTK_WINDOW(prefWindow), 665, 521);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(prefWindow), TRUE);
 
 	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
@@ -860,131 +860,158 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_widget_set_size_request(prefList, 128, -1);
 
 	prefFrame = gtk_frame_new(_("Settings"));
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(prefFrame), 3);
+	gtk_widget_set_margin_bottom(GTK_WIDGET(prefFrame), 3);
+	gtk_widget_set_margin_start(GTK_WIDGET(prefFrame), 3);
+	gtk_widget_set_margin_end(GTK_WIDGET(prefFrame), 3);
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	box = gtk_grid_new();
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+
 	label = gtk_label_new(_("Description"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(desc);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("URL"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(url);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	line++;
+
 	label = gtk_label_new(_("User"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(user);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Password"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(passwd);
 	gtk_entry_set_visibility(GTK_ENTRY(input), FALSE);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
 
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+	line++;
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("Color"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	colorBtn = gtk_color_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox), colorBtn, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
+	gtk_widget_set_margin_top(GTK_WIDGET(colorBtn), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(colorBtn), 3);
+	gtk_grid_attach(GTK_GRID(box), colorBtn, 3, line++, 1, 1);
 
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+	line++;
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
-	gtk_box_pack_start(GTK_BOX(hbox), exportCertBtn, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Certificate is issued for "));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	label = gtk_label_new(_("Certificate is issued for"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(issued);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
 	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 3, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	label = gtk_label_new(_("Certificate issued by "));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	label = gtk_label_new(_("Certificate issued by"));
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(issuer);
 	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
-	gtk_box_pack_start(GTK_BOX(hbox), input, TRUE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 3, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	digSwitch = gtk_switch_new();
-	gtk_box_pack_start(GTK_BOX(hbox), digSwitch, FALSE, TRUE, 2);
-	label = gtk_label_new(_("Trust Certificate?"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	line++;
+
+	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
+	gtk_widget_set_margin_top(GTK_WIDGET(exportCertBtn), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(exportCertBtn), 3);
+	gtk_grid_attach(GTK_GRID(box), exportCertBtn, 4, line++, 2, 1);
 
 #ifdef _USE_DANE
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	daneResult = gtk_label_new("");
-	gtk_box_pack_start(GTK_BOX(hbox), daneResult, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(daneResult), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
+	gtk_widget_set_margin_start(GTK_WIDGET(daneResult), 3);
+	gtk_grid_attach(GTK_GRID(box), daneResult, 3, line++, 4, 1);
+	line++;
+#endif		/*		_USE_DANE		*/
 
-#endif	/*	_USE_DANE	*/
+	label = gtk_label_new(_("Trust Certificate?"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
+	digSwitch = gtk_switch_new();
+	gtk_widget_set_margin_top(GTK_WIDGET(digSwitch), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(digSwitch), 3);
+	gtk_grid_attach(GTK_GRID(box), digSwitch, 3, line++, 1, 1);
 
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+	line++;
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	label = gtk_label_new(_("One-Way-Sync"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
-
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	uploadSwitch = gtk_switch_new();
-	gtk_box_pack_start(GTK_BOX(hbox), uploadSwitch, FALSE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(uploadSwitch), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(uploadSwitch), 3);
+	gtk_grid_attach(GTK_GRID(box), uploadSwitch, 3, line++, 1, 1);
 
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+	line++;
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	checkBtn = gtk_button_new_with_label(_("Check for address books"));
-	gtk_box_pack_start(GTK_BOX(hbox), checkBtn, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(checkBtn), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(checkBtn), 3);
+	gtk_grid_attach(GTK_GRID(box), checkBtn, 4, line++, 2, 1);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	line++;
+
 	abbox = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(abbox), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(abbox, 256, 128);
 	ablist = gtk_list_box_new();
 	gtk_container_add(GTK_CONTAINER(abbox), ablist);
-	gtk_box_pack_start(GTK_BOX(hbox), abbox, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 2);
+	gtk_widget_set_margin_top(GTK_WIDGET(abbox), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(abbox), 3);
+	gtk_grid_attach(GTK_GRID(box), abbox, 3, line++, 4, 1);
 
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, TRUE, 2);
+	line++;
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	deleteBtn = gtk_button_new_with_label(_("Remove server from address book"));
-	gtk_box_pack_start(GTK_BOX(hbox), deleteBtn, FALSE, FALSE, 2);
+	deleteBtn = gtk_button_new_with_label(_("Remove server"));
+	gtk_widget_set_margin_top(GTK_WIDGET(deleteBtn), 6);
+	gtk_widget_set_margin_bottom(GTK_WIDGET(deleteBtn), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(deleteBtn), 3);
+	gtk_grid_attach(GTK_GRID(box), deleteBtn, 4, line, 1, 1);
 	saveBtn = gtk_button_new_with_label(_("Save changes"));
-	gtk_box_pack_start(GTK_BOX(hbox), saveBtn, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 10);
+	gtk_widget_set_margin_top(GTK_WIDGET(saveBtn), 6);
+	gtk_widget_set_margin_bottom(GTK_WIDGET(saveBtn), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(saveBtn), 3);
+	gtk_grid_attach(GTK_GRID(box), saveBtn, 5, line++, 1, 1);
 
-	gtk_container_add(GTK_CONTAINER(prefFrame), vbox);
+	gtk_container_add(GTK_CONTAINER(scroll), box);
+	gtk_container_add(GTK_CONTAINER(prefFrame), scroll);
 	gtk_container_add(GTK_CONTAINER(prefList), serverPrefList);
 	fillList(appBase.db, 3, 0, 0, serverPrefList);
 
