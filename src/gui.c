@@ -2025,6 +2025,7 @@ void *importCards(void *trans){
 
 	ContactCards_item_t		*data = trans;
 	int						aID = data->itemID;
+	int						newID = 0;
 	GSList					*cards = data->element;
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
@@ -2034,7 +2035,16 @@ void *importCards(void *trans){
 			cards = next;
 			continue;
 		}
-		pushCard(appBase.db, g_strstrip(cards->data), aID, 0, 0);
+		/*
+		 * Handle local contacts
+		 * They will not leave this database!
+		 */
+		if(aID == 0){
+			newID = newContact(appBase.db, 0, g_strstrip(cards->data));
+			setSingleInt(appBase.db, "contacts", "flags", CONTACTCARDS_LOCAL, "contactID", newID);
+		} else {
+			pushCard(appBase.db, g_strstrip(cards->data), aID, 0, 0);
+		}
 		cards = next;
 	}
 	g_mutex_unlock(&mutex);
@@ -2261,6 +2271,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem5 = gtk_menu_item_new_with_label(_("Export Contacts"));
 				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactLoc, NULL);
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
+				menuItem3 = gtk_menu_item_new_with_label(_("Import *.vcf"));
+				g_signal_connect(menuItem3, "activate", (GCallback)importVCF, GINT_TO_POINTER(0));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem3);
 			default:
 				break;
 		}
