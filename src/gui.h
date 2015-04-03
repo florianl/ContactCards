@@ -39,6 +39,9 @@ ContactCardsGuiBase appBase;
 #define		FAMILYNAME_ONLY		0x04
 #define		USE_SEPARATOR		0x08
 
+#define		USE_OSM				0x10
+#define		USE_GOOGLE			0x20
+
 /*	Adress Book Tree	*/
 enum {
 	DESC_COL = 0,
