@@ -2393,6 +2393,30 @@ static GtkTreeModel *addressbookModelCreate(void){
 	return GTK_TREE_MODEL(treestore);
 }
 
+gboolean addressbookTreeCursorCB (GtkTreeView *view, GtkMovementStep step, gint dir, gpointer data){
+	__PRINTFUNC__;
+
+	GtkTreeModel			*model;
+	GtkTreeIter				iter;
+	GtkTreePath				*path;
+
+	if(step != GTK_MOVEMENT_VISUAL_POSITIONS){
+		return FALSE;
+	}
+
+	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(view), &model, &iter))
+	{
+		path = gtk_tree_model_get_path(model, &iter);
+		if(gtk_tree_view_row_expanded(view, path) == TRUE){
+			gtk_tree_view_collapse_row(view, path);
+		} else {
+			gtk_tree_view_expand_to_path(view, path);
+		}
+	}
+
+	return TRUE;
+}
+
 /**
  * addressbookTreeCreate - creates the model and view for the adress books
  */
@@ -2416,6 +2440,8 @@ GtkWidget *addressbookTreeCreate(void){
 	g_object_unref(model);
 
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_SINGLE);
+
+	g_signal_connect(G_OBJECT(view), "move-cursor", G_CALLBACK(addressbookTreeCursorCB), NULL);
 
 	return view;
 }
