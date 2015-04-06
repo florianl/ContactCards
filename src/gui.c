@@ -1057,11 +1057,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 					if((appBase.flags & USE_GOOGLE) == USE_GOOGLE) {
 					mapUrl = g_strconcat("https://www.google.com/maps?q=", g_uri_escape_string(g_strdelimit(valCpy, ";", ' '), NULL, TRUE), NULL);
 					} else {
-						/*
-						 * For more take a look at:
-						 * http://wiki.openstreetmap.org/wiki/Nominatim
-						 */
-						mapUrl = g_strconcat("http://nominatim.openstreetmap.org/search?q=", g_uri_escape_string(g_strdelimit(valCpy, ";", ' '), NULL, TRUE), "&polygon=1", NULL);
+						mapUrl = g_strconcat("https://www.openstreetmap.org/search?query=", g_uri_escape_string(g_strdelimit(valCpy, ";", ' '), NULL, TRUE), "&polygon=1", NULL);
 					}
 					gtk_link_button_set_uri(GTK_LINK_BUTTON(mapBtn), mapUrl);
 					gtk_button_set_image(GTK_BUTTON(mapBtn), image);
