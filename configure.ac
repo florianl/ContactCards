@@ -6,6 +6,8 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Checks for programs.
 AC_PROG_CC([gcc])
 AM_PROG_CC_C_O
+AC_C_INLINE
+AC_TYPE_UINT16_T
 
 IT_PROG_INTLTOOL([0.40])
 GETTEXT_PACKAGE=contactcards
@@ -17,6 +19,12 @@ AM_GNU_GETTEXT_VERSION([0.18.1])
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([libintl.h locale.h stdlib.h stdio.h string.h])
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([setlocale])
+AC_CHECK_FUNCS([socket])
+AC_CHECK_HEADERS([netinet/in.h])
+AC_CHECK_HEADERS([sys/socket.h])
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
