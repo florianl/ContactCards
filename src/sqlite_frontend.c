@@ -28,7 +28,7 @@ void contactsTreeFill(GSList *contacts){
 		}
 
 		flags = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", id, "", "", "", "");
-		if(flags & CONTACTCARDS_TMP){
+		if((flags & CONTACTCARDS_TMP) == CONTACTCARDS_TMP){
 			debugCC("[%s] hiding %d\n", __func__, id);
 			contacts = next;
 			continue;
@@ -527,7 +527,7 @@ void writeEvents(int fd, GSList *contacts){
 		}
 
 		flags = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", id, "", "", "", "");
-		if(flags & CONTACTCARDS_TMP){
+		if((flags & CONTACTCARDS_TMP) == CONTACTCARDS_TMP){
 			debugCC("[%s] hiding %d\n", __func__, id);
 			contacts = next;
 			continue;

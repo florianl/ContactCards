@@ -1167,7 +1167,7 @@ void markDay(GSList *contacts, ContactCards_cal_t *data){
 		}
 
 		flags = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", id, "", "", "", "");
-		if(flags & CONTACTCARDS_TMP){
+		if((flags & CONTACTCARDS_TMP) == CONTACTCARDS_TMP){
 			debugCC("[%s] hiding %d\n", __func__, id);
 			contacts = next;
 			continue;

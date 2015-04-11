@@ -182,7 +182,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", addrID, "", "", "", "");
 
 		flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-		if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+		if((flag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 			feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 			return;
 		}
@@ -792,7 +792,7 @@ void createNewCollection(GtkMenuItem *menuitem, gpointer data){
 	verboseCC("[%s] new collection on %d\n", __func__, srvID);
 
 	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+	if((flag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
@@ -1725,7 +1725,7 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 
 	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
 	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+	if((flag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
@@ -1760,7 +1760,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 	abID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
 	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
 	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+	if((flag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
@@ -2143,7 +2143,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", aID, "", "", "", "");
 
 	flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-	if(flag & CONTACTCARDS_ONE_WAY_SYNC){
+	if((flag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 		feedbackDialog(GTK_MESSAGE_WARNING, _("With One-Way-Sync enabled you are not allowed to do this!"));
 		return;
 	}
@@ -2219,13 +2219,13 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				g_signal_connect(menuItem2, "activate", (GCallback)cbSrvExportBirthdays, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem2);
 				flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
-				if(flags & DAV_OPT_MKCOL){
+				if((flags & DAV_OPT_MKCOL) == DAV_OPT_MKCOL){
 					verboseCC("[%s] %d supports MKCOL\n", __func__, selID);
 				} else {
 					verboseCC("[%s] %d doesn't support MKCOL\n", __func__, selID);
 					break;
 				}
-				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
+				if((flags & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 					break;
 				}
 				verboseCC("[%s] Server %d selected\n", __func__, selID);
@@ -2243,7 +2243,7 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem5 = gtk_menu_item_new_with_label(_("Export Contacts"));
 				g_signal_connect(menuItem5, "activate", (GCallback)cbExportContactABook, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem5);
-				if(flags & CONTACTCARDS_ONE_WAY_SYNC){
+				if((flags & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
 					break;
 				}
 				menuItem = gtk_menu_item_new_with_label(_("Delete address book"));
@@ -2474,7 +2474,7 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 		abID = getSingleInt(appBase.db, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
 		srvID = getSingleInt(appBase.db, "addressbooks", "cardServer", 1, "addressbookID", abID, "", "", "", "");
 		flag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", srvID, "", "", "", "");
-		if(flag & ~CONTACTCARDS_ONE_WAY_SYNC){
+		if((flag & ~CONTACTCARDS_ONE_WAY_SYNC) == flag){
 			delItem = gtk_menu_item_new_with_label(_("Delete"));
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), delItem);
 			g_signal_connect(delItem, "activate", (GCallback)contactDelcb, NULL);
@@ -2486,7 +2486,7 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), exportItem);
 		g_signal_connect(exportItem, "activate", (GCallback)contactExportcb, NULL);
 		userflag = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", selID, "", "", "", "");
-		if(userflag & CONTACTCARDS_FAVORIT){
+		if((userflag & CONTACTCARDS_FAVORIT) == CONTACTCARDS_FAVORIT){
 			favItem = gtk_menu_item_new_with_label(_("Delete from Favorits"));
 			g_signal_connect(favItem, "activate", (GCallback)contactDelFavcb, NULL);
 		} else {
@@ -2528,11 +2528,11 @@ void contactsTreeAppend(char *card, int id){
 	if(strlen(g_strstrip(last)) == 0)
 		last = g_strndup("(no name)", sizeof("(no name)"));
 
-	if(appBase.flags & FAMILYNAME_FIRST){
+	if((appBase.flags & FAMILYNAME_FIRST) == FAMILYNAME_FIRST){
 		show = g_strconcat(g_strstrip(last), " ", g_strstrip(first), NULL);
-	} else if (appBase.flags & GIVENNAME_FIST){
+	} else if ((appBase.flags & GIVENNAME_FIST) == GIVENNAME_FIST){
 		show = g_strconcat(g_strstrip(first), " ", g_strstrip(last), NULL);
-	} else if (appBase.flags & FAMILYNAME_ONLY){
+	} else if ((appBase.flags & FAMILYNAME_ONLY) == FAMILYNAME_ONLY){
 		show = g_strconcat(g_strstrip(last), " ", g_strndup(g_strstrip(first), 1), ".", NULL);
 	} else {
 		show = g_strconcat(g_strstrip(last), " ", g_strstrip(first), NULL);
@@ -2614,7 +2614,7 @@ void contactsTreeUpdate(int type, int id){
 				}
 				g_slist_free(addressBooks);
 /*
-				if(appBase.flags & USE_SEPARATOR)
+				if((appBase.flags & USE_SEPARATOR) == USE_SEPARATOR)
 					contactsTreeSetSeperators();
 */
 				g_mutex_unlock(&contactsTreeMutex);
@@ -2637,7 +2637,7 @@ void contactsTreeUpdate(int type, int id){
 		debugCC("There are no contacts actually\n");
 		g_slist_free(contacts);
 /*
-		if(appBase.flags & USE_SEPARATOR)
+		if((appBase.flags & USE_SEPARATOR) == USE_SEPARATOR)
 			contactsTreeSetSeperators();
 */
 		g_mutex_unlock(&contactsTreeMutex);
@@ -2645,7 +2645,7 @@ void contactsTreeUpdate(int type, int id){
 		contactsTreeFill(contacts);
 		g_slist_free(contacts);
 /*
-		if(appBase.flags & USE_SEPARATOR)
+		if((appBase.flags & USE_SEPARATOR) == USE_SEPARATOR)
 			contactsTreeSetSeperators();
 */
 		g_mutex_unlock(&contactsTreeMutex);
