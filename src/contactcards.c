@@ -68,6 +68,7 @@ int main(int argc, char **argv){
 		return -1;
 	}
 	appBase.db = db_handler;
+	appBase.flags = app->flag;
 
 	g_mutex_init(&mutex);
 	g_mutex_init(&aBookTreeMutex);
