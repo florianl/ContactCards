@@ -1133,7 +1133,7 @@ void oAuthAccess(sqlite3 *ptr, int serverID, int oAuthServerEntity, int type){
 	}
 
 	sess = ne_session_create("https", uri.host, 443);
-	ne_ssl_trust_default_ca(sess);
+	ne_ssl_set_verify(sess, verifyCert, GINT_TO_POINTER(serverID));
 
 	switch(type){
 		case DAV_REQ_GET_GRANT:
