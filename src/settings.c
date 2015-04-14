@@ -18,11 +18,13 @@ static char			*version = NULL;
 static char			*query = NULL;
 static gboolean		verbose = FALSE;
 static gboolean		debug = FALSE;
+static gboolean		noLoc = FALSE;
 
 static GOptionEntry entries[] =
 {
 	{ "config", 'c', 0, G_OPTION_ARG_FILENAME, &alternate_config, "Alternate configuration directory", NULL },
 	{ "debug", 'd', 0, G_OPTION_ARG_NONE, &debug, "debugging output", NULL },
+	{ "no Locales", 'l', 0, G_OPTION_ARG_NONE, &noLoc, "Don't use a local address book", NULL},
 	{ "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "verbose output", NULL },
 	{ "version", 'V', 0, G_OPTION_ARG_NONE, &version, "Show version", NULL },
 	{ "query", 'q', 0, G_OPTION_ARG_STRING, &query, "Look for this query", NULL},
@@ -59,6 +61,9 @@ ContactCards_app_t *parseCmdLine(int *argc, char **argv[]){
 
 	if(debug)
 		app->flag |= CONTACTCARDS_DEBUG;
+
+	if(noLoc)
+		app->flag |= CONTACTCARDS_NO_LOCAL;
 
 	if(alternate_config){
 		app->configdir = alternate_config;

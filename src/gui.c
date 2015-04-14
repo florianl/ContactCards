@@ -2316,8 +2316,10 @@ void addressbookTreeUpdate(void){
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Favorites"), ID_COL, 0, TYP_COL, 2,  -1);
 
-	gtk_tree_store_append(store, &toplevel, NULL);
-	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Locales"), ID_COL, 0, TYP_COL, 3,  -1);
+	if((appBase.flags & ~CONTACTCARDS_NO_LOCAL) == appBase.flags){
+		gtk_tree_store_append(store, &toplevel, NULL);
+		gtk_tree_store_set(store, &toplevel, DESC_COL, _("Locales"), ID_COL, 0, TYP_COL, 3,  -1);
+	}
 
 	if(g_slist_length(servers) <= 1){
 		debugCC("There are no servers actually\n");
