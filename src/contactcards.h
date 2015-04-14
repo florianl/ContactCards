@@ -50,13 +50,15 @@ GMutex 					aBookTreeMutex;
 GMutex					contactsTreeMutex;
 sqlite3_mutex			*dbMutex;
 
-#define	CONTACTCARDS_TMP			0x1
+#define	CONTACTCARDS_TMP			0x1		/*	For DB only	*/
 #define	CONTACTCARDS_ONE_WAY_SYNC	0x2
-#define	CONTACTCARDS_FAVORIT		0x4
-#define	CONTACTCARDS_LOCAL			0x8
+#define	CONTACTCARDS_FAVORIT		0x4		/*	For DB only	*/
+#define	CONTACTCARDS_LOCAL			0x8		/*	For DB only	*/
 #define	CONTACTCARDS_QUERY			0x10
 #define	CONTACTCARDS_VERBOSE		0x20
 #define	CONTACTCARDS_DEBUG			0x40
+#define	CONTACTCARDS_NO_LOCAL		0x80
+
 
 #define	__PRINTFUNC__	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", __func__);
 
