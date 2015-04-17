@@ -500,17 +500,17 @@ static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int typ
 }
 
 /**
- * cleanCard - clean up the area to display a new vCard
+ * viewCleaner - clean up the area to display a new content
  */
-static void cleanCard(GtkWidget *widget){
+void viewCleaner(GtkWidget *widget){
 	__PRINTFUNC__;
 
 	GList				*children, *child;
 
 	children = gtk_container_get_children(GTK_CONTAINER(widget));
-		for(child = children; child != NULL; child = g_list_next(child))
-			gtk_widget_destroy(GTK_WIDGET(child->data));
-		g_list_free(children);
+	for(child = children; child != NULL; child = g_list_next(child))
+		gtk_widget_destroy(GTK_WIDGET(child->data));
+	g_list_free(children);
 }
 
 /**
@@ -525,14 +525,14 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
 	ne_session 				*sess = NULL;
 
 	if(gtk_entry_buffer_get_length(GTK_ENTRY_BUFFER(data->element)) == 0){
-		cleanCard(appBase.contactView);
+		viewCleaner(appBase.contactView);
 		g_free(data);
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to create an address book without a name"));
 		return;
 	}
 	colName = g_strstrip((char *)gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(data->element)));
 
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
 
@@ -567,7 +567,7 @@ static void collectionDiscard(GtkWidget *widget, gpointer trans){
 
 	ContactCards_item_t		*data = trans;
 
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 
 	g_free(data);
 
@@ -799,7 +799,7 @@ void createNewCollection(GtkMenuItem *menuitem, gpointer data){
 
 	collection = createNewCollectionCard(srvID);
 	gtk_widget_show_all(collection);
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), collection);
 
 }
@@ -1299,7 +1299,7 @@ static void contactEditDiscard(GtkWidget *widget, gpointer trans){
 
 	card = buildNewCard(appBase.db, ((ContactCards_add_t *)trans)->editID);
 	gtk_widget_show_all(card);
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), card);
 
 	g_slist_free_full(((ContactCards_add_t *)trans)->list, g_free);
@@ -1386,7 +1386,7 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
 		return;
 	}
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	thread = g_thread_try_new("pushing vCard", pushingCard, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
@@ -1731,7 +1731,7 @@ static void contactNew(GtkWidget *widget, gpointer trans){
 	}
 
 	newCard = buildEditCard(appBase.db, 0, abID);
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	gtk_widget_show_all(newCard);
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), newCard);
 }
@@ -1766,7 +1766,7 @@ static void contactEdit(GtkWidget *widget, gpointer trans){
 	}
 
 	editCard = buildEditCard(appBase.db, selID, 0);
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	gtk_widget_set_halign (editCard, GTK_ALIGN_FILL);
 	gtk_widget_set_valign (editCard, GTK_ALIGN_FILL);
 	gtk_widget_show_all(editCard);
@@ -1859,7 +1859,7 @@ static void completionContact(GtkEntryCompletion *widget, GtkTreeModel *model, G
 	gtk_tree_selection_select_iter(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), iter);
 	card = buildNewCard(appBase.db, selID);
 	gtk_widget_show_all(card);
-	cleanCard(appBase.contactView);
+	viewCleaner(appBase.contactView);
 	gtk_container_add(GTK_CONTAINER(appBase.contactView), card);
 }
 
@@ -1879,7 +1879,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 		verboseCC("[%s] %d\n",__func__, selID);
 		card = buildNewCard(appBase.db, selID);
 		gtk_widget_show_all(card);
-		cleanCard(appBase.contactView);
+		viewCleaner(appBase.contactView);
 		gtk_container_add(GTK_CONTAINER(appBase.contactView), card);
 	}
 }
