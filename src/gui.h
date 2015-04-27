@@ -115,6 +115,15 @@ typedef struct ContactCards_pref {
 #endif	/*	_USE_DANE	*/
 } ContactCards_pref_t;
 
+
+/**
+ * struct ContactCards_genPref	- structure for handling the general settings
+ */
+typedef struct ContactCards_genPref {
+	GtkWidget			*sort;
+	GtkWidget			*map;
+} ContactCards_genPref_t;
+
 /**
  * struct ContactCards_aBooks	- structure for handling address books in the preferences dialog
  */

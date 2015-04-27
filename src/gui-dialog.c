@@ -802,54 +802,74 @@ void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
 }
 
 /**
- * prefViewGen - Dialoview for general settings
+ * prefGenExit - CleanUp
+ */
+void prefGenExit(GtkWidget *widget, gpointer data){
+	__PRINTFUNC__;
+
+	g_free(data);
+}
+
+/**
+ * prefGenSave - Save the general settings
+ */
+void prefGenSave(GtkWidget *widget, gpointer trans){
+	__PRINTFUNC__;
+
+	ContactCards_genPref_t		*gen = trans;
+	int							newSort, newMap;
+
+	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
+	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
+
+	debugCC("\t\tstyle:%d\tmap: %d\n", newSort, newMap);
+}
+
+/**
+ * prefViewGen - Dialogview for general settings
  */
 void prefViewGen(GtkWidget *btn, gpointer *trans){
 	__PRINTFUNC__;
 
 	GtkWidget			*layout = GTK_WIDGET(trans);
 	GtkWidget			*prefView;
-	GtkWidget			*txt, *dropdown, *input;
+	GtkWidget			*txt;
+	GtkWidget			*sort, *map;
 	GtkWidget			*sBtn;
-	GtkEntryBuffer		*database;
 	int					line = 2;
+	ContactCards_genPref_t		*gen;
 
 	viewCleaner(layout);
 	prefView = gtk_grid_new();
+
+	gen = g_new(ContactCards_genPref_t, 1);
 
 	gtk_widget_set_hexpand(GTK_WIDGET(prefView), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(prefView), TRUE);
 	gtk_widget_set_halign(GTK_WIDGET(prefView), GTK_ALIGN_START);
 	gtk_widget_set_valign(GTK_WIDGET(prefView), GTK_ALIGN_START);
 
-	database = gtk_entry_buffer_new(NULL, -1);
-
-	txt = gtk_label_new(_("Database"));
-	gtk_widget_set_margin_start(txt, 12);
-	gtk_widget_set_margin_end(txt, 12);
-	gtk_widget_set_margin_top(txt, 18);
-	gtk_widget_set_halign(txt, GTK_ALIGN_END);
-	input = gtk_entry_new_with_buffer(database);
-	gtk_widget_set_hexpand(input, TRUE);
-	gtk_widget_set_margin_top(input, 18);
-	gtk_widget_set_halign(input, GTK_ALIGN_START);
-	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(prefView), input, 1, line++, 4, 1);
-	line++;
-
 	txt = gtk_label_new(_("Sorting"));
 	gtk_widget_set_margin_start(txt, 12);
 	gtk_widget_set_margin_end(txt, 12);
 	gtk_widget_set_margin_top(txt, 18);
 	gtk_widget_set_halign(txt, GTK_ALIGN_END);
-	dropdown = gtk_combo_box_text_new();
-	gtk_widget_set_margin_top(dropdown, 18);
-	gtk_widget_set_halign(dropdown, GTK_ALIGN_START);
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(dropdown), "1", _("Last name first"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(dropdown), "2", _("Given name first"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(dropdown), "4", _("Last name only"));
+	sort = gtk_combo_box_text_new();
+	gtk_widget_set_margin_top(sort, 18);
+	gtk_widget_set_halign(sort, GTK_ALIGN_START);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "1", _("Last name first"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "2", _("Given name first"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "4", _("Last name only"));
+	if((appBase.flags & FAMILYNAME_FIRST) == FAMILYNAME_FIRST)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 0);
+	else if((appBase.flags & GIVENNAME_FIST) == GIVENNAME_FIST)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 1);
+	else if((appBase.flags & FAMILYNAME_ONLY) == FAMILYNAME_ONLY)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 2);
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 0);
 	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(prefView), dropdown, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(prefView), sort, 1, line++, 2, 1);
 	line++;
 
 	txt = gtk_label_new(_("Map to use"));
@@ -857,14 +877,23 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_widget_set_margin_end(txt, 12);
 	gtk_widget_set_margin_top(txt, 18);
 	gtk_widget_set_halign(txt, GTK_ALIGN_END);
-	dropdown = gtk_combo_box_text_new();
-	gtk_widget_set_margin_top(dropdown, 18);
-	gtk_widget_set_halign(dropdown, GTK_ALIGN_START);
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(dropdown), "16", _("Open Street Maps"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(dropdown), "32", _("Google Maps"));
+	map = gtk_combo_box_text_new();
+	gtk_widget_set_margin_top(map, 18);
+	gtk_widget_set_halign(map, GTK_ALIGN_START);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(map), "16", _("Open Street Maps"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(map), "32", _("Google Maps"));
+	if((appBase.flags & USE_OSM) == USE_OSM)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(map), 0);
+	else if((appBase.flags & USE_GOOGLE) == USE_GOOGLE)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(map), 1);
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 0);
 	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(prefView), dropdown, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(prefView), map, 1, line++, 2, 1);
 	line++;
+
+	gen->sort	= sort;
+	gen->map	= map;
 
 	sBtn = gtk_button_new_with_label(_("Save changes"));
 	gtk_widget_set_margin_start(sBtn, 12);
@@ -872,6 +901,9 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_widget_set_margin_top(sBtn, 18);
 	gtk_widget_set_halign(sBtn, GTK_ALIGN_END);
 	gtk_grid_attach(GTK_GRID(prefView), sBtn, 4, line++, 1, 1);
+	g_signal_connect(sBtn, "clicked", G_CALLBACK(prefGenSave), gen);
+
+	g_signal_connect(prefView, "unmap", G_CALLBACK(prefGenExit), gen);
 
 	gtk_widget_show_all(prefView);
 	gtk_container_add(GTK_CONTAINER(layout), prefView);
@@ -943,7 +975,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_toolbar_insert(GTK_TOOLBAR(prefToolBar), prefSrv, -1);
 	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefToolBar), FALSE, FALSE, 2);
 
-	prefView = gtk_scrolled_window_new(NULL, NULL);
+	prefView = gtk_frame_new (NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(prefView), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefView), TRUE, TRUE, 2);
 
@@ -953,6 +985,7 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 	gtk_container_add(GTK_CONTAINER(prefWindow), prefLayout);
 	gtk_widget_show_all(prefWindow);
 }
+
 void prefWindow2(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
