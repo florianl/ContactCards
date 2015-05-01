@@ -802,15 +802,6 @@ void prefKeyHandler(GtkWidget *window, GdkEventKey *event, gpointer data){
 }
 
 /**
- * prefGenExit - CleanUp
- */
-void prefGenExit(GtkWidget *widget, gpointer data){
-	__PRINTFUNC__;
-
-	g_free(data);
-}
-
-/**
  * prefGenSave - Save the general settings
  */
 void prefGenSave(GtkWidget *widget, gpointer trans){
@@ -882,12 +873,13 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_widget_set_halign(map, GTK_ALIGN_START);
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(map), "16", _("Open Street Maps"));
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(map), "32", _("Google Maps"));
+
 	if((appBase.flags & USE_OSM) == USE_OSM)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(map), 0);
 	else if((appBase.flags & USE_GOOGLE) == USE_GOOGLE)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(map), 1);
 	else
-		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 0);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(map), 0);
 	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(prefView), map, 1, line++, 2, 1);
 	line++;
@@ -903,105 +895,36 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_grid_attach(GTK_GRID(prefView), sBtn, 4, line++, 1, 1);
 	g_signal_connect(sBtn, "clicked", G_CALLBACK(prefGenSave), gen);
 
-	g_signal_connect(prefView, "unmap", G_CALLBACK(prefGenExit), gen);
+	g_signal_connect(prefView, "unmap", G_CALLBACK(prefExit), gen);
 
 	gtk_widget_show_all(prefView);
 	gtk_container_add(GTK_CONTAINER(layout), prefView);
 }
 
 /**
- * prefViewSrv - Dialoview for the server settings
+ * prefSrvSel - select a server in the preferences dialog
+ */
+void prefSrvSel(GtkWidget *widget, gpointer trans){
+	__PRINTFUNC__;
+}
+
+/**
+ * prefViewSrv - Dialogview for the server settings
  */
 void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	__PRINTFUNC__;
 
 	GtkWidget			*layout = GTK_WIDGET(trans);
 	GtkWidget			*prefView, *prefFrame, *prefList;
-
-	prefView = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
-	viewCleaner(layout);
-
-	prefList = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(prefList), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_size_request(prefList, 128, -1);
-
-	prefFrame = gtk_frame_new(_("Settings"));
-	gtk_widget_set_margin_top(GTK_WIDGET(prefFrame), 3);
-	gtk_widget_set_margin_bottom(GTK_WIDGET(prefFrame), 3);
-	gtk_widget_set_margin_start(GTK_WIDGET(prefFrame), 3);
-	gtk_widget_set_margin_end(GTK_WIDGET(prefFrame), 3);
-
-	gtk_container_add(GTK_CONTAINER(prefView), prefList);
-	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
-	gtk_widget_show_all(prefView);
-	gtk_container_add(GTK_CONTAINER(layout), prefView);
-
-}
-
-/**
- * prefWindow - build the preferences dialog
- */
-void prefWindow(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-
-	GtkWidget			*prefWindow, *prefView;
-	GtkWidget			*prefToolBar;
-	GtkWidget			*prefLayout;
-	GtkToolItem			*prefGen, *prefSrv;
-	GError				*error = NULL;
-	GdkPixbuf			*pixbuf;
-
-	prefWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(prefWindow), _("Preferences"));
-	gtk_window_resize(GTK_WINDOW(prefWindow), 665, 521);
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(prefWindow), TRUE);
-
-	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
-	if(error){
-		verboseCC("[%s] something has gone wrong\n", __func__);
-		verboseCC("%s\n", error->message);
-	}
-	gtk_window_set_icon(GTK_WINDOW(prefWindow), pixbuf);
-	g_object_unref(pixbuf);
-
-	prefLayout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-
-	prefToolBar = gtk_toolbar_new();
-	prefGen = gtk_tool_button_new(NULL, _("General settings"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(prefGen), _("General settings"));
-	gtk_toolbar_insert(GTK_TOOLBAR(prefToolBar), prefGen, -1);
-	prefSrv = gtk_tool_button_new(NULL, _("Server settings"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(prefSrv), _("Server settings"));
-	gtk_toolbar_insert(GTK_TOOLBAR(prefToolBar), prefSrv, -1);
-	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefToolBar), FALSE, FALSE, 2);
-
-	prefView = gtk_frame_new (NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(prefView), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefView), TRUE, TRUE, 2);
-
-	g_signal_connect(prefGen, "clicked", G_CALLBACK(prefViewGen), prefView);
-	g_signal_connect(prefSrv, "clicked", G_CALLBACK(prefViewSrv), prefView);
-
-	gtk_container_add(GTK_CONTAINER(prefWindow), prefLayout);
-	gtk_widget_show_all(prefWindow);
-}
-
-void prefWindow2(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-
-	GtkWidget			*prefWindow, *prefView, *prefFrame, *prefList;
-	GtkWidget			*serverPrefList;
-	GtkWidget			*scroll, *box, *abbox, *colorBtn;
 	GtkWidget			*label, *input;
-	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
+	GtkWidget			*srvList, *scroll, *box, *abbox;
 	GtkWidget			*digSwitch, *uploadSwitch;
-	GtkWidget			*ablist;
+	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
+	GtkWidget			*ablist, *colorBtn;
+	GSList				*aBooks = g_slist_alloc();
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
 	GtkEntryBuffer		*issued, *issuer;
-	GtkTreeSelection	*serverSel;
-	GSList				*aBooks = g_slist_alloc();
-	GError				*error = NULL;
-	GdkPixbuf			*pixbuf;
+	GtkTreeSelection	*srvSel;
 	int					line = 1;
 #ifdef _USE_DANE
 	GtkWidget			*daneResult;
@@ -1017,36 +940,26 @@ void prefWindow2(GtkWidget *widget, gpointer trans){
 	issuer = gtk_entry_buffer_new(NULL, -1);
 
 	buffers = g_new(ContactCards_pref_t, 1);
-
-	serverPrefList = gtk_tree_view_new();
-	listInit(serverPrefList);
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(serverPrefList), FALSE);
-
-	prefWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(prefWindow), _("Preferences"));
-	gtk_window_resize(GTK_WINDOW(prefWindow), 665, 521);
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(prefWindow), TRUE);
-
-	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
-	if(error){
-		verboseCC("[%s] something has gone wrong\n", __func__);
-		verboseCC("%s\n", error->message);
-	}
-	gtk_window_set_icon(GTK_WINDOW(prefWindow), pixbuf);
-	g_object_unref(pixbuf);
-
 	prefView = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+	viewCleaner(layout);
 
 	prefList = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(prefList), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(prefList, 128, -1);
+
+	srvList = gtk_tree_view_new();
+	listInit(srvList);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(srvList), FALSE);
+	gtk_container_add(GTK_CONTAINER(prefList), srvList);
+	fillList(appBase.db, 3, 0, 0, srvList);
 
 	prefFrame = gtk_frame_new(_("Settings"));
 	gtk_widget_set_margin_top(GTK_WIDGET(prefFrame), 3);
 	gtk_widget_set_margin_bottom(GTK_WIDGET(prefFrame), 3);
 	gtk_widget_set_margin_start(GTK_WIDGET(prefFrame), 3);
 	gtk_widget_set_margin_end(GTK_WIDGET(prefFrame), 3);
-	scroll = gtk_scrolled_window_new(NULL, NULL);
+
+scroll = gtk_scrolled_window_new(NULL, NULL);
 	box = gtk_grid_new();
 
 
@@ -1194,8 +1107,11 @@ void prefWindow2(GtkWidget *widget, gpointer trans){
 
 	gtk_container_add(GTK_CONTAINER(scroll), box);
 	gtk_container_add(GTK_CONTAINER(prefFrame), scroll);
-	gtk_container_add(GTK_CONTAINER(prefList), serverPrefList);
-	fillList(appBase.db, 3, 0, 0, serverPrefList);
+
+	gtk_container_add(GTK_CONTAINER(prefView), prefList);
+	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
+	gtk_widget_show_all(prefView);
+	gtk_container_add(GTK_CONTAINER(layout), prefView);
 
 	buffers->prefFrame = prefFrame;
 	buffers->descBuf = desc;
@@ -1204,7 +1120,7 @@ void prefWindow2(GtkWidget *widget, gpointer trans){
 	buffers->passwdBuf = passwd;
 	buffers->issuedBuf = issued;
 	buffers->issuerBuf = issuer;
-	buffers->srvPrefList = serverPrefList;
+	buffers->srvPrefList = srvList;
 	buffers->certSel = digSwitch;
 	buffers->syncSel = uploadSwitch;
 	buffers->listbox = ablist;
@@ -1215,21 +1131,69 @@ void prefWindow2(GtkWidget *widget, gpointer trans){
 #endif	/*	_USE_DANE	*/
 
 	/*		Connect Signales		*/
-	serverSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(serverPrefList));
-	gtk_tree_selection_set_mode (serverSel, GTK_SELECTION_SINGLE);
-	g_signal_connect(serverSel, "changed", G_CALLBACK(prefServerSelect), buffers);
-	g_signal_connect(G_OBJECT(prefWindow), "destroy", G_CALLBACK(prefExit), buffers);
+	srvSel = gtk_tree_view_get_selection(GTK_TREE_VIEW(srvList));
+	gtk_tree_selection_set_mode (srvSel, GTK_SELECTION_SINGLE);
+	g_signal_connect(srvSel, "changed", G_CALLBACK(prefSrvSel), buffers);
+
+	g_signal_connect(prefView, "unmap", G_CALLBACK(prefExit), buffers);
 
 	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefServerDelete), buffers);
 	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefServerSave), buffers);
 	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), buffers);
 	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), buffers);
 
-	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), buffers);
+}
 
-	gtk_container_add(GTK_CONTAINER(prefView), prefList);
-	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
-	gtk_container_add(GTK_CONTAINER(prefWindow), prefView);
+/**
+ * prefWindow - build the preferences dialog
+ */
+void prefWindow(GtkWidget *widget, gpointer trans){
+	__PRINTFUNC__;
+
+	GtkWidget			*prefWindow, *prefView;
+	GtkWidget			*prefToolBar;
+	GtkWidget			*prefLayout;
+	GtkWidget			*empty;
+	GtkToolItem			*prefGen, *prefSrv;
+	GError				*error = NULL;
+	GdkPixbuf			*pixbuf;
+
+	prefWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(prefWindow), _("Preferences"));
+	gtk_window_resize(GTK_WINDOW(prefWindow), 665, 521);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(prefWindow), TRUE);
+
+	pixbuf = gdk_pixbuf_new_from_file("artwork/icon_48.png", &error);
+	if(error){
+		verboseCC("[%s] something has gone wrong\n", __func__);
+		verboseCC("%s\n", error->message);
+	}
+	gtk_window_set_icon(GTK_WINDOW(prefWindow), pixbuf);
+	g_object_unref(pixbuf);
+
+	prefLayout = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+	prefToolBar = gtk_toolbar_new();
+	prefGen = gtk_tool_button_new(NULL, _("General settings"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(prefGen), _("General settings"));
+	gtk_toolbar_insert(GTK_TOOLBAR(prefToolBar), prefGen, -1);
+	prefSrv = gtk_tool_button_new(NULL, _("Server settings"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(prefSrv), _("Server settings"));
+	gtk_toolbar_insert(GTK_TOOLBAR(prefToolBar), prefSrv, -1);
+	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefToolBar), FALSE, FALSE, 2);
+
+	prefView = gtk_frame_new (NULL);
+	gtk_box_pack_start(GTK_BOX(prefLayout), GTK_WIDGET(prefView), TRUE, TRUE, 2);
+
+	empty = gtk_image_new_from_icon_name("preferences-system-symbolic", GTK_ICON_SIZE_DIALOG);
+	gtk_container_add(GTK_CONTAINER(prefView), empty);
+
+	g_signal_connect(prefGen, "clicked", G_CALLBACK(prefViewGen), prefView);
+	g_signal_connect(prefSrv, "clicked", G_CALLBACK(prefViewSrv), prefView);
+
+	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), NULL);
+
+	gtk_container_add(GTK_CONTAINER(prefWindow), prefLayout);
 	gtk_widget_show_all(prefWindow);
 }
 
