@@ -814,6 +814,8 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
 
 	debugCC("\t\tstyle:%d\tmap: %d\n", newSort, newMap);
+
+	feedbackDialog(GTK_MESSAGE_ERROR, _("This function is not implemented so far!"));
 }
 
 /**
