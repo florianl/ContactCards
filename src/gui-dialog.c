@@ -472,9 +472,9 @@ static GtkWidget *buildRow(sqlite3 *ptr, int aID, GSList *list){
 }
 
 /**
- * prefServerDelete - delete a server in the preferences dialog
+ * prefSrvDel - delete a server in the preferences dialog
  */
-void prefServerDelete(GtkWidget *widget, gpointer trans){
+void prefSrvDel(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	ContactCards_pref_t		*buffers = trans;
@@ -513,9 +513,9 @@ void prefServerDelete(GtkWidget *widget, gpointer trans){
 }
 
 /**
- * prefServerSave - save changes to a server in the preferences dialog
+ * prefSrvSave - save changes to a server in the preferences dialog
  */
-void prefServerSave(GtkWidget *widget, gpointer trans){
+void prefSrvSave(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	ContactCards_pref_t		*buffers = trans;
@@ -652,9 +652,9 @@ void prefExportCert(GtkWidget *widget, gpointer trans){
 }
 
 /**
- * prefServerSelect - select a server in the preferences dialog
+ * prefSrvSel - select a server in the preferences dialog
  */
-void prefServerSelect(GtkWidget *widget, gpointer trans){
+void prefSrvSel(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	GtkTreeIter			iter;
@@ -902,13 +902,6 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 }
 
 /**
- * prefSrvSel - select a server in the preferences dialog
- */
-void prefSrvSel(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-}
-
-/**
  * prefViewSrv - Dialogview for the server settings
  */
 void prefViewSrv(GtkWidget *btn, gpointer *trans){
@@ -1137,8 +1130,8 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 
 	g_signal_connect(prefView, "unmap", G_CALLBACK(prefExit), buffers);
 
-	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefServerDelete), buffers);
-	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefServerSave), buffers);
+	g_signal_connect(deleteBtn, "clicked", G_CALLBACK(prefSrvDel), buffers);
+	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefSrvSave), buffers);
 	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), buffers);
 	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), buffers);
 
