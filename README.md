@@ -64,4 +64,4 @@ License: GPLv2
 
 Contact: dev (AT) der-flo.net
 
-More Information: https://der-flo.net/contactcards/
+More Information: [http://florianl.github.io/ContactCards/](http://florianl.github.io/ContactCards/)
