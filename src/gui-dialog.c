@@ -809,13 +809,44 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 
 	ContactCards_genPref_t		*gen = trans;
 	int							newSort, newMap;
+	int							eraser = ~(DISPLAY_STYLE_MASK & USE_MAP_MASK);
+	int							newFlag = 0;
+
+	newFlag = (appBase.flags & eraser);
 
 	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
 
 	debugCC("\t\tstyle:%d\tmap: %d\n", newSort, newMap);
 
-	feedbackDialog(GTK_MESSAGE_ERROR, _("This function is not implemented so far!"));
+	switch(newSort){
+		case 0:
+			newFlag |= FAMILYNAME_FIRST;
+			break;
+		case 1:
+			newFlag |= GIVENNAME_FIST;
+			break;
+		case 2:
+			newFlag |= FAMILYNAME_ONLY;
+			break;
+		default:
+			newFlag |= FAMILYNAME_FIRST;
+			break;
+	}
+
+	switch(newMap){
+		case 0:
+			newFlag |= USE_OSM;
+			break;
+		case 1:
+			newFlag |= USE_GOOGLE;
+			break;
+		default:
+			newFlag |= USE_OSM;
+			break;
+	}
+
+	appBase.flags = newFlag;
 }
 
 /**

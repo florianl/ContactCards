@@ -34,11 +34,14 @@ typedef struct ContactCardsGuiBase{
 
 ContactCardsGuiBase appBase;
 
+#define		DISPLAY_STYLE_MASK	0x07
 #define		FAMILYNAME_FIRST	0x01
 #define		GIVENNAME_FIST		0x02
 #define		FAMILYNAME_ONLY		0x04
+
 #define		USE_SEPARATOR		0x08
 
+#define		USE_MAP_MASK		0x30
 #define		USE_OSM				0x10
 #define		USE_GOOGLE			0x20
 
