@@ -21,6 +21,8 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <glib-unix.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 #endif	/*	std_H		*/
 
 #ifndef	gui_H

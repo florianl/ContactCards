@@ -29,5 +29,5 @@ extern void verboseCC(gchar const *format, ...);
 extern void checkAndSetConfig(ContactCards_app_t *app);
 extern void config_load(ContactCards_app_t *app);
 extern ContactCards_app_t *parseCmdLine(int *argc, char **argv[]);
-
+extern void saveSettings(char *confDir);
 #endif	/*	settings_H		*/

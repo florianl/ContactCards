@@ -201,10 +201,62 @@ void config_load(ContactCards_app_t *app){
 		appBase.syncIntervall = 1800;
 		return;
 	}
-	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE, NULL);
+	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE,, NULL);
 	g_free(configfile);
 
 	config_load_ui(config);
 
 	g_key_file_free(config);
+}
+
+/**
+ * writeConfigFile - write the config file
+ */
+int writeConfigFile(char *file, char *text){
+	__PRINTFUNC__;
+
+		FILE			*fp;
+		gsize			written, len;
+
+		len = strlen(text);
+
+		fp = g_fopen(file, "w");
+		if (fp == NULL){
+			return -1;
+		}
+
+		written = fwrite(text, sizeof(gchar), len, fp);
+
+		if(len != written){
+			verboseCC("[%s] didn't wirte the whole config ... I'm sorry!\n", __func__);
+		}
+		if(fclose(fp) != 0)
+			return -1;
+
+	return 0;
+}
+
+/**
+ * saveSettings - look for existing config file and write the new one
+ */
+void saveSettings(char *confDir){
+	__PRINTFUNC__;
+
+	gchar			*confFile = g_build_filename(confDir, "contactcards.conf", NULL);
+	GKeyFile		*config = g_key_file_new();
+	gchar			*data;
+
+
+	g_key_file_load_from_file(config, confFile, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+	g_key_file_set_integer(config, PACKAGE, "formation", appBase.flags & DISPLAY_STYLE_MASK);
+	g_key_file_set_integer(config, PACKAGE, "map", appBase.flags & USE_MAP_MASK);
+
+	data = g_key_file_to_data(config, NULL, NULL);
+	writeConfigFile(confFile, data);
+	g_free(data);
+
+	g_free(confFile);
+	g_key_file_free(config);
+
 }

@@ -93,6 +93,8 @@ int main(int argc, char **argv){
 	}
 	dbClose(db_handler);
 
+	saveSettings(app->configdir);
+
 	g_free(db);
 	sqlite3_mutex_free(dbMutex);
 
