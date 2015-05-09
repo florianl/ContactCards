@@ -56,11 +56,25 @@ sqlite3_mutex			*dbMutex;
 #define	CONTACTCARDS_ONE_WAY_SYNC	0x2
 #define	CONTACTCARDS_FAVORIT		0x4		/*	For DB only	*/
 #define	CONTACTCARDS_LOCAL			0x8		/*	For DB only	*/
-#define	CONTACTCARDS_QUERY			0x10
-#define	CONTACTCARDS_VERBOSE		0x20
-#define	CONTACTCARDS_DEBUG			0x40
-#define	CONTACTCARDS_NO_LOCAL		0x80
 
+#define	CONTACTCARDS_VERBOSE		0x10
+#define	CONTACTCARDS_DEBUG			0x20
+
+#define	CONTACTCARDS_NO_LOCAL		0x40
+#define	CONTACTCARDS_QUERY			0x80
+
+#define	DISPLAY_STYLE_MASK			0x700
+#define	FAMILYNAME_FIRST			0x100
+#define	GIVENNAME_FIRST				0x200
+#define	FAMILYNAME_ONLY				0x400
+
+
+
+#define	USE_MAP_MASK		0x3000
+#define	USE_OSM				0x1000
+#define	USE_GOOGLE			0x2000
+
+#define		USE_SEPARATOR		0x08	/*	Unused so far	*/
 
 #define	__PRINTFUNC__	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", __func__);
 

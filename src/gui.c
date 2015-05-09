@@ -2532,7 +2532,7 @@ void contactsTreeAppend(char *card, int id){
 
 	if((appBase.flags & FAMILYNAME_FIRST) == FAMILYNAME_FIRST){
 		show = g_strconcat(g_strstrip(last), " ", g_strstrip(first), NULL);
-	} else if ((appBase.flags & GIVENNAME_FIST) == GIVENNAME_FIST){
+	} else if ((appBase.flags & GIVENNAME_FIRST) == GIVENNAME_FIRST){
 		show = g_strconcat(g_strstrip(first), " ", g_strstrip(last), NULL);
 	} else if ((appBase.flags & FAMILYNAME_ONLY) == FAMILYNAME_ONLY){
 		show = g_strconcat(g_strstrip(last), " ", g_strndup(g_strstrip(first), 1), ".", NULL);

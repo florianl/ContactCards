@@ -148,7 +148,13 @@ static void config_load_ui(GKeyFile *config){
 	} else {
 		flags |= tmp;
 	}
-	tmp = 0;
+	if(tmp == 0)
+	{
+		/*	Set default value	*/
+		flags |= FAMILYNAME_FIRST;
+	} else {
+		tmp = 0;
+	}
 
 	tmp |= g_key_file_get_integer(config, PACKAGE, "map", &error);
 	if (error){
@@ -157,7 +163,13 @@ static void config_load_ui(GKeyFile *config){
 	} else {
 		flags |= tmp;
 	}
-	tmp = 0;
+	if(tmp == 0)
+	{
+		/*	Set default value	*/
+		flags |= USE_OSM;
+	} else {
+		tmp = 0;
+	}
 
 /*
 	tmp |= g_key_file_get_integer(config, PACKAGE, "separator", &error);
@@ -201,7 +213,7 @@ void config_load(ContactCards_app_t *app){
 		appBase.syncIntervall = 1800;
 		return;
 	}
-	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE,, NULL);
+	g_key_file_load_from_file(config, configfile, G_KEY_FILE_NONE, NULL);
 	g_free(configfile);
 
 	config_load_ui(config);
