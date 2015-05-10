@@ -809,10 +809,11 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 
 	ContactCards_genPref_t		*gen = trans;
 	int							newSort, newMap;
-	int							eraser = ~(DISPLAY_STYLE_MASK & USE_MAP_MASK);
 	int							newFlag = 0;
 
-	newFlag = (appBase.flags & eraser);
+	/*	Delete old flags	*/
+	appBase.flags &= ~DISPLAY_STYLE_MASK;
+	appBase.flags &= ~USE_MAP_MASK;
 
 	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
@@ -824,7 +825,7 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 			newFlag |= FAMILYNAME_FIRST;
 			break;
 		case 1:
-			newFlag |= GIVENNAME_FIST;
+			newFlag |= GIVENNAME_FIRST;
 			break;
 		case 2:
 			newFlag |= FAMILYNAME_ONLY;
@@ -846,7 +847,8 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 			break;
 	}
 
-	appBase.flags = newFlag;
+	appBase.flags |= newFlag;
+
 }
 
 /**
@@ -881,12 +883,12 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	sort = gtk_combo_box_text_new();
 	gtk_widget_set_margin_top(sort, 18);
 	gtk_widget_set_halign(sort, GTK_ALIGN_START);
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "1", _("Last name first"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "2", _("Given name first"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "4", _("Last name only"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "0x1", _("Last name first"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "0x2", _("Given name first"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(sort), "0x4", _("Last name only"));
 	if((appBase.flags & FAMILYNAME_FIRST) == FAMILYNAME_FIRST)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 0);
-	else if((appBase.flags & GIVENNAME_FIST) == GIVENNAME_FIST)
+	else if((appBase.flags & GIVENNAME_FIRST) == GIVENNAME_FIRST)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 1);
 	else if((appBase.flags & FAMILYNAME_ONLY) == FAMILYNAME_ONLY)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sort), 2);
