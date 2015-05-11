@@ -1826,6 +1826,28 @@ static void contactAddFavcb(GtkMenuItem *menuitem, gpointer data){
 }
 
 /**
+ * contactCopycb - Callback to copy one Contact to another address book
+ */
+static void contactCopycb(GtkMenuItem *menuitem, gpointer data){
+	__PRINTFUNC__;
+	int				destABook = GPOINTER_TO_INT(data);
+	GtkTreeIter			iter;
+	GtkTreeModel		*model;
+	int					selID;
+
+	debugCC("copy contact to address book %d\n", destABook);
+
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
+		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
+		verboseCC("[%s] %d\n",__func__, selID);
+	} else {
+		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected."));
+		return;
+	}
+
+}
+
+/**
  * contactDelFavcb - Callback to add one Contact to Favorites
  */
 static void contactDelFavcb(GtkMenuItem *menuitem, gpointer data){
@@ -2468,6 +2490,12 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 						*editItem,
 						*exportItem,
 						*favItem;
+		GSList			*server, *aBooks;
+		GtkWidget		*cpyMenu, *subMenu;
+		int				cpyDst = 0;
+		int				serverflag = 0;
+		int				serverID = 0;
+		int				aBookID = 0;
 
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
 		verboseCC("[%s] %d\n",__func__, selID);
@@ -2496,6 +2524,68 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 			g_signal_connect(favItem, "activate", (GCallback)contactAddFavcb, NULL);
 		}
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), favItem);
+
+		server = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
+		if(g_slist_length(server) <= 1){
+			debugCC("There are no servers actually\n");
+		} else {
+			cpyMenu = gtk_menu_new();
+			while(server){
+				GSList				*next = server->next;
+				char				*srvDesc;
+
+				serverID = GPOINTER_TO_INT(server->data);
+				serverflag = 0;
+				serverflag = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", serverID, "", "", "", "");
+				if((serverflag & CONTACTCARDS_ONE_WAY_SYNC) == CONTACTCARDS_ONE_WAY_SYNC){
+					debugCC("[%s] server %d is on ONE_WAY_SYNC\n", __func__, serverID);
+					server = next;
+					continue;
+				}
+				aBooks = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", serverID, "", "", "", "");
+
+				if(g_slist_length(aBooks) <= 1){
+					g_slist_free(aBooks);
+					server = next;
+					continue;
+				}
+				srvDesc = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", serverID, "", "", "", "", "", 0);
+
+				while(aBooks){
+					GtkWidget		*cpyItem;
+					GSList			*next2 = aBooks->next;
+					char			*aBookDesc = NULL;
+					char			*desc = NULL;
+
+					aBookID = GPOINTER_TO_INT(aBooks->data);
+
+					if(aBookID == 0){
+						aBooks = next2;
+						continue;
+					}
+					debugCC("[%s] appending address book %d to submenu\n", __func__, aBookID);
+					cpyDst++;
+					aBookDesc = getSingleChar(appBase.db, "addressbooks", "displayname", 1, "addressbookID", aBookID, "", "", "", "", "", 0);
+					desc = g_strconcat(srvDesc, " | ", aBookDesc, NULL);
+					cpyItem = gtk_menu_item_new_with_label(desc);
+					gtk_menu_shell_append(GTK_MENU_SHELL(cpyMenu), cpyItem);
+					g_signal_connect(cpyItem, "activate", (GCallback)contactCopycb, GINT_TO_POINTER(aBookID));
+					g_free(desc);
+					g_free(aBookDesc);
+					aBooks = next2;
+				}
+				g_slist_free(aBooks);
+				g_free(srvDesc);
+				server = next;
+			}
+			if(cpyDst > 0){
+				subMenu = gtk_menu_item_new_with_label(_("Copy to ..."));
+				gtk_menu_item_set_submenu(GTK_MENU_ITEM(subMenu), cpyMenu);
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), subMenu);
+			}
+		}
+		g_slist_free(server);
+
 		gtk_widget_show_all(menu);
 		gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button.button, gdk_event_get_time((GdkEvent*)event));
 	}
