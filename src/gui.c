@@ -1834,12 +1834,16 @@ static void contactCopycb(GtkMenuItem *menuitem, gpointer data){
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 	int					selID;
-
-	debugCC("copy contact to address book %d\n", destABook);
+	char				*vCard = NULL;
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
-		verboseCC("[%s] %d\n",__func__, selID);
+		verboseCC("[%s] copy vCard %d to address book %d\n",__func__, selID, destABook);
+
+		vCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", selID, "", "", "", "","",0);
+		pushCard(appBase.db, vCard, destABook, 0, 0);
+		g_free(vCard);
+
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no vCard selected."));
 		return;
