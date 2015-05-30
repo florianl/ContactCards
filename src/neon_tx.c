@@ -1072,7 +1072,6 @@ int oAuthUpdate(sqlite3 *ptr, int serverID){
 	oAuthRefresh = getSingleChar(ptr, "cardServer", "oAuthRefreshToken", 1, "serverID", serverID, "", "", "", "", "", 0);
 	if(strlen(oAuthRefresh) == 1){
 		verboseCC("[%s] there is no refresh_token\n", __func__);
-		ret = OAUTH_REFRESHTOKEN_FAILURE;
 		oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
 	} else {
 		verboseCC("[%s] there is already a refresh_token\n", __func__);
