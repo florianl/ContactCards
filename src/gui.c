@@ -927,9 +927,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 		}
 	} else {
 		GInputStream	*ginput = g_memory_input_stream_new_from_data(tmp->pixel, tmp->size, NULL);
-
 		photo = gtk_drawing_area_new();
-		g_signal_connect (photo, "draw", G_CALLBACK(edgy2roundCB), ginput);
+		g_signal_connect (photo, "draw", G_CALLBACK(edgy2roundCB), (gpointer *)ginput);
 	}
 	gtk_widget_set_size_request(GTK_WIDGET(photo), 102, 102);
 	gtk_widget_set_margin_start(photo, 18);

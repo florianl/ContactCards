@@ -355,6 +355,67 @@ fastExit:
 }
 
 /**
+ * getRemotePhoto - load the remote PHOTO from a vCard
+ */
+char *getRemotePhoto(char *url, int *size){
+	__PRINTFUNC__;
+
+	ne_session			*sess;
+	ne_uri				uri;
+	ne_request			*req;
+	char				*photo = NULL;
+	char				*tmp = NULL;
+	char				*ContactCardsIdent = NULL;
+	int					ret = 0;
+	int					count = 0;
+	char				buf[BUFFERSIZE+1];
+	char				**elements = g_strsplit(url, "\r\n", 2);
+	char				**element = elements;
+
+	ne_uri_parse(element[0], &uri);
+	g_strfreev(elements);
+	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
+	debugCC("%s://%s/%s\n",uri.scheme, uri.host, uri.path);
+	if (ne_sock_init() != 0){
+		verboseCC("[%s] failed to init socket library \n", __func__);
+		return NULL;
+	}
+
+	sess = ne_session_create(uri.scheme, uri.host, uri.port);
+	req = ne_request_create(sess, "GET", uri.path);
+	ContactCardsIdent = g_strconcat("ContactCards/", VERSION, NULL);
+	ne_set_useragent(sess, ContactCardsIdent);
+	ret = ne_begin_request(req);
+	if(ret == NE_OK){
+		do{
+			memset(&buf, 0, BUFFERSIZE);
+			ret = ne_read_response_block(req, buf, sizeof(buf));
+			if(ret == 0){
+				break;
+			}
+			count += ret;
+			if(photo == NULL){
+				tmp = g_strndup(buf, strlen(buf));
+			} else {
+				tmp = g_strconcat(photo, buf, NULL);
+			}
+			photo = g_strndup(tmp, strlen(tmp));
+		} while(ret);
+		if (ret == NE_OK){
+			ret = ne_end_request(req);
+		}
+	}
+
+	ne_request_destroy(req);
+	ne_session_destroy(sess);
+	free(ContactCardsIdent);
+	free(tmp);
+
+	*size = count;
+	return photo;
+}
+
+/**
  * serverConnectionTest - tests the connection to a server
  */
 int serverConnectionTest(int serverID){

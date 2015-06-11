@@ -189,6 +189,7 @@ typedef struct credits{
 	char			*passwd;
 } credits_t;
 
+extern char *getRemotePhoto(char *url, int *size);
 extern gboolean validateUrl(char *url);
 extern int serverConnectionTest(int serverID);
 extern ne_session *serverConnect(int serverID);
