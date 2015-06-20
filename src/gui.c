@@ -843,8 +843,8 @@ static gboolean edgy2roundCB(GtkWidget *widget, GdkEventConfigure *event, gpoint
 	cr = gdk_cairo_create (gtk_widget_get_window (widget));
 	pixbuf = gdk_pixbuf_new_from_stream((GInputStream *)data, NULL, &error);
 	if(error){
-		verboseCC("%s\n", error->message);
-		return FALSE;
+		verboseCC("[%s] %s\n", __func__, error->message);
+		pixbuf = gdk_pixbuf_new_from_data((guchar *) data, GDK_COLORSPACE_RGB, TRUE, 8, 96,128, 3*96, NULL, NULL);
 	}
 	w = gdk_pixbuf_get_width (pixbuf);
 	h = gdk_pixbuf_get_height (pixbuf);

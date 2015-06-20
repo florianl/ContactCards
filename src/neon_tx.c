@@ -375,7 +375,7 @@ char *getRemotePhoto(char *url, int *size){
 	ne_uri_parse(element[0], &uri);
 	g_strfreev(elements);
 	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
-	debugCC("%s://%s/%s\n",uri.scheme, uri.host, uri.path);
+	verboseCC("%s://%s/%s\n",uri.scheme, uri.host, uri.path);
 	if (ne_sock_init() != 0){
 		verboseCC("[%s] failed to init socket library \n", __func__);
 		return NULL;
