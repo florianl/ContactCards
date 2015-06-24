@@ -645,12 +645,12 @@ ContactCards_pix_t *getCardPhoto(char *card){
 	i++;	/* Set i to the point after the :	*/
 
 	if(g_regex_match_simple(".*=ur[il].*", g_utf8_strdown(start, -1), 0,0)){
-		pix = getRemotePhoto(&start[i], &j);
-		pic->pixel = g_strndup(pix, j+1);
-		pic->size = j;
+		buf = getRemotePhoto(&start[i], &j);
+		pic->pixel = g_base64_decode(buf->str, &len);
+		pic->size = (int) len;
+		g_string_free(buf, TRUE);
 		return pic;
 	}
-
 
 	buf = g_string_new(NULL);
 	tmp = g_string_new(NULL);

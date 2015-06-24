@@ -357,25 +357,38 @@ fastExit:
 /**
  * getRemotePhoto - load the remote PHOTO from a vCard
  */
-char *getRemotePhoto(char *url, int *size){
+GString *getRemotePhoto(char *url, int *size){
 	__PRINTFUNC__;
 
 	ne_session			*sess;
 	ne_uri				uri;
 	ne_request			*req;
-	char				*photo = NULL;
-	char				*tmp = NULL;
 	char				*ContactCardsIdent = NULL;
 	int					ret = 0;
 	int					count = 0;
 	char				buf[BUFFERSIZE+1];
 	char				**elements = g_strsplit(url, "\r\n", 2);
 	char				**element = elements;
+	GString				*photo;
+	int					i = 0;
+	int					statuscode = 0;
+	int					failed = 0;
+	char				*moved = NULL;
 
-	ne_uri_parse(element[0], &uri);
-	g_strfreev(elements);
+	photo = g_string_new(NULL);
+
+tryAgain:
+
+	if(moved == NULL){
+		ne_uri_parse(element[0], &uri);
+		g_strfreev(elements);
+	} else {
+		ne_uri_free(&uri);
+		ne_uri_parse(moved, &uri);
+	}
+
 	uri.port = uri.port ? uri.port : ne_uri_defaultport(uri.scheme);
-	verboseCC("%s://%s/%s\n",uri.scheme, uri.host, uri.path);
+	verboseCC("%s://%s%s\n",uri.scheme, uri.host, uri.path);
 	if (ne_sock_init() != 0){
 		verboseCC("[%s] failed to init socket library \n", __func__);
 		return NULL;
@@ -386,20 +399,30 @@ char *getRemotePhoto(char *url, int *size){
 	ContactCardsIdent = g_strconcat("ContactCards/", VERSION, NULL);
 	ne_set_useragent(sess, ContactCardsIdent);
 	ret = ne_begin_request(req);
+	statuscode = ne_get_status(req)->code;
+	switch(statuscode){
+		case 301:
+			moved = (char *) ne_get_response_header(req, "Location");
+			if(failed++ > 3)
+				return photo;
+			goto tryAgain;
+			break;
+		default:
+			/*	In the future we can handle more - maybe ;)	*/
+			break;
+	}
 	if(ret == NE_OK){
 		do{
-			memset(&buf, 0, BUFFERSIZE);
-			ret = ne_read_response_block(req, buf, sizeof(buf));
+			memset(&buf, 0x0, BUFFERSIZE);
+			ret = ne_read_response_block(req, buf, BUFFERSIZE);
 			if(ret == 0){
 				break;
 			}
 			count += ret;
-			if(photo == NULL){
-				tmp = g_strndup(buf, strlen(buf));
-			} else {
-				tmp = g_strconcat(photo, buf, NULL);
-			}
-			photo = g_strndup(tmp, strlen(tmp));
+			i=0;
+			while(buf[i])
+				g_string_append_unichar(photo, buf[i++]);
+			debugCC("i: %d\n", i);
 		} while(ret);
 		if (ret == NE_OK){
 			ret = ne_end_request(req);
@@ -409,7 +432,7 @@ char *getRemotePhoto(char *url, int *size){
 	ne_request_destroy(req);
 	ne_session_destroy(sess);
 	free(ContactCardsIdent);
-	free(tmp);
+	ne_uri_free(&uri);
 
 	*size = count;
 	return photo;
