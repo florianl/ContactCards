@@ -59,6 +59,14 @@ Now get it, build it and run it:
 
 Alternatively ContactCards may be also installed from copr using [flo/contactcards/](https://copr.fedoraproject.org/coprs/flo/contactcards/).
 
+To use DANE in ContactCards you had to enable it at the moment:
+
+    $ git clone https://github.com/florianl/ContactCards.git
+    $ cd ContactCards
+    $ ./autogen.sh
+    $ ./configure --enable-dane
+    $ make
+    $ ./src/contactcards
 
 License: GPLv2
 
