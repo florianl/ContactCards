@@ -551,6 +551,30 @@ void prefSrvSave(GtkWidget *widget, gpointer trans){
 	addressbookTreeUpdate();
 }
 
+#ifdef _USE_DANE
+/**
+ * prefServerCheckDane - Callback to check DANE/TLSA
+ */
+void prefServerCheckDane(GtkWidget *widget, gpointer trans){
+	__PRINTFUNC__;
+
+	ContactCards_pref_t			*buffers = trans;
+	int							serverID = 0;
+
+	if(buffers->srvID == 0){
+		verboseCC("[%s] this isn't a server\n", __func__);
+		return;
+	}
+
+	serverID = buffers->srvID;
+
+	if(validateDANE(serverID) == TRUE){
+		setSingleInt(appBase.db, "certs", "trustFlag", (int) ContactCards_DIGEST_TRUSTED | ContactCards_DANE, "serverID", serverID);
+	}
+
+}
+#endif	/*	_USE_DANE	*/
+
 /**
  * prefServerCheck - checking for address books
  */
@@ -722,7 +746,7 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 			}
 #ifdef _USE_DANE
 			if((res & ContactCards_DANE) == ContactCards_DANE){
-				gtk_label_set_text(GTK_LABEL(buffers->dane), _("Based on DANE the certificate is considered trustworthy."));
+				gtk_label_set_text(GTK_LABEL(buffers->dane), _("Certificate seems to be trustworthy."));
 			} else {
 				gtk_label_set_text(GTK_LABEL(buffers->dane), _("No information available via DANE."));
 			}
@@ -956,6 +980,7 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	int					line = 1;
 #ifdef _USE_DANE
 	GtkWidget			*daneResult;
+	GtkWidget			*daneCheck;
 #endif	/*	_USE_DANE	*/
 
 	ContactCards_pref_t		*buffers = NULL;
@@ -1056,10 +1081,12 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 3, 1);
 
 	label = gtk_label_new(_("Certificate issued by"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
 	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
 	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
 	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(issuer);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
 	gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
 	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
 	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 3, 1);
@@ -1069,14 +1096,24 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	exportCertBtn = gtk_button_new_with_label(_("Export Certificate"));
 	gtk_widget_set_margin_top(GTK_WIDGET(exportCertBtn), 6);
 	gtk_widget_set_margin_start(GTK_WIDGET(exportCertBtn), 3);
-	gtk_grid_attach(GTK_GRID(box), exportCertBtn, 4, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(box), exportCertBtn, 3, line++, 2, 1);
 
 #ifdef _USE_DANE
+	line++;
+	label = gtk_label_new(_("DANE/TLSA"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	daneResult = gtk_label_new("");
 	gtk_widget_set_margin_top(GTK_WIDGET(daneResult), 6);
-	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_CENTER);
 	gtk_widget_set_margin_start(GTK_WIDGET(daneResult), 3);
-	gtk_grid_attach(GTK_GRID(box), daneResult, 3, line++, 4, 1);
+	gtk_grid_attach(GTK_GRID(box), daneResult, 3, line++, 3, 1);
+	line++;
+	daneCheck = gtk_button_new_with_label(_("Check DANE/TLSA again"));
+	gtk_widget_set_margin_top(GTK_WIDGET(daneCheck), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(daneCheck), 3);
+	gtk_grid_attach(GTK_GRID(box), daneCheck, 3, line++, 2, 1);
 	line++;
 #endif		/*		_USE_DANE		*/
 
@@ -1107,7 +1144,7 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	checkBtn = gtk_button_new_with_label(_("Check for address books"));
 	gtk_widget_set_margin_top(GTK_WIDGET(checkBtn), 6);
 	gtk_widget_set_margin_start(GTK_WIDGET(checkBtn), 3);
-	gtk_grid_attach(GTK_GRID(box), checkBtn, 4, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(box), checkBtn, 3, line++, 2, 1);
 
 	line++;
 
@@ -1169,7 +1206,9 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	g_signal_connect(saveBtn, "clicked", G_CALLBACK(prefSrvSave), buffers);
 	g_signal_connect(exportCertBtn, "clicked", G_CALLBACK(prefExportCert), buffers);
 	g_signal_connect(checkBtn, "clicked", G_CALLBACK(prefServerCheck), buffers);
-
+#ifdef _USE_DANE
+	g_signal_connect(daneCheck, "clicked", G_CALLBACK(prefServerCheckDane), buffers);
+#endif	/*	_USE_DANE	*/
 }
 
 /**
