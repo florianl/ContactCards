@@ -75,6 +75,7 @@ static void newDialogApply(GtkWidget *widget, gpointer trans){
 	GtkWidget					*assistant, *box;
 	GtkWidget					*controller;
 	GtkEntryBuffer				*buf1, *buf2, *buf3, *buf4;
+	gboolean					savePasswd = FALSE;
 
 	assistant = (GtkWidget*)widget;
 
@@ -94,10 +95,11 @@ static void newDialogApply(GtkWidget *widget, gpointer trans){
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 2);
 	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
+	savePasswd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON((g_object_get_data(G_OBJECT(box), "sPasswd"))));
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 1);
 	buf3 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "descEntry");
 	buf4 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "urlEntry");
-	newServer(appBase.db, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
+	newServer(appBase.db, savePasswd, (char *) gtk_entry_buffer_get_text(buf3), (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), (char *) gtk_entry_buffer_get_text(buf4));
 	syncMenuUpdate();
 	addressbookTreeUpdate();
 	return;
@@ -106,7 +108,7 @@ fruux:
 	box = gtk_assistant_get_nth_page(GTK_ASSISTANT(assistant), 2);
 	buf1 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "userEntry");
 	buf2 = (GtkEntryBuffer*) g_object_get_data(G_OBJECT(box), "passwdEntry");
-	newServer(appBase.db, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
+	newServer(appBase.db, FALSE, "fruux", (char *) gtk_entry_buffer_get_text(buf1), (char *) gtk_entry_buffer_get_text(buf2), "https://dav.fruux.com");
 	syncMenuUpdate();
 	addressbookTreeUpdate();
 	return;
@@ -209,6 +211,7 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 
 	GtkWidget				*box;
 	GtkWidget				*label, *inputUser, *inputPasswd;
+	GtkWidget				*sPasswd;
 	GtkEntryBuffer			*user, *passwd;
 	int						line = 0;
 
@@ -239,6 +242,15 @@ static void newDialogUserCredentials(GtkWidget *widget, gpointer data){
 	gtk_entry_set_visibility(GTK_ENTRY(inputPasswd), FALSE);
 	g_object_set_data(G_OBJECT(box),"passwdEntry", passwd);
 	gtk_grid_attach(GTK_GRID(box), inputPasswd, 1, line++, 1, 1);
+
+	sPasswd = gtk_check_button_new_with_label(_("Safe password?"));
+	gtk_widget_set_margin_start(sPasswd, 12);
+	gtk_widget_set_margin_end(sPasswd, 12);
+	gtk_widget_set_margin_top(sPasswd, 6);
+	gtk_widget_set_halign(GTK_WIDGET(sPasswd), GTK_ALIGN_START);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(sPasswd), TRUE);
+	g_object_set_data(G_OBJECT(box),"sPasswd", sPasswd);
+	gtk_grid_attach(GTK_GRID(box), sPasswd, 1, line++, 1, 1);
 
 	gtk_widget_show_all(box);
 	gtk_assistant_append_page (GTK_ASSISTANT(widget), box);

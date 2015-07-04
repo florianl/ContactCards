@@ -39,7 +39,7 @@ extern void handleServerOptions(char *val, int serverID);
 extern void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path);
 extern int newAddressbookTmp(int srvID, char *name);
 extern int newContact(sqlite3 *ptr, int addressbookID, char *card);
-extern void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url);
+extern void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *passwd, char *url);
 extern void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int oAuthEntity);
 extern void newOAuthEntity(sqlite3 *ptr, char *desc, char *clientID, char *clientSecret, char *davURI, char *scope, char *grantURI, char *tokenURI, char *responseType, char *redirURI, char *grantType);
 extern void contactHandle(sqlite3 *ptr, char *href, char *etag, int serverID, int addressbookID, ne_session *sess);

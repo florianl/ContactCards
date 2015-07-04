@@ -103,6 +103,8 @@ static void dbCleanUp(sqlite3 *ptr){
 
 	temporary = getListInt(ptr, "contacts", "contactID", 91, "flags", CONTACTCARDS_TMP, "", "", "", "");
 
+	/*	Remove unfinished contacts	*/
+	/*	Something went wrong and we do not want to waste the DB	*/
 	while(temporary){
 		GSList				*next = temporary->next;
 		int					id = GPOINTER_TO_INT(temporary->data);
@@ -111,10 +113,24 @@ static void dbCleanUp(sqlite3 *ptr){
 			continue;
 		}
 		dbRemoveItem(ptr, "contacts", 2, "", "", "contactID", id);
-				temporary = next;
+		temporary = next;
 	}
 	g_slist_free(temporary);
 
+	/*	Remove passwords from DB	*/
+	temporary = getListInt(ptr, "cardServer", "serverID", 91, "flags", CONTACTCARDS_SAVE_PASSWD, "", "", "", "");
+	while(temporary){
+		GSList				*next = temporary->next;
+		int					id = GPOINTER_TO_INT(temporary->data);
+		if(id == 0){
+			temporary = next;
+			continue;
+		}
+		debugCC("Remove password from server %d\n", id);
+		setSingleChar(ptr, "cardServer", "passwd", "", "serverID", id);
+		temporary = next;
+	}
+	g_slist_free(temporary);
 }
 
 /**
@@ -897,13 +913,14 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 /**
  * newServer - create a new server
  */
-void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
+void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *passwd, char *url){
 	__PRINTFUNC__;
 
 	ne_uri				uri;
 	char		 		*sql_query;
 	GSList				*retList;
 	int					serverID;
+	int					flags = 0;
 
 	g_strstrip(desc);
 	g_strstrip(user);
@@ -945,6 +962,11 @@ void newServer(sqlite3 *ptr, char *desc, char *user, char *passwd, char *url){
 	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", desc, user, passwd, url, uri.host);
 
 	serverID = insertAndID(ptr, sql_query, __func__);
+
+	if(sPasswd == TRUE)
+		flags |= CONTACTCARDS_SAVE_PASSWD;
+
+	setSingleInt(appBase.db, "cardServer", "flags", flags, "serverID", serverID);
 
 	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
