@@ -702,6 +702,7 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
 	char				*issued = NULL, *issuer = NULL, *url = NULL, *color = NULL;
 	int					isOAuth;
+	int					flags = 0;
 	gboolean			res = 0;
 	GdkRGBA				rgba;
 
@@ -726,8 +727,15 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 		if(!isOAuth){
 			passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
+			flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
+			if(flags & CONTACTCARDS_SAVE_PASSWD){
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), TRUE);
+			} else {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
+			}
 		} else {
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
 		}
 
 		url = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
@@ -984,6 +992,7 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	GtkWidget			*srvList, *scroll, *box, *abbox;
 	GtkWidget			*digSwitch, *uploadSwitch;
 	GtkWidget			*saveBtn, *deleteBtn, *exportCertBtn, *checkBtn;
+	GtkWidget			*sPasswd;
 	GtkWidget			*ablist, *colorBtn;
 	GSList				*aBooks = g_slist_alloc();
 	GtkEntryBuffer		*desc, *url, *user, *passwd;
@@ -1066,6 +1075,11 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_entry_set_visibility(GTK_ENTRY(input), FALSE);
 	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
 	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
+
+	sPasswd = gtk_check_button_new_with_label(_("Safe password?"));
+	gtk_widget_set_margin_top(GTK_WIDGET(sPasswd), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(sPasswd), 3);
+	gtk_grid_attach(GTK_GRID(box), sPasswd, 3, line++, 4, 1);
 
 	line++;
 
@@ -1203,6 +1217,7 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	buffers->listbox = ablist;
 	buffers->aBooks = aBooks;
 	buffers->colorChooser = colorBtn;
+	buffers->sPasswd = sPasswd;
 #ifdef _USE_DANE
 	buffers->dane = daneResult;
 #endif	/*	_USE_DANE	*/
