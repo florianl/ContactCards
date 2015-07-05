@@ -118,7 +118,7 @@ static void dbCleanUp(sqlite3 *ptr){
 	g_slist_free(temporary);
 
 	/*	Remove passwords from DB	*/
-	temporary = getListInt(ptr, "cardServer", "serverID", 91, "flags", CONTACTCARDS_SAVE_PASSWD, "", "", "", "");
+	temporary = getListInt(ptr, "cardServer", "serverID", 91, "flags", CONTACTCARDS_NO_PASSWD, "", "", "", "");
 	while(temporary){
 		GSList				*next = temporary->next;
 		int					id = GPOINTER_TO_INT(temporary->data);
@@ -964,7 +964,7 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	serverID = insertAndID(ptr, sql_query, __func__);
 
 	if(sPasswd == TRUE)
-		flags |= CONTACTCARDS_SAVE_PASSWD;
+		flags |= CONTACTCARDS_NO_PASSWD;
 
 	setSingleInt(appBase.db, "cardServer", "flags", flags, "serverID", serverID);
 

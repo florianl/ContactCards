@@ -52,31 +52,95 @@ GMutex 					aBookTreeMutex;
 GMutex					contactsTreeMutex;
 sqlite3_mutex			*dbMutex;
 
-#define	CONTACTCARDS_TMP			0x1		/*	For DB only	*/
-#define	CONTACTCARDS_ONE_WAY_SYNC	0x2
-#define	CONTACTCARDS_FAVORIT		0x4		/*	For DB only	*/
-#define	CONTACTCARDS_LOCAL			0x8		/*	For DB only	*/
+/**
 
-#define	CONTACTCARDS_VERBOSE		0x10
-#define	CONTACTCARDS_DEBUG			0x20
+    Some words on flags:
 
-#define	CONTACTCARDS_NO_LOCAL		0x40
-#define	CONTACTCARDS_QUERY			0x80
+    The first 8 fields are for general orientation:
 
-#define	CONTACTCARDS_SAVE_PASSWD	0x10000
+     +----------------
+     | +--------------
+     | | +------------
+     | | | +----------
+     | | | | +--------
+     | | | | | +------ graphical stuff 
+     | | | | | | +---- DB stuff
+     | | | | | | | +-- general stuff
+     v v v v v v v v
+    +-+-+-+-+-+-+-+-+
+    | | | | | | | | |
+    +-+-+-+-+-+-+-+-+
+   8                 0
 
-#define	DISPLAY_STYLE_MASK			0x700
-#define	FAMILYNAME_FIRST			0x100
-#define	GIVENNAME_FIRST				0x200
-#define	FAMILYNAME_ONLY				0x400
+    The second 8 bits on combination with "general stuff"
+     +----------------
+     | +--------------
+     | | +------------
+     | | | +----------
+     | | | | +--------
+     | | | | | +------ query 
+     | | | | | | +---- debug
+     | | | | | | | +-- verbose
+     v v v v v v v v
+    +-+-+-+-+-+-+-+-+
+    | | | | | | | | |
+    +-+-+-+-+-+-+-+-+
+  16                 8
+
+    The second 8 bits on combination with "DB stuff"
+     +----------------
+     | +--------------
+     | | +------------
+     | | | +---------- no passwd
+     | | | | +-------- local
+     | | | | | +------ favorit 
+     | | | | | | +---- one way
+     | | | | | | | +-- tmp
+     v v v v v v v v
+    +-+-+-+-+-+-+-+-+
+    | | | | | | | | |
+    +-+-+-+-+-+-+-+-+
+  16                 8
 
 
+    The second 8 bits on combination with "graphical stuff"
+     +----------------
+     | +-------------- no local address book
+     | | +------------ separator
+     | | | +---------- google maps
+     | | | | +-------- open street map
+     | | | | | +------ family name only 
+     | | | | | | +---- given name first
+     | | | | | | | +-- family name first
+     v v v v v v v v
+    +-+-+-+-+-+-+-+-+
+    | | | | | | | | |
+    +-+-+-+-+-+-+-+-+
+  16                 8
 
-#define	USE_MAP_MASK		0x3000
-#define	USE_OSM				0x1000
-#define	USE_GOOGLE			0x2000
+ */
 
-#define		USE_SEPARATOR		0x08	/*	Unused so far	*/
+#define	CONTACTCARDS_VERBOSE		0x101
+#define	CONTACTCARDS_DEBUG			0x201
+#define	CONTACTCARDS_QUERY			0x401
+
+#define	CONTACTCARDS_TMP			0x0102
+#define	CONTACTCARDS_ONE_WAY_SYNC	0x0202
+#define	CONTACTCARDS_FAVORIT		0x0402
+#define	CONTACTCARDS_LOCAL			0x0802
+#define	CONTACTCARDS_NO_PASSWD		0x1002
+
+
+#define	DISPLAY_STYLE_MASK					0x0704
+#define	FAMILYNAME_FIRST			0x0104
+#define	GIVENNAME_FIRST				0x0204
+#define	FAMILYNAME_ONLY				0x0404
+#define	USE_MAP_MASK						0x1804
+#define	USE_OSM						0x0804
+#define	USE_GOOGLE					0x1004
+#define	USE_SEPARATOR				0x2004		/*	Unused so far	*/
+#define	CONTACTCARDS_NO_LOCAL		0x4004
+
 
 #define	__PRINTFUNC__	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", __func__);
 

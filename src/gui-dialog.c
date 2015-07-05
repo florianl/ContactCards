@@ -728,10 +728,10 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 			passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
 			flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
-			if(flags & CONTACTCARDS_SAVE_PASSWD){
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), TRUE);
-			} else {
+			if(flags & CONTACTCARDS_NO_PASSWD){
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
+			} else {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), TRUE);
 			}
 		} else {
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
