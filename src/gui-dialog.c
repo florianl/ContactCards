@@ -559,6 +559,7 @@ void prefSrvSave(GtkWidget *widget, gpointer trans){
 						gtk_entry_buffer_get_text(buffers->descBuf), gtk_entry_buffer_get_text(buffers->urlBuf), gtk_entry_buffer_get_text(buffers->userBuf), gtk_entry_buffer_get_text(buffers->passwdBuf),
 						gtk_switch_get_active(GTK_SWITCH(buffers->certSel)),
 						gtk_switch_get_active(GTK_SWITCH(buffers->syncSel)),
+						gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(buffers->sPasswd)),
 						gdk_rgba_to_string(&rgba));
 	addressbookTreeUpdate();
 }

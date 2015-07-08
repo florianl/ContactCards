@@ -963,7 +963,7 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 
 	serverID = insertAndID(ptr, sql_query, __func__);
 
-	if(sPasswd == TRUE)
+	if(sPasswd == FALSE)
 		flags |= CONTACTCARDS_NO_PASSWD;
 
 	setSingleInt(appBase.db, "cardServer", "flags", flags, "serverID", serverID);
@@ -1370,7 +1370,7 @@ stepForward:
 /**
  * updateServerDetails - update changes to the server settings
  */
-void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel, char *newColor){
+void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gchar *newUrl, const gchar *newUser, const gchar *newPw, gboolean certSel, gboolean syncSel, gboolean safePasswd, char *newColor){
 	__PRINTFUNC__;
 
 	char				*oldDesc = NULL, *oldUrl = NULL, *oldUser = NULL, *oldPw = NULL, *oldColor = NULL;
@@ -1388,6 +1388,12 @@ void updateServerDetails(sqlite3 *ptr, int srvID, const gchar *newDesc, const gc
 		flag &= ~CONTACTCARDS_ONE_WAY_SYNC;
 	} else {
 		flag |= CONTACTCARDS_ONE_WAY_SYNC;
+	}
+
+	if(safePasswd == FALSE){
+		flag |= CONTACTCARDS_NO_PASSWD;
+	} else {
+		flag &= ~CONTACTCARDS_NO_PASSWD;
 	}
 	setSingleInt(appBase.db, "cardServer", "flags", flag, "serverID", srvID);
 
