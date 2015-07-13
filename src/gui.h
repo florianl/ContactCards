@@ -80,6 +80,7 @@ extern void viewCleaner(GtkWidget *widget);
 
 /*		gui-dialog.c	*/
 extern void newDialog(GtkWidget *do_widget, gpointer trans);
+extern void requestPasswd(credits_t *key, int serverID);
 extern void prefWindow(GtkWidget *widget, gpointer trans);
 extern void syncMenuUpdate();
 extern void birthdayDialog(GtkWidget *widget, gpointer trans);

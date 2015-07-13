@@ -13,6 +13,64 @@
 
 #include "contactcards.h"
 
+void requestPasswd(credits_t *key, int serverID){
+	__PRINTFUNC__;
+
+	GtkWidget			*dialog, *content, *view;
+	GtkWidget			*label, *input;
+	GtkEntryBuffer		*username, *passwd;
+	char				*user = NULL;
+	gint 				resp;
+	int					line = 0;
+
+	dialog = gtk_dialog_new_with_buttons (_("Request for Password"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, _("OK"), GTK_RESPONSE_ACCEPT, _("Cancel"), GTK_RESPONSE_REJECT, NULL);
+
+	content = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+
+	view = gtk_grid_new();
+	username = gtk_entry_buffer_new(NULL, -1);
+	passwd = gtk_entry_buffer_new(NULL, -1);
+
+	label = gtk_label_new(_("Username"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(view), label, 1, line, 1, 1);
+	input = gtk_entry_new_with_buffer(username);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(view), input, 2, line++, 3, 1);
+
+	/*	If there is a username, use it	*/
+	user = getSingleChar(appBase.db, "cardServer", "user", 1, "serverID", serverID, "", "", "", "", "", 0);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(username), user, -1);
+
+	label = gtk_label_new(_("Password"));
+	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(view), label, 1, line, 1, 1);
+	input = gtk_entry_new_with_buffer(passwd);
+	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+	gtk_grid_attach(GTK_GRID(view), input, 2, line++, 3, 1);
+
+	gtk_container_add (GTK_CONTAINER (content), view);
+	gtk_widget_show_all (dialog);
+
+	resp = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if (resp != GTK_RESPONSE_ACCEPT) return;
+
+	if(strlen(gtk_entry_buffer_get_text(username)) < 1 ) return;
+	if(strlen(gtk_entry_buffer_get_text(passwd)) < 1 ) return;
+	key->user = g_strdup(gtk_entry_buffer_get_text(username));
+	key->passwd = g_strdup(gtk_entry_buffer_get_text(passwd));
+
+	return;
+}
+
 /**
  * newDialogEntryChanged - check for changes of a server in the preferences dialog
  */

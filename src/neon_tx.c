@@ -49,6 +49,17 @@ static int getUserAuth(void *trans, const char *realm, int attempts, char *usern
 
 	if(key.user == NULL) return 5;
 
+	if(strlen(key.passwd)<1){
+		debugCC("There is no passwd in the db\n");
+		requestPasswd(&key, id);
+		/*
+		 * 	If user does not provide a password, there is no way
+		 *	to establish a secure connection
+		 */
+		if(strlen(key.passwd)<1)
+			return 5;
+	}
+
 	g_stpcpy(username, key.user);
 	g_stpcpy(password, key.passwd);
 
