@@ -263,6 +263,7 @@ void saveSettings(char *confDir){
 
 	g_key_file_set_integer(config, PACKAGE, "formation", appBase.flags & DISPLAY_STYLE_MASK);
 	g_key_file_set_integer(config, PACKAGE, "map", appBase.flags & USE_MAP_MASK);
+	g_key_file_set_integer(config, PACKAGE, "syncIntervall", appBase.syncIntervall);
 
 	data = g_key_file_to_data(config, NULL, NULL);
 	writeConfigFile(confFile, data);

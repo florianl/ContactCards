@@ -116,6 +116,7 @@ typedef struct ContactCards_pref {
 typedef struct ContactCards_genPref {
 	GtkWidget			*sort;
 	GtkWidget			*map;
+	GtkWidget			*interval;
 } ContactCards_genPref_t;
 
 /**

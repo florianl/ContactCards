@@ -911,7 +911,7 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	ContactCards_genPref_t		*gen = trans;
-	int							newSort, newMap;
+	int							newSort, newMap, newInterval;
 	int							newFlag = 0;
 
 	/*	Delete old flags	*/
@@ -920,6 +920,7 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 
 	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
+	newInterval = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->interval));
 
 	debugCC("\t\tstyle:%d\tmap: %d\n", newSort, newMap);
 
@@ -952,6 +953,23 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 
 	appBase.flags |= newFlag;
 
+	switch(newInterval){
+		case 0:
+			appBase.syncIntervall = 3600;
+			break;
+		case 1:
+			appBase.syncIntervall = 3600 * 2;
+			break;
+		case 2:
+			appBase.syncIntervall = 3600 * 4;
+			break;
+		case 3:
+			appBase.syncIntervall = 3600 * 8;
+			break;
+		default:
+			appBase.syncIntervall = 3600 * 2;
+			break;
+	}
 }
 
 /**
@@ -963,7 +981,7 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	GtkWidget			*layout = GTK_WIDGET(trans);
 	GtkWidget			*prefView;
 	GtkWidget			*txt;
-	GtkWidget			*sort, *map;
+	GtkWidget			*sort, *map, *interval;
 	GtkWidget			*sBtn;
 	int					line = 2;
 	ContactCards_genPref_t		*gen;
@@ -1022,8 +1040,44 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_grid_attach(GTK_GRID(prefView), map, 1, line++, 2, 1);
 	line++;
 
-	gen->sort	= sort;
-	gen->map	= map;
+	txt = gtk_label_new(_("Sync interval"));
+	gtk_widget_set_margin_start(txt, 12);
+	gtk_widget_set_margin_end(txt, 12);
+	gtk_widget_set_margin_top(txt, 18);
+	gtk_widget_set_halign(txt, GTK_ALIGN_END);
+	interval = gtk_combo_box_text_new();
+	gtk_widget_set_margin_top(interval, 18);
+	gtk_widget_set_halign(interval, GTK_ALIGN_START);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(interval), "1", _("1 h"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(interval), "2", _("2 h"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(interval), "4", _("4 h"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(interval), "8", _("8 h"));
+
+	switch((appBase.syncIntervall / 3600)){
+		case 1:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(interval), 0);
+			break;
+		case 2:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(interval), 1);
+			break;
+		case 4:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(interval), 2);
+			break;
+		case 8:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(interval), 3);
+			break;
+		default:
+			gtk_combo_box_set_active(GTK_COMBO_BOX(interval), 1);
+			break;
+	}
+	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(prefView), interval, 1, line++, 2, 1);
+	line++;
+
+
+	gen->sort		= sort;
+	gen->map		= map;
+	gen->interval	= interval;
 
 	sBtn = gtk_button_new_with_label(_("Save changes"));
 	gtk_widget_set_margin_start(sBtn, 12);
