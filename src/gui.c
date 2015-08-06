@@ -3001,6 +3001,8 @@ void guiInit(void){
 
 	GtkWidget			*mainVBox, *mainToolbar, *mainStatusbar, *mainContent;
 	GtkWidget			*addressbookWindow;
+	GtkWidget			*cal, *leftBox;
+	GtkRequisition 		natSize;
 	GtkWidget			*contactBox, *contactWindow, *scroll;
 	GtkWidget			*addContact, *delContact, *contactButtons, *contactsEdit, *editContact;
 	GtkWidget			*ascContact, *descContact, *searchbar;
@@ -3077,7 +3079,17 @@ void guiInit(void){
 	addressbookWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(addressbookWindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(addressbookWindow, 144, -1);
+	gtk_widget_set_vexpand(GTK_WIDGET(addressbookWindow), TRUE);
 	appBase.addressbookList = addressbookTreeCreate();
+
+	cal = gtk_calendar_new();
+	gtk_calendar_set_display_options(GTK_CALENDAR(cal), GTK_CALENDAR_SHOW_HEADING|GTK_CALENDAR_SHOW_DAY_NAMES);
+	gtk_widget_show(cal);
+	gtk_widget_get_preferred_size(cal, NULL, &natSize);
+	gtk_widget_set_size_request(cal, natSize.width,natSize.height);
+	appBase.cal = cal;
+
+	leftBox = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -3171,7 +3183,9 @@ void guiInit(void){
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
 	gtk_container_add(GTK_CONTAINER(addressbookWindow), appBase.addressbookList);
-	gtk_container_add(GTK_CONTAINER(mainContent), addressbookWindow);
+	gtk_container_add(GTK_CONTAINER(leftBox), addressbookWindow);
+	gtk_container_add(GTK_CONTAINER(leftBox), appBase.cal);
+	gtk_container_add(GTK_CONTAINER(mainContent), leftBox);
 	gtk_container_add(GTK_CONTAINER(contactWindow), appBase.contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
 	gtk_container_add(GTK_CONTAINER(contactBox), scroll);

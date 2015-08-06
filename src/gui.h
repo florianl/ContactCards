@@ -28,6 +28,7 @@ typedef struct ContactCardsGuiBase{
 	GtkWidget	*addressbookList;
 	GtkWidget	*contactList;
 	GtkWidget	*contactView;
+	GtkWidget	*cal;
 	int			flags;
 	int			syncIntervall;
 }ContactCardsGuiBase;
