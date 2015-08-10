@@ -3089,7 +3089,7 @@ void guiInit(void){
 	gtk_widget_set_size_request(cal, natSize.width,natSize.height);
 	appBase.cal = cal;
 
-	leftBox = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
+	leftBox = GTK_WIDGET(gtk_box_new(GTK_ORIENTATION_VERTICAL, 2));
 
 	/*		Contactstuff			*/
 	contactBox = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -3183,8 +3183,8 @@ void guiInit(void){
 	/*		Put it all together		*/
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
 	gtk_container_add(GTK_CONTAINER(addressbookWindow), appBase.addressbookList);
-	gtk_container_add(GTK_CONTAINER(leftBox), addressbookWindow);
-	gtk_container_add(GTK_CONTAINER(leftBox), appBase.cal);
+	gtk_box_pack_start(GTK_BOX(leftBox), GTK_WIDGET(addressbookWindow), TRUE, TRUE, 2);
+	gtk_box_pack_end(GTK_BOX(leftBox), GTK_WIDGET(appBase.cal), FALSE, FALSE, 2);
 	gtk_container_add(GTK_CONTAINER(mainContent), leftBox);
 	gtk_container_add(GTK_CONTAINER(contactWindow), appBase.contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
