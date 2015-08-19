@@ -3008,7 +3008,7 @@ void guiInit(void){
 	GtkWidget			*ascContact, *descContact, *searchbar;
 	GtkWidget			*emptyCard, *noContact;
 	GtkWidget			*syncMenu;
-	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem, *calItem;
+	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
 	GtkEntryCompletion	*completion;
@@ -3043,11 +3043,6 @@ void guiInit(void){
 	gtk_widget_set_tooltip_text(GTK_WIDGET(prefItem), _("Preferences"));
 	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (prefItem), "preferences-system");
 	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), prefItem, -1);
-
-	calItem = gtk_tool_button_new(NULL, _("Birthday Calendar"));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(calItem), _("Birthday Calendar"));
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (calItem), "x-office-calendar");
-	gtk_toolbar_insert(GTK_TOOLBAR(mainToolbar), calItem, -1);
 
 	syncItem = gtk_menu_tool_button_new(NULL, _("Refresh"));
 	syncMenu = gtk_menu_new();
@@ -3168,7 +3163,6 @@ void guiInit(void){
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), NULL);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), NULL);
-	g_signal_connect(G_OBJECT(calItem), "clicked", G_CALLBACK(birthdayDialog), NULL);
 
 	/*	Build the base structure 	*/
 	appBase.statusbar 		= mainStatusbar;
