@@ -1502,10 +1502,8 @@ insertDirect:
 /**
  * markDay - mark the birthday of each contact in the calendar
  */
-void markDay(GSList *contacts, ContactCards_cal_t *data){
+void markDay(GSList *contacts){
 	__PRINTFUNC__;
-
-	GtkWidget		*cal = data->cal;
 
 	while(contacts){
 		GSList				*next =  contacts->next;
@@ -1535,10 +1533,10 @@ void markDay(GSList *contacts, ContactCards_cal_t *data){
 			date = g_date_new();
 			g_date_set_parse(date, bday);
 			if(g_date_valid(date) == TRUE){
-				gtk_calendar_get_date(GTK_CALENDAR(cal), NULL, &month, NULL);
+				gtk_calendar_get_date(GTK_CALENDAR(appBase.cal), NULL, &month, NULL);
 				if(g_date_get_month(date) == (month+1)){
-					gtk_calendar_mark_day(GTK_CALENDAR(cal), (int)g_date_get_day(date));
-					birthdayListAppend(data, g_date_get_day(date), card);
+					gtk_calendar_mark_day(GTK_CALENDAR(appBase.cal), (int)g_date_get_day(date));
+//					birthdayListAppend(data, g_date_get_day(date), card);
 				}
 			}
 			g_date_free(date);
@@ -1553,18 +1551,20 @@ void markDay(GSList *contacts, ContactCards_cal_t *data){
 /**
  * calendarUpdate - Update the birthday calendar
  */
-void calendarUpdate(ContactCards_cal_t *data, int type, int id){
+void calendarUpdate(int type, int id){
 	__PRINTFUNC__;
 
 	GSList			*contacts = NULL;
 
 	/*	Clean up at first	*/
-	gtk_calendar_clear_marks (GTK_CALENDAR(data->cal));
+	gtk_calendar_clear_marks (GTK_CALENDAR(appBase.cal));
+/*
 	if (g_slist_length (data->list) > 1){
 		debugCC("Delete old list and create a new one\n");
 		g_slist_free_full(data->list, g_free);
 		data->list = g_slist_alloc();
 	}
+*/
 
 	/* Insert new elements	*/
 	switch(type){
@@ -1590,22 +1590,27 @@ void calendarUpdate(ContactCards_cal_t *data, int type, int id){
 						continue;
 					}
 					contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", addressbookID, "", "", "", "");
-					markDay(contacts, data);
+					markDay(contacts);
 					g_slist_free(contacts);
 					addressBooks = next;
 				}
 				g_slist_free(addressBooks);
-				debugCC("\t\t\tcontaints %d elements\n", g_slist_length((data->list)));
 				return;
 			}
 			break;
 		case 1:		/*	address book selected	*/
 			contacts = getListInt(appBase.db, "contacts", "contactID", 1, "addressbookID", id, "", "", "", "");
 			break;
+		case 2:
+			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
+			break;
+		case 3:
+			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_LOCAL, "", "", "", "");
+			break;
 		default:
 			break;
 	}
-	markDay(contacts, data);
+	markDay(contacts);
 	g_slist_free(contacts);
 
 }
@@ -1628,14 +1633,14 @@ static void selABook(GtkWidget *widget, gpointer trans){
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
-					calendarUpdate(data, 0, 0);
+//					calendarUpdate(data, 0, 0);
 				} else {
 					verboseCC("[%s] whole server\n", __func__);
-					calendarUpdate(data, 0, selID);
+//					calendarUpdate(data, 0, selID);
 				}
 				break;
 			case 1:		/* Just one address book selected	*/
-				calendarUpdate(data, 1, selID);
+//				calendarUpdate(data, 1, selID);
 				break;
 		}
 	}

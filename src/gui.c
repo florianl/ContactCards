@@ -120,19 +120,24 @@ static void selBook(GtkWidget *widget, gpointer trans){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
 					contactsTreeUpdate(0, 0);
+					calendarUpdate(0,0);
 				} else {
 					verboseCC("[%s] whole server\n", __func__);
 					contactsTreeUpdate(0, selID);
+					calendarUpdate(0, selID);
 				}
 				break;
 			case 1:		/* Just one address book selected	*/
 				contactsTreeUpdate(1, selID);
+				calendarUpdate(1, selID);
 				break;
 			case 2:		/*	Favorites are selected			*/
 				contactsTreeUpdate(2, 0);
+				calendarUpdate(2, 0);
 				break;
 			case 3:		/*	Locales are selected			*/
 				contactsTreeUpdate(3, 0);
+				calendarUpdate(3, 0);
 				break;
 			default:
 				verboseCC("[%s] something is strange around here\n", __func__);
@@ -3163,6 +3168,8 @@ void guiInit(void){
 	g_signal_connect(G_OBJECT(aboutItem), "clicked", G_CALLBACK(dialogAbout), NULL);
 	g_signal_connect(G_OBJECT(newServer), "clicked", G_CALLBACK(newDialog), NULL);
 	g_signal_connect(G_OBJECT(syncItem), "clicked", G_CALLBACK(syncServer), NULL);
+
+	g_signal_connect(appBase.cal, "month-changed", G_CALLBACK (selBook), NULL);
 
 	/*	Build the base structure 	*/
 	appBase.statusbar 		= mainStatusbar;

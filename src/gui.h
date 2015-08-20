@@ -62,6 +62,7 @@ extern void guiRun(sqlite3 *ptr);
 extern void guiInit(void);
 
 extern void listAppend(GtkWidget *list, gchar *text, guint id);
+extern void calendarUpdate(int type, int id);
 extern void comboAppend(GtkListStore *store, gchar *text, guint id);
 extern void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data);
 extern void feedbackDialog(int type, char *msg);
