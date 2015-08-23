@@ -1456,20 +1456,19 @@ void syncMenuUpdate(void){
 /**
  * birthdayListAppend - appends the birthday to the list for the tooltips
  */
-void birthdayListAppend(ContactCards_cal_t *data, int day, char *card){
+void birthdayListAppend(int day, char *card){
 	__PRINTFUNC__;
 
 	ContactCards_cal_item_t			*item;
 	char							*displayname;
-	GSList							*list = data->list;
 
-	if(g_slist_length((data->list)) == 1){
+	if(g_slist_length(appBase.callist) == 1){
 		goto insertDirect;
 	}
 
-	while(list){
-		GSList						*next = list->next;
-		ContactCards_cal_item_t		*item = list->data;
+	while(appBase.callist){
+		GSList						*next = (appBase.callist)->next;
+		ContactCards_cal_item_t		*item = (appBase.callist)->data;
 		if(!item){
 			goto stepForward;
 		}
@@ -1482,11 +1481,12 @@ void birthdayListAppend(ContactCards_cal_t *data, int day, char *card){
 				append = g_strndup("(no name)", sizeof("(no name)"));
 
 			new = g_strconcat(old, "\n", append, NULL);
+			debugCC("\t\tappending %s\n", new);
 			item->txt = new;
 			return;
 		}
 stepForward:
-		list = next;
+		(appBase.callist) = next;
 	}
 
 insertDirect:
@@ -1496,7 +1496,7 @@ insertDirect:
 	if(strlen(g_strstrip(displayname)) == 0)
 		displayname = g_strndup("(no name)", sizeof("(no name)"));
 	item->txt = displayname;
-	data->list = g_slist_append(data->list, item);
+	appBase.callist = g_slist_append((appBase.callist), item);
 }
 
 /**
@@ -1536,7 +1536,7 @@ void markDay(GSList *contacts){
 				gtk_calendar_get_date(GTK_CALENDAR(appBase.cal), NULL, &month, NULL);
 				if(g_date_get_month(date) == (month+1)){
 					gtk_calendar_mark_day(GTK_CALENDAR(appBase.cal), (int)g_date_get_day(date));
-//					birthdayListAppend(data, g_date_get_day(date), card);
+//					birthdayListAppend(g_date_get_day(date), card);
 				}
 			}
 			g_date_free(date);
@@ -1558,13 +1558,12 @@ void calendarUpdate(int type, int id){
 
 	/*	Clean up at first	*/
 	gtk_calendar_clear_marks (GTK_CALENDAR(appBase.cal));
-/*
-	if (g_slist_length (data->list) > 1){
+
+	if (g_slist_length (appBase.callist) > 1){
 		debugCC("Delete old list and create a new one\n");
-		g_slist_free_full(data->list, g_free);
-		data->list = g_slist_alloc();
+		g_slist_free_full(appBase.callist, g_free);
+		appBase.callist = g_slist_alloc();
 	}
-*/
 
 	/* Insert new elements	*/
 	switch(type){
@@ -1780,8 +1779,7 @@ void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer 
 gchar *birthdayTooltip(GtkCalendar *cal, guint year, guint month, guint day, gpointer trans){
 	__PRINTFUNC__;
 
-	ContactCards_cal_t				*data = trans;
-	GSList							*list = data->list;
+	GSList							*list = trans;
 
 	if(g_slist_length(list) == 1)
 		return NULL;

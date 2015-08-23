@@ -29,6 +29,7 @@ typedef struct ContactCardsGuiBase{
 	GtkWidget	*contactList;
 	GtkWidget	*contactView;
 	GtkWidget	*cal;
+	GSList		*callist;
 	int			flags;
 	int			syncIntervall;
 }ContactCardsGuiBase;
@@ -62,6 +63,7 @@ extern void guiRun(sqlite3 *ptr);
 extern void guiInit(void);
 
 extern void listAppend(GtkWidget *list, gchar *text, guint id);
+extern gchar *birthdayTooltip(GtkCalendar *cal, guint year, guint month, guint day, gpointer trans);
 extern void calendarUpdate(int type, int id);
 extern void comboAppend(GtkListStore *store, gchar *text, guint id);
 extern void dialogKeyHandler(GtkDialog *widget, GdkEventKey *event, gpointer data);

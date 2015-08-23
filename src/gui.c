@@ -3016,6 +3016,7 @@ void guiInit(void){
 	GtkToolItem			*prefItem, *aboutItem, *sep, *newServer, *syncItem;
 	GtkTreeSelection	*bookSel, *contactSel;
 	GSList 				*cleanUpList = g_slist_alloc();
+	GSList				*callist = g_slist_alloc();
 	GtkEntryCompletion	*completion;
 	GError				*error = NULL;
 	GdkPixbuf			*pixbuf;
@@ -3088,6 +3089,8 @@ void guiInit(void){
 	gtk_widget_get_preferred_size(cal, NULL, &natSize);
 	gtk_widget_set_size_request(cal, natSize.width,natSize.height);
 	appBase.cal = cal;
+	appBase.callist = callist;
+	gtk_calendar_set_detail_func(GTK_CALENDAR(appBase.cal), birthdayTooltip, appBase.callist, NULL);
 
 	leftBox = GTK_WIDGET(gtk_box_new(GTK_ORIENTATION_VERTICAL, 2));
 
