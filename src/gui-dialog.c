@@ -1536,7 +1536,7 @@ void markDay(GSList *contacts){
 				gtk_calendar_get_date(GTK_CALENDAR(appBase.cal), NULL, &month, NULL);
 				if(g_date_get_month(date) == (month+1)){
 					gtk_calendar_mark_day(GTK_CALENDAR(appBase.cal), (int)g_date_get_day(date));
-//					birthdayListAppend(g_date_get_day(date), card);
+					birthdayListAppend(g_date_get_day(date), card);
 				}
 			}
 			g_date_free(date);
@@ -1779,7 +1779,7 @@ void birthdayDialogTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer 
 gchar *birthdayTooltip(GtkCalendar *cal, guint year, guint month, guint day, gpointer trans){
 	__PRINTFUNC__;
 
-	GSList							*list = trans;
+	GSList							*list = appBase.callist;
 
 	if(g_slist_length(list) == 1)
 		return NULL;

@@ -3090,7 +3090,7 @@ void guiInit(void){
 	gtk_widget_set_size_request(cal, natSize.width,natSize.height);
 	appBase.cal = cal;
 	appBase.callist = callist;
-	gtk_calendar_set_detail_func(GTK_CALENDAR(appBase.cal), birthdayTooltip, appBase.callist, NULL);
+	gtk_calendar_set_detail_func(GTK_CALENDAR(appBase.cal), birthdayTooltip, NULL, NULL);
 
 	leftBox = GTK_WIDGET(gtk_box_new(GTK_ORIENTATION_VERTICAL, 2));
 
