@@ -173,13 +173,4 @@ typedef struct ContactCards_cal_item {
 	char		*txt;
 } ContactCards_cal_item_t;
 
-/**
- * struct ContactCards_cal	- structure for displaying the right stuff in the calender
- */
-typedef struct ContactCards_cal {
-	GtkWidget			*cal;
-	GtkWidget			*tree;
-	GSList				*list;
-} ContactCards_cal_t;
-
 #endif	/*	gui_H	*/
