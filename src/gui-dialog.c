@@ -465,7 +465,7 @@ void newDialog(GtkWidget *do_widget, gpointer trans){
 /**
  * syncMenuSel - Callback for sync menu
  */
-static void syncMenuSel(GtkWidget *widget, gpointer trans){
+void syncMenuSel(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	GError		 				*error = NULL;

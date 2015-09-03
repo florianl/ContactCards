@@ -87,6 +87,7 @@ extern void newDialog(GtkWidget *do_widget, gpointer trans);
 extern void requestPasswd(credits_t *key, int serverID);
 extern void prefWindow(GtkWidget *widget, gpointer trans);
 extern void syncMenuUpdate();
+extern void syncMenuSel(GtkWidget *widget, gpointer trans);
 extern void birthdayDialog(GtkWidget *widget, gpointer trans);
 
 /**

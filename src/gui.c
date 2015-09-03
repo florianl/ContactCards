@@ -2262,6 +2262,9 @@ void addressbookTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer dat
 				menuItem = gtk_menu_item_new_with_label(_("Create new address book"));
 				g_signal_connect(menuItem, "activate", (GCallback)createNewCollection, GINT_TO_POINTER(selID));
 				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem);
+				menuItem4 = gtk_menu_item_new_with_label(_("Sync with server"));
+				g_signal_connect(menuItem4, "activate", (GCallback)syncMenuSel, GINT_TO_POINTER(selID));
+				gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuItem4);
 				break;
 			case 1:		/* address book	*/
 				verboseCC("[%s] Adress book %d selected\n", __func__, selID);
