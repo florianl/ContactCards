@@ -582,6 +582,7 @@ void exportBirthdays(int type, int id, char *base){
 			break;
 		case 3:
 			desc = g_strdup(_("Locales"));
+			break;
 		default:
 			return;
 	}
@@ -647,7 +648,7 @@ void exportBirthdays(int type, int id, char *base){
 		case 2:		/*	favorites		*/
 			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_FAVORIT, "", "", "", "");
 			break;
-		case 3:		/*	favorites		*/
+		case 3:		/*	locales		*/
 			contacts = getListInt(appBase.db, "contacts", "contactID", 91, "flags", CONTACTCARDS_LOCAL, "", "", "", "");
 			break;
 		default:
