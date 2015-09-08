@@ -1406,37 +1406,26 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	__PRINTFUNC__;
 
-	GtkWidget			*card, *label, *sep, *input;
-	GtkWidget			*addPhone, *addMail, *addUrl, *addPostal, *addIM, *addNote;
-	GSList				*list, *items;
-	GtkWidget			*discardBtn, *saveBtn, *row;
-	GtkEntryBuffer		*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
-	int								line = 1;
-	char							*vData = NULL;
-	char							*naming = NULL;
-	gchar							**namingPtr = NULL;
-	ContactCards_add_t				*transNew = NULL;
-	ContactCards_new_Value_t		*transPhone = NULL,
-									*transUrl = NULL,
-									*transEMail = NULL,
-									*transIM = NULL,
-									*transNote = NULL;
-	ContactCards_item_t				*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
+	GtkWidget				*card, *frame;
+	GtkWidget				*saveBtn, *discardBtn, *addItemBtn, *addMenu;
+	GtkWidget				*typ, *label, *input;
+	GSList					*items;
+	GtkEntryBuffer			*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
+	ContactCards_add_t		*transNew = NULL;
+	ContactCards_item_t		*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
+	int					line = 0;
 
+	frame = gtk_frame_new(NULL);
 	card = gtk_grid_new();
-	if(selID){
-		vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
-		if(vData == NULL)
-			return card;
-	}
+
+	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
+	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
+	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
+
+	items = g_slist_alloc();
 
 	transNew = g_new(ContactCards_add_t, 1);
-	transPhone = g_new(ContactCards_new_Value_t, 1);
-	transUrl = g_new(ContactCards_new_Value_t, 1);
-	transEMail = g_new(ContactCards_new_Value_t, 1);
-	transIM = g_new(ContactCards_new_Value_t, 1);
-	transNote = g_new(ContactCards_new_Value_t, 1);
-	items = g_slist_alloc();
 
 	prefixItem = g_new(ContactCards_item_t, 1);
 	firstNItem = g_new(ContactCards_item_t, 1);
@@ -1450,255 +1439,84 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	lastNBuf = gtk_entry_buffer_new(NULL, -1);
 	suffixBuf = gtk_entry_buffer_new(NULL, -1);
 
-	if(selID){
-		naming = getSingleCardAttribut(CARDTYPE_N, vData);
-		if(naming){
-			namingPtr = g_strsplit(naming, ";", 5);
-			gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
-			gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
-			gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
-			gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
-			gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
-			g_strfreev(namingPtr);
-		} else {
-			gtk_entry_buffer_set_text(lastNBuf, "", 0);
-			gtk_entry_buffer_set_text(firstNBuf, "", 0);
-			gtk_entry_buffer_set_text(middleNBuf, "", 0);
-			gtk_entry_buffer_set_text(prefixBuf, "", 0);
-			gtk_entry_buffer_set_text(suffixBuf, "", 0);
-		}
-	}
-
-	transNew->list = items;
-	transNew->editID = selID;
-	if(!abID)
-		abID = getSingleInt(ptr, "contacts", "addressbookID", 1, "contactID", selID, "", "", "", "");
-	transNew->aID = abID;
-
-	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
-	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
-
-	row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-
-	discardBtn = gtk_button_new_with_label(_("Discard"));
 	saveBtn = gtk_button_new_with_label(_("Save"));
-	gtk_box_pack_end(GTK_BOX(row), discardBtn, FALSE, FALSE, 1);
-	gtk_box_pack_end(GTK_BOX(row), saveBtn, FALSE, FALSE, 1);
-	gtk_grid_attach(GTK_GRID(card), row, 0, line++, 8, 1);
+	discardBtn = gtk_button_new_with_label(_("Discard"));
+	gtk_grid_attach(GTK_GRID(card), saveBtn, 5, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), discardBtn, 6, line, 1, 1);
+	addItemBtn = gtk_menu_tool_button_new(NULL, _("Add Information"));
+	addMenu = gtk_menu_new();
+	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(addItemBtn), addMenu);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
+	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (addItemBtn), "list-add");
+	gtk_grid_attach(GTK_GRID(card), addItemBtn, 7, line, 1, 1);
+	line++;
 
-	/*	Naming	*/
+	/*		Naming	*/
+	typ = gtk_label_new(_("Name"));
+	gtk_widget_set_margin_start(typ, 12);
+	gtk_widget_set_margin_end(typ, 12);
+	gtk_widget_set_margin_top(typ, 18);
+	gtk_widget_set_halign(typ, GTK_ALIGN_START);
+	gtk_grid_attach(GTK_GRID(card), typ, 1, line, 1, 1);
+	line++;
+
 	label = gtk_label_new(_("Prefix"));
+	gtk_widget_set_halign(label, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(label, 6);
 	input = gtk_entry_new_with_buffer(prefixBuf);
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 5, 1);
 	prefixItem->itemID = CARDTYPE_FN_PREFIX;
 	prefixItem->element = prefixBuf;
 	items = g_slist_append(items, prefixItem);
 
 	label = gtk_label_new(_("First name"));
+	gtk_widget_set_halign(label, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(label, 6);
 	input = gtk_entry_new_with_buffer(firstNBuf);
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 5, 1);
 	firstNItem->itemID = CARDTYPE_FN_FIRST;
 	firstNItem->element = firstNBuf;
 	items = g_slist_append(items, firstNItem);
 
 	label = gtk_label_new(_("Middle name"));
+	gtk_widget_set_halign(label, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(label, 6);
 	input = gtk_entry_new_with_buffer(middleNBuf);
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 5, 1);
 	middleNItem->itemID = CARDTYPE_FN_MIDDLE;
 	middleNItem->element = middleNBuf;
 	items = g_slist_append(items, middleNItem);
 
 	label = gtk_label_new(_("Last name"));
+	gtk_widget_set_halign(label, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(label, 6);
 	input = gtk_entry_new_with_buffer(lastNBuf);
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 5, 1);
 	lastNItem->itemID = CARDTYPE_FN_LAST;
 	lastNItem->element = lastNBuf;
 	items = g_slist_append(items, lastNItem);
 
 	label = gtk_label_new(_("Suffix"));
+	gtk_widget_set_halign(label, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(label, 6);
 	input = gtk_entry_new_with_buffer(suffixBuf);
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(card), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), input, 2, line++, 5, 1);
 	suffixItem->itemID = CARDTYPE_FN_SUFFIX;
 	suffixItem->element = suffixBuf;
 	items = g_slist_append(items, suffixItem);
 
-	/*	Phone	*/
-	label = gtk_label_new(_("Phone"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addPhone = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addPhone), _("Add a phone"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
-	gtk_grid_attach(GTK_GRID(card), addPhone, 3, line++, 1,1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_TEL, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_TEL, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	transPhone->grid = card;
-	transPhone->list = items;
-	transPhone->type = CARDTYPE_TEL;
-	line++;
-
-	/*	Address	*/
-	label = gtk_label_new(_("Address"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addPostal = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addPostal), _("Add a postal address"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line++, 2, 1);
-	//gtk_grid_attach(GTK_GRID(card), addPostal, 2, line++, 1, 1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_ADR, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditPostalItem(card, items, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	line++;
-
-	/*	EMAIL	*/
-	label = gtk_label_new(_("EMail"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addMail = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addMail), _("Add a EMail"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
-	gtk_grid_attach(GTK_GRID(card), addMail, 3, line++, 1, 1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_EMAIL, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_EMAIL, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	transEMail->grid = card;
-	transEMail->list = items;
-	transEMail->type = CARDTYPE_EMAIL;
-	line++;
-
-	/*	URL	*/
-	label = gtk_label_new(_("URL"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addUrl = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addUrl), _("Add a Url"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
-	gtk_grid_attach(GTK_GRID(card), addUrl, 3, line++, 1, 1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_URL, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_URL, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	transUrl->grid = card;
-	transUrl->list = items;
-	transUrl->type = CARDTYPE_URL;
-	line++;
-
-	/*	IM	*/
-	label = gtk_label_new(_("IM"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addIM = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addIM), _("Add a IM"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
-	gtk_grid_attach(GTK_GRID(card), addIM, 3, line++, 1, 1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_IMPP, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditSingleItem(card, items, CARDTYPE_IMPP, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	transIM->grid = card;
-	transIM->list = items;
-	transIM->type = CARDTYPE_IMPP;
-	line++;
-
-	/*	Note	*/
-	label = gtk_label_new(_("Note"));
-	sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-	addNote = gtk_button_new_from_icon_name("list-add", 1);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(addNote), _("Add a Note"));
-	gtk_grid_attach(GTK_GRID(card), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), sep, 1, line, 2, 1);
-	gtk_grid_attach(GTK_GRID(card), addNote, 3, line++, 1, 1);
-	if(selID){
-		list = getMultipleCardAttribut(CARDTYPE_NOTE, vData, FALSE);
-		if (g_slist_length(list) > 1){
-			while(list){
-					GSList				*next = list->next;
-					char				*value = (char *) list->data;
-					if(value != NULL){
-						line = contactEditSingleMultilineItem(card, items, CARDTYPE_NOTE, line, g_strstrip(value));
-					}
-					list = next;
-			}
-		}
-		g_slist_free_full(list, g_free);
-	}
-	transNote->grid = card;
-	transNote->list = items;
-	transNote->type = CARDTYPE_NOTE;
-	line++;
+	gtk_container_add(GTK_CONTAINER(frame), card);
 
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactEditSave), transNew);
 	g_signal_connect(G_OBJECT(discardBtn), "clicked", G_CALLBACK(contactEditDiscard), transNew);
 
-	g_signal_connect(G_OBJECT(addPhone), "clicked", G_CALLBACK(contactNewSingleItem), transPhone);
-	g_signal_connect(G_OBJECT(addMail), "clicked", G_CALLBACK(contactNewSingleItem), transEMail);
-	g_signal_connect(G_OBJECT(addUrl), "clicked", G_CALLBACK(contactNewSingleItem), transUrl);
-	g_signal_connect(G_OBJECT(addIM), "clicked", G_CALLBACK(contactNewSingleItem), transIM);
-	g_signal_connect(G_OBJECT(addNote), "clicked", G_CALLBACK(contactNewSingleMultilineItem), transNote);
-
-	return card;
+	return frame;
 }
 
 /**
