@@ -159,7 +159,7 @@ void feedbackDialog(int type, char *msg){
 
 	GtkWidget		*infoDia;
 
-	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, type, GTK_BUTTONS_OK, "%s", msg);
+	infoDia = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT & GTK_DIALOG_MODAL, type, GTK_BUTTONS_OK, "%s", msg);
 	gtk_dialog_run(GTK_DIALOG(infoDia));
 	gtk_widget_destroy(infoDia);
 }
@@ -194,7 +194,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 		verboseCC("[%s] %d\n",__func__, selID);
 
-		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
+		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT & GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this contact?"));
 
 		resp = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
@@ -1996,7 +1996,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 		return;
 	}
 
-	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this address book?"));
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT & GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Do you really want to delete this address book?"));
 
 	debugCC("[%s] deleting address book %d\n", __func__, aID);
 
