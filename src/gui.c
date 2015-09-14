@@ -1408,7 +1408,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 
 	GtkWidget				*card, *frame;
 	GtkWidget				*saveBtn, *discardBtn, *addItemBtn, *addMenu;
-	GtkWidget				*typ, *label, *input;
+	GtkWidget				*typ, *label, *input, *item;
 	GSList					*list, *items;
 	GtkEntryBuffer			*prefixBuf, *firstNBuf, *middleNBuf, *lastNBuf, *suffixBuf;
 	ContactCards_item_t		*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
@@ -1453,11 +1453,18 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	discardBtn = gtk_button_new_with_label(_("Discard"));
 	gtk_grid_attach(GTK_GRID(card), saveBtn, 5, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), discardBtn, 6, line, 1, 1);
-	addItemBtn = gtk_menu_tool_button_new(NULL, _("Add Information"));
-	addMenu = gtk_menu_new();
-	gtk_menu_tool_button_set_menu(GTK_MENU_TOOL_BUTTON(addItemBtn), addMenu);
+
+	addItemBtn = gtk_menu_button_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
-	gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (addItemBtn), "list-add");
+	addMenu = gtk_menu_new();
+	item = gtk_menu_item_new_with_label(_("Add Phone"));
+	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	item = gtk_menu_item_new_with_label(_("Add EMail"));
+	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	item = gtk_menu_item_new_with_label(_("Add URL"));
+	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	gtk_widget_show_all(addMenu);
+	gtk_menu_button_set_popup(addItemBtn, addMenu);
 	gtk_grid_attach(GTK_GRID(card), addItemBtn, 7, line, 1, 1);
 	line++;
 
