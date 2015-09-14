@@ -276,56 +276,56 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 
 	label = gtk_label_new(_("post office box"));
 	input = gtk_entry_new_with_buffer(boxBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	boxItem->itemID = CARDTYPE_ADR_OFFICE_BOX;
 	boxItem->element = boxBuf;
 	elements = g_slist_append(elements, boxItem);
 
 	label = gtk_label_new(_("extended address"));
 	input = gtk_entry_new_with_buffer(extBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	extItem->itemID = CARDTYPE_ADR_EXT_ADDR;
 	extItem->element = extBuf;
 	elements = g_slist_append(elements, extItem);
 
 	label = gtk_label_new(_("street"));
 	input = gtk_entry_new_with_buffer(streetBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	streetItem->itemID = CARDTYPE_ADR_STREET;
 	streetItem->element = streetBuf;
 	elements = g_slist_append(elements, streetItem);
 
 	label = gtk_label_new(_("city"));
 	input = gtk_entry_new_with_buffer(cityBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	cityItem->itemID = CARDTYPE_ADR_CITY;
 	cityItem->element = cityBuf;
 	elements = g_slist_append(elements, cityItem);
 
 	label = gtk_label_new(_("region"));
 	input = gtk_entry_new_with_buffer(regBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	regItem->itemID = CARDTYPE_ADR_REGION;
 	regItem->element = regBuf;
 	elements = g_slist_append(elements, regItem);
 
 	label = gtk_label_new(_("zip"));
 	input = gtk_entry_new_with_buffer(zipBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	zipItem->itemID = CARDTYPE_ADR_ZIP;
 	zipItem->element = zipBuf;
 	elements = g_slist_append(elements, zipItem);
 
 	label = gtk_label_new(_("country"));
 	input = gtk_entry_new_with_buffer(countryBuf);
-	gtk_grid_attach(GTK_GRID(grid), label, 0, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), input, 1, line++, 2, 1);
+	gtk_grid_attach(GTK_GRID(grid), label, 1, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
 	countryItem->itemID = CARDTYPE_ADR_COUNTRY;
 	countryItem->element = countryBuf;
 	elements = g_slist_append(elements, countryItem);
@@ -1427,7 +1427,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
-	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_START);
+	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(GTK_WIDGET(card), GTK_ALIGN_START);
 
 	items = g_slist_alloc();
@@ -1451,8 +1451,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 
 	saveBtn = gtk_button_new_with_label(_("Save"));
 	discardBtn = gtk_button_new_with_label(_("Discard"));
-	gtk_grid_attach(GTK_GRID(card), saveBtn, 5, line, 1, 1);
-	gtk_grid_attach(GTK_GRID(card), discardBtn, 6, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), saveBtn, 4, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(card), discardBtn, 5, line, 1, 1);
 
 	addItemBtn = gtk_menu_button_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
@@ -1464,8 +1464,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	item = gtk_menu_item_new_with_label(_("Add URL"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
 	gtk_widget_show_all(addMenu);
-	gtk_menu_button_set_popup(addItemBtn, addMenu);
-	gtk_grid_attach(GTK_GRID(card), addItemBtn, 7, line, 1, 1);
+	gtk_menu_button_set_popup(GTK_MENU_BUTTON(addItemBtn), addMenu);
+	gtk_grid_attach(GTK_GRID(card), addItemBtn, 6, line, 1, 1);
 	line++;
 
 	/*		Naming	*/
@@ -1605,6 +1605,32 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		line++;
 	}
 
+	/*	Address	*/
+	if(selID){
+		list = getMultipleCardAttribut(CARDTYPE_ADR, vData, FALSE);
+		if (g_slist_length(list) > 1){
+			typ = gtk_label_new(_("Address"));
+			gtk_widget_set_margin_start(typ, 12);
+			gtk_widget_set_margin_end(typ, 12);
+			gtk_widget_set_margin_top(typ, 18);
+			gtk_widget_set_halign(typ, GTK_ALIGN_START);
+			gtk_grid_attach(GTK_GRID(card), typ, 1, line++, 1, 1);
+			while(list){
+				GSList				*next = list->next;
+				char				*value = (char *) list->data;
+				if(value != NULL){
+					line = contactEditPostalItem(card, items, line, g_strstrip(value));
+				}
+				list = next;
+			}
+		}
+		g_slist_free_full(list, g_free);
+		transPhone->grid = card;
+		transPhone->list = items;
+		transPhone->type = CARDTYPE_URL;
+		line++;
+	}
+
 	/*	Note	*/
 	if(selID){
 		list = getMultipleCardAttribut(CARDTYPE_NOTE, vData, FALSE);
@@ -1630,6 +1656,12 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 		transPhone->type = CARDTYPE_URL;
 		line++;
 	}
+
+	/*	dirty hack to add some space between the last entry and the end of the containing widget	*/
+	item = gtk_label_new("");
+	gtk_widget_set_margin_start(GTK_WIDGET(item), 24);
+	gtk_widget_set_margin_end(GTK_WIDGET(item), 24);
+	gtk_grid_attach(GTK_GRID(card), GTK_WIDGET(item), 1, line++, 5, 1);
 
 	gtk_container_add(GTK_CONTAINER(frame), card);
 
