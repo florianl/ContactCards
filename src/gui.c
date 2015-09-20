@@ -492,7 +492,9 @@ static int contactEditSingleMultilineItem(GtkWidget *grid, GSList *list, int typ
 	gtk_text_buffer_set_text(buf, g_strcompress(g_strstrip(value)), -1);
 
 	input = gtk_text_view_new_with_buffer(buf);
-	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
+	gtk_widget_set_hexpand(GTK_WIDGET(input), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(input), TRUE);
+	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 5);
 	item->itemID = type;
 	item->element = buf;
 	elements = g_slist_append(elements, item);
@@ -1415,7 +1417,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	int						line = 0;
 	char					*vData = NULL;
 	ContactCards_add_t			*transNew;
-	ContactCards_new_Value_t	*transPhone;
+	ContactCards_new_Value_t	*transPhone, *transUrl, *transEMail, *transNote;
 
 	frame = gtk_frame_new(NULL);
 	card = gtk_grid_new();
@@ -1425,6 +1427,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 				return card;
 	}
 
+	gtk_widget_set_hexpand(GTK_WIDGET(frame), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(frame), TRUE);
 	gtk_widget_set_hexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_vexpand(GTK_WIDGET(card), TRUE);
 	gtk_widget_set_halign(GTK_WIDGET(card), GTK_ALIGN_CENTER);
@@ -1446,8 +1450,10 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	lastNBuf = gtk_entry_buffer_new(NULL, -1);
 	suffixBuf = gtk_entry_buffer_new(NULL, -1);
 
-	transNew = g_new(ContactCards_add_t, 1);
 	transPhone = g_new(ContactCards_new_Value_t, 1);
+	transUrl = g_new(ContactCards_new_Value_t, 1);
+	transEMail = g_new(ContactCards_new_Value_t, 1);
+	transNote = g_new(ContactCards_new_Value_t, 1);
 
 	saveBtn = gtk_button_new_with_label(_("Save"));
 	discardBtn = gtk_button_new_with_label(_("Discard"));
@@ -1573,9 +1579,9 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 			}
 		}
 		g_slist_free_full(list, g_free);
-		transPhone->grid = card;
-		transPhone->list = items;
-		transPhone->type = CARDTYPE_EMAIL;
+		transEMail->grid = card;
+		transEMail->list = items;
+		transEMail->type = CARDTYPE_EMAIL;
 		line++;
 	}
 
@@ -1599,9 +1605,9 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 			}
 		}
 		g_slist_free_full(list, g_free);
-		transPhone->grid = card;
-		transPhone->list = items;
-		transPhone->type = CARDTYPE_URL;
+		transUrl->grid = card;
+		transUrl->list = items;
+		transUrl->type = CARDTYPE_URL;
 		line++;
 	}
 
@@ -1625,9 +1631,6 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 			}
 		}
 		g_slist_free_full(list, g_free);
-		transPhone->grid = card;
-		transPhone->list = items;
-		transPhone->type = CARDTYPE_URL;
 		line++;
 	}
 
@@ -1651,9 +1654,9 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 			}
 		}
 		g_slist_free_full(list, g_free);
-		transPhone->grid = card;
-		transPhone->list = items;
-		transPhone->type = CARDTYPE_URL;
+		transNote->grid = card;
+		transNote->list = items;
+		transNote->type = CARDTYPE_NOTE;;
 		line++;
 	}
 
@@ -1664,6 +1667,9 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), GTK_WIDGET(item), 1, line++, 5, 1);
 
 	gtk_container_add(GTK_CONTAINER(frame), card);
+
+	transNew->list = items;
+	transNew->editID = selID;
 
 	/*		Connect Signales		*/
 	g_signal_connect(G_OBJECT(saveBtn), "clicked", G_CALLBACK(contactEditSave), transNew);
@@ -3152,6 +3158,8 @@ void guiInit(void){
 	appBase.statusbar 		= mainStatusbar;
 	appBase.syncMenu 		= syncMenu;
 	appBase.contactView		= scroll;
+	gtk_widget_set_hexpand(GTK_WIDGET(appBase.contactView), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(appBase.contactView), TRUE);
 
 	/*	capture some signals	*/
 	g_unix_signal_add(SIGINT, exitOnSignal, cleanUpList);
