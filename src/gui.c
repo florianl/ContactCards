@@ -1390,7 +1390,6 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 
 	if(checkInput(value->list)== FALSE){
 		feedbackDialog(GTK_MESSAGE_ERROR, _("Unable to save changes"));
-		return;
 	}
 	viewCleaner(appBase.contactView);
 	thread = g_thread_try_new("pushing vCard", pushingCard, trans, &error);
@@ -1416,6 +1415,8 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	ContactCards_item_t		*prefixItem, *firstNItem, *middleNItem, *lastNItem, *suffixItem;
 	int						line = 0;
 	char					*vData = NULL;
+	char					*naming;
+	gchar					**namingPtr = NULL;
 	ContactCards_add_t			*transNew;
 	ContactCards_new_Value_t	*transPhone, *transUrl, *transEMail, *transNote;
 
@@ -1473,6 +1474,26 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_menu_button_set_popup(GTK_MENU_BUTTON(addItemBtn), addMenu);
 	gtk_grid_attach(GTK_GRID(card), addItemBtn, 6, line, 1, 1);
 	line++;
+
+	if(selID){
+		naming = getSingleCardAttribut(CARDTYPE_N, vData);
+		if(naming){
+			namingPtr = g_strsplit(naming, ";", 5);
+			gtk_entry_buffer_set_text(lastNBuf, g_strstrip(namingPtr[0]), -1);
+			gtk_entry_buffer_set_text(firstNBuf, g_strstrip(namingPtr[1]), -1);
+			gtk_entry_buffer_set_text(middleNBuf, g_strstrip(namingPtr[2]), -1);
+			gtk_entry_buffer_set_text(prefixBuf, g_strstrip(namingPtr[3]), -1);
+			gtk_entry_buffer_set_text(suffixBuf, g_strstrip(namingPtr[4]), -1);
+			g_strfreev(namingPtr);
+			g_free(naming);
+		} else {
+			gtk_entry_buffer_set_text(lastNBuf, "", 0);
+			gtk_entry_buffer_set_text(firstNBuf, "", 0);
+			gtk_entry_buffer_set_text(middleNBuf, "", 0);
+			gtk_entry_buffer_set_text(prefixBuf, "", 0);
+			gtk_entry_buffer_set_text(suffixBuf, "", 0);
+		}
+	}
 
 	/*		Naming	*/
 	typ = gtk_label_new(_("Name"));
