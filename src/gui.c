@@ -1469,7 +1469,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	discardBtn = gtk_button_new_with_label(_("Discard"));
 	gtk_grid_attach(GTK_GRID(card), saveBtn, 4, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), discardBtn, 5, line, 1, 1);
-
+/*
 	addItemBtn = gtk_menu_button_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
 	addMenu = gtk_menu_new();
@@ -1482,6 +1482,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_widget_show_all(addMenu);
 	gtk_menu_button_set_popup(GTK_MENU_BUTTON(addItemBtn), addMenu);
 	gtk_grid_attach(GTK_GRID(card), addItemBtn, 6, line, 1, 1);
+*/
 	line++;
 
 	if(selID){
