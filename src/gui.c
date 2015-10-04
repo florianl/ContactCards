@@ -345,105 +345,6 @@ static int contactEditPostalItem(GtkWidget *grid, GSList *list, int line, char *
 }
 
 /**
- * contactNewSingleItem - Add a single line value to edit a vCard
- * Here a single linked list is added to a single linked list, to
- * implement TYP-stuff in the future
- */
-static void contactNewSingleItem(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-
-	GtkWidget				*input, *label;
-	GtkEntryBuffer			*buf;
-	GSList					*elements;
-	ContactCards_item_t		*item, *eleList;
-
-	item = g_new(ContactCards_item_t, 1);
-	eleList = g_new(ContactCards_item_t, 1);
-	buf = gtk_entry_buffer_new(NULL, -1);
-
-	elements = g_slist_alloc();
-
-	switch(((ContactCards_new_Value_t *)trans)->type){
-		case CARDTYPE_TEL:
-			label = gtk_label_new(_("Phone"));
-			break;
-		case CARDTYPE_EMAIL:
-			label = gtk_label_new(_("EMail"));
-			break;
-		case CARDTYPE_URL:
-			label = gtk_label_new(_("URL"));
-			break;
-		case CARDTYPE_IMPP:
-			label = gtk_label_new(_("IM"));
-			break;
-		default:
-			label = gtk_label_new(NULL);
-			break;
-	}
-	gtk_widget_show_all(label);
-	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), label, NULL, GTK_POS_BOTTOM, 1, 1);
-
-	input = gtk_entry_new_with_buffer(buf);
-	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), input, label, GTK_POS_RIGHT, 2, 1);
-	item->itemID = ((ContactCards_new_Value_t *)trans)->type;
-	item->element = buf;
-	elements = g_slist_append(elements, item);
-
-	gtk_widget_show_all(GTK_WIDGET(input));
-
-	eleList->itemID = ((ContactCards_new_Value_t *)trans)->type;
-	eleList->element = elements;
-	((ContactCards_new_Value_t *)trans)->list = g_slist_append(((ContactCards_new_Value_t *)trans)->list, eleList);
-
-	return;
-}
-
-/**
- * contactNewSingleMultilineItem - Add a single multiline value to edit a vCard
- * Here a single linked list is added to a single linked list, to
- * implement TYP-stuff in the future
- */
-static void contactNewSingleMultilineItem(GtkWidget *widget, gpointer trans){
-	__PRINTFUNC__;
-
-	GtkWidget				*input, *label;
-	GtkTextBuffer			*buf;
-	GSList					*elements;
-	ContactCards_item_t		*item, *eleList;
-
-	item = g_new(ContactCards_item_t, 1);
-	eleList = g_new(ContactCards_item_t, 1);
-	buf = gtk_text_buffer_new(NULL);
-
-	elements = g_slist_alloc();
-
-	switch(((ContactCards_new_Value_t *)trans)->type){
-		case CARDTYPE_NOTE:
-			label = gtk_label_new(_("Note"));
-			break;
-		default:
-			label = gtk_label_new(NULL);
-			break;
-	}
-	gtk_widget_show_all(label);
-	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), label, NULL, GTK_POS_BOTTOM, 1, 1);
-
-	input = gtk_text_view_new_with_buffer(buf);
-	gtk_grid_attach_next_to(GTK_GRID(((ContactCards_new_Value_t *)trans)->grid), input, label, GTK_POS_RIGHT, 2, 1);
-	item->itemID = ((ContactCards_new_Value_t *)trans)->type;
-	item->element = buf;
-	elements = g_slist_append(elements, item);
-
-	gtk_widget_show_all(GTK_WIDGET(input));
-
-	eleList->itemID = ((ContactCards_new_Value_t *)trans)->type;
-	eleList->element = elements;
-	((ContactCards_new_Value_t *)trans)->list = g_slist_append(((ContactCards_new_Value_t *)trans)->list, eleList);
-
-	return;
-}
-
-/**
  * contactEditSingleItem - Add a single line value to edit a vCard
  * Here a single linked list is added to a single linked list, to
  * implement TYP-stuff in the future
@@ -1469,16 +1370,20 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	discardBtn = gtk_button_new_with_label(_("Discard"));
 	gtk_grid_attach(GTK_GRID(card), saveBtn, 4, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), discardBtn, 5, line, 1, 1);
+
 /*
 	addItemBtn = gtk_menu_button_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
 	addMenu = gtk_menu_new();
 	item = gtk_menu_item_new_with_label(_("Add Phone"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	g_signal_connect_swapped (item, "activate", G_CALLBACK (menuNewPhone),  NULL);
 	item = gtk_menu_item_new_with_label(_("Add EMail"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	g_signal_connect_swapped (item, "activate", G_CALLBACK (menuNewMail),  NULL);
 	item = gtk_menu_item_new_with_label(_("Add URL"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(addMenu), item);
+	g_signal_connect_swapped (item, "activate", G_CALLBACK (menuNewUrl),  NULL);
 	gtk_widget_show_all(addMenu);
 	gtk_menu_button_set_popup(GTK_MENU_BUTTON(addItemBtn), addMenu);
 	gtk_grid_attach(GTK_GRID(card), addItemBtn, 6, line, 1, 1);
