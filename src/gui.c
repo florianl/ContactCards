@@ -2328,6 +2328,7 @@ void addressbookTreeUpdate(void){
 	}
 	g_slist_free(servers);
 	g_mutex_unlock(&aBookTreeMutex);
+	calendarUpdate(0,0);
 }
 
 /**
