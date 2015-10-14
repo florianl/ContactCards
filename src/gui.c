@@ -2263,6 +2263,7 @@ void addressbookTreeUpdate(void){
 	servers = getListInt(appBase.db, "cardServer", "serverID", 0, "", 0, "", "", "", "");
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("All"), ID_COL, 0, TYP_COL, 0,  -1);
+	gtk_tree_selection_select_iter(selection, &toplevel);
 
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Favorites"), ID_COL, 0, TYP_COL, 2,  -1);
