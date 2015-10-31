@@ -601,38 +601,37 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 
 	sqlite3_stmt 		*vm;
 	char 				*sql_query = NULL;
+	char				*tmpValue2, *tmpValue3;
 	int 				ret;
 	GSList				*list = g_slist_alloc();
 
-	g_strstrip(tableName);
-	g_strstrip(selValue);
-	g_strstrip(row1);
-	g_strstrip(row2);
-	g_strstrip(value2);
-	g_strstrip(row3);
-	g_strstrip(value3);
+
+	tmpValue2 = g_strndup(value2, strlen(value2));
+	g_strstrip(tmpValue2);
+	tmpValue3 = g_strndup(value3, strlen(value3));
+	g_strstrip(tmpValue3);
 
 	switch(selRow){
 		case 1:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d';", selValue, tableName, row1, value1);
 			break;
 		case 12:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2);
 			break;
 		case 2:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, tmpValue2);
 			break;
 		case 0:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q;", selValue, tableName);
 			break;
 		case 23:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, value2,  row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, tmpValue2,  row3, tmpValue3);
 			break;
 		case 123:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2, row3, tmpValue3);
 			break;
 		case 90:	/* SQL Query for query option	*/
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE instr(%q, '%q') > 0;", selValue, tableName, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE instr(%q, '%q') > 0;", selValue, tableName, row2, tmpValue2);
 			break;
 		case 91:	/* SQL Query using bitwise operation	*/
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE (%q & %d) = %d;", selValue, tableName, row1, value1, value1);
@@ -641,6 +640,9 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 			return NULL;
 	}
+
+	g_free(tmpValue2);
+	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
@@ -687,38 +689,39 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 
 	sqlite3_stmt 		*vm;
 	char 				*sql_query = NULL;
+	char				*tmpValue2, *tmpValue3;
 	int					ret;
 	int					count = 0;
 	int					retValue = 0;
 
-	g_strstrip(tableName);
-	g_strstrip(selValue);
-	g_strstrip(row1);
-	g_strstrip(row2);
-	g_strstrip(value2);
-	g_strstrip(row3);
-	g_strstrip(value3);
+	tmpValue2 = g_strndup(value2, strlen(value2));
+	g_strstrip(tmpValue2);
+	tmpValue3 = g_strndup(value3, strlen(value3));
+	g_strstrip(tmpValue3);
 
 	switch(selRow){
 		case 1:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d';", selValue, tableName, row1, value1);
 			break;
 		case 12:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2);
 			break;
 		case 2:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q';", selValue, tableName, row2, tmpValue2);
 			break;
 		case 23:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, value2, row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, tmpValue2, row3, tmpValue3);
 			break;
 		case 123:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2, row3, tmpValue3);
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 			return -1;
 	}
+
+	g_free(tmpValue2);
+	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
@@ -777,39 +780,39 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 
 	sqlite3_stmt 		*vm;
 	char 				*sql_query = NULL;
+	char				*tmpValue2, *tmpValue3;
 	int					ret;
 	int					count = 0;
 	char				*retValue = NULL;
 
-	g_strstrip(tableName);
-	g_strstrip(selValue);
-	g_strstrip(row1);
-	g_strstrip(row2);
-	g_strstrip(value2);
-	g_strstrip(row3);
-	g_strstrip(value3);
-	g_strstrip(row4);
+	tmpValue2 = g_strndup(value2, strlen(value2));
+	g_strstrip(tmpValue2);
+	tmpValue3 = g_strndup(value3, strlen(value3));
+	g_strstrip(tmpValue3);
 
 	switch(selRow){
 		case 1:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d';", selValue, tableName, row1, value1);
 			break;
 		case 12:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2);
 			break;
 		case 23:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, value2, row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%q' AND %q = '%q';", selValue, tableName, row2, tmpValue2, row3, tmpValue3);
 			break;
 		case 14:
 			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%d';", selValue, tableName, row1, value1, row4, value4);
 			break;
 		case 123:
-			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, value2, row3, value3);
+			sql_query = sqlite3_mprintf("SELECT %q FROM %q WHERE %q = '%d' AND %q = '%q' AND %q = '%q';", selValue, tableName, row1, value1, row2, tmpValue2, row3, tmpValue3);
 			break;
 		default:
 			verboseCC("[%s] can't handle this number: %d\n", __func__, selRow);
 			return NULL;
 	}
+
+	g_free(tmpValue2);
+	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
 
@@ -918,14 +921,18 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 
 	ne_uri				uri;
 	char		 		*sql_query;
+	char				*tmpdesc;
+	char				*tmpurl;
 	GSList				*retList;
 	int					serverID;
 	int					flags = 0;
 
-	g_strstrip(desc);
+	tmpdesc = g_strndup(desc, strlen(desc));
+	g_strstrip(tmpdesc);
 	g_strstrip(user);
 	g_strstrip(passwd);
-	g_strstrip(url);
+	tmpurl = g_strndup(url, strlen(url));
+	g_strstrip(tmpurl);
 
 	ne_uri_parse(url, &uri);
 
@@ -959,8 +966,10 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	}
 	g_slist_free(retList);
 
-	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", desc, user, passwd, url, uri.host);
+	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", tmpdesc, user, passwd, tmpurl, uri.host);
 
+	g_free(tmpdesc);
+	g_free(tmpurl);
 	serverID = insertAndID(ptr, sql_query, __func__);
 
 	if(sPasswd == FALSE)
