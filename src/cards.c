@@ -35,6 +35,8 @@ char *getUID(void){
 		g_rand_int_range(rand, 0, 0xffff),
 		g_rand_int_range(rand, 0, 0xffff));
 
+	g_rand_free(rand);
+
 	return uid;
 }
 
