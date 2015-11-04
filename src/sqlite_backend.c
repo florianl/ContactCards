@@ -875,10 +875,16 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	char				*davBase = NULL;
 	GSList				*retList;
 	int					serverID;
+	char				*randomColor;
+	GRand				*rand = g_rand_new();
 
-	g_strstrip(desc);
 	g_strstrip(newuser);
 	g_strstrip(newGrant);
+
+	randomColor = g_strdup_printf("rgb (%d, %d, %d)",
+		g_rand_int_range(rand, 0, 255),
+		g_rand_int_range(rand, 0, 255),
+		g_rand_int_range(rand, 0, 255));
 
 	davBase = getSingleChar(ptr, "oAuthServer", "davURI", 1, "oAuthID", oAuthEntity, "", "", "", "", "", 0);
 
@@ -891,11 +897,14 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	}
 	g_slist_free(retList);
 
-	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, srvUrl, isOAuth, oAuthType) VALUES ('%q','%q','%q','%d','%d');", desc, newuser,  davBase, 1, oAuthEntity);
+	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, srvUrl, isOAuth, oAuthType, color) VALUES ('%q','%q','%q','%d','%d', '%q');", desc, newuser,  davBase, 1, oAuthEntity, randomColor);
 
 	serverID = insertAndID(ptr, sql_query, __func__);
 
 	setSingleChar(ptr, "cardServer", "oAuthAccessGrant", newGrant, "serverID", serverID);
+
+	g_free(randomColor);
+	g_rand_free(rand);
 
 	g_mutex_lock(&mutex);
 	serverConnectionTest(serverID);
@@ -923,9 +932,11 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	char		 		*sql_query;
 	char				*tmpdesc;
 	char				*tmpurl;
+	char				*randomColor;
 	GSList				*retList;
 	int					serverID;
 	int					flags = 0;
+	GRand				*rand = g_rand_new();
 
 	tmpdesc = g_strndup(desc, strlen(desc));
 	g_strstrip(tmpdesc);
@@ -935,6 +946,11 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	g_strstrip(tmpurl);
 
 	ne_uri_parse(url, &uri);
+
+	randomColor = g_strdup_printf("rgb (%d, %d, %d)",
+		g_rand_int_range(rand, 0, 255),
+		g_rand_int_range(rand, 0, 255),
+		g_rand_int_range(rand, 0, 255));
 
 	if(uri.host == NULL){
 		verboseCC("[%s] ne_uri_parse didn't find host in %s", __func__, url);
@@ -966,10 +982,12 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	}
 	g_slist_free(retList);
 
-	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority) VALUES ('%q','%q','%q','%q', '%q');", tmpdesc, user, passwd, tmpurl, uri.host);
+	sql_query = sqlite3_mprintf("INSERT INTO cardServer (desc, user, passwd, srvUrl, authority, color) VALUES ('%q','%q','%q','%q', '%q', '%q');", tmpdesc, user, passwd, tmpurl, uri.host, randomColor);
 
 	g_free(tmpdesc);
 	g_free(tmpurl);
+	g_free(randomColor);
+	g_rand_free(rand);
 	serverID = insertAndID(ptr, sql_query, __func__);
 
 	if(sPasswd == FALSE)
