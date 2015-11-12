@@ -51,6 +51,7 @@ void requestPasswd(credits_t *key, int serverID){
 	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
 	gtk_grid_attach(GTK_GRID(view), label, 1, line, 1, 1);
 	input = gtk_entry_new_with_buffer(passwd);
+	gtk_entry_set_visibility(GTK_ENTRY(input), FALSE);
 	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
 	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
 	gtk_grid_attach(GTK_GRID(view), input, 2, line++, 3, 1);
