@@ -1312,6 +1312,30 @@ static void contactEditSave(GtkWidget *widget, gpointer trans){
 }
 
 /**
+ * menuNewPhone - callback to add a new phone number to a contact
+ */
+static void menuNewPhone(GtkButton *btn, GtkWidget *other){
+	__PRINTFUNC__;
+	debugCC("It doesn't work so far...\n");
+}
+
+/**
+ * menuNewMail - callback to add a new Mail to a contact
+ */
+static void menuNewMail(GtkButton *btn, GtkWidget *other){
+	__PRINTFUNC__;
+	debugCC("It doesn't work so far...\n");
+}
+
+/**
+ * menuNewUrl - callback to add a new Url to a contact
+ */
+static void menuNewUrl(GtkButton *btn, GtkWidget *other){
+	__PRINTFUNC__;
+	debugCC("It doesn't work so far...\n");
+}
+
+/**
  * buildEditCard - display the data of a selected vCard for editing
  */
 static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
@@ -1371,7 +1395,7 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_grid_attach(GTK_GRID(card), saveBtn, 4, line, 1, 1);
 	gtk_grid_attach(GTK_GRID(card), discardBtn, 5, line, 1, 1);
 
-/*
+
 	addItemBtn = gtk_menu_button_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(addItemBtn), _("Add Information"));
 	addMenu = gtk_menu_new();
@@ -1387,7 +1411,6 @@ static GtkWidget *buildEditCard(sqlite3 *ptr, int selID, int abID){
 	gtk_widget_show_all(addMenu);
 	gtk_menu_button_set_popup(GTK_MENU_BUTTON(addItemBtn), addMenu);
 	gtk_grid_attach(GTK_GRID(card), addItemBtn, 6, line, 1, 1);
-*/
 	line++;
 
 	if(selID){
