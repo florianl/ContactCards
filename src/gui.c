@@ -2553,6 +2553,7 @@ void contactsTreeAppend(char *card, int id){
 
 	GtkTreeStore		*store;
 	GtkTreeIter 		iter;
+	GtkTreeSelection	*selection;
 	char				*show = NULL,
 						*n = NULL,
 						*first  = NULL,
@@ -2593,6 +2594,9 @@ void contactsTreeAppend(char *card, int id){
 
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, FN_COLUMN, show, FIRST_COLUMN, first, LAST_COLUMN, last, SELECTION_COLUMN, id, SEP_COLUMN, FALSE, -1);
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW (appBase.contactList));
+	gtk_tree_selection_select_iter(selection, &iter);
 
 	g_free(show);
 	g_free(n);
