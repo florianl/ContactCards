@@ -2698,6 +2698,8 @@ void contactsTreeUpdate(int type, int id){
 		if((appBase.flags & USE_SEPARATOR) == USE_SEPARATOR)
 			contactsTreeSetSeperators();
 */
+		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), LAST_COLUMN, GTK_SORT_ASCENDING);
+
 		g_mutex_unlock(&contactsTreeMutex);
 	}
 }
