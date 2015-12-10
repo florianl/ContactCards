@@ -303,6 +303,14 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		goto newCert;
 	}
 
+	if (g_strcmp0(ne_ssl_cert_identity(cert), "accounts.google.com") == 0){
+		/*
+		 * We had to trust accounts.google.com
+		 */
+		trust = 0;
+		return trust;
+	}
+
 	if (failures & NE_SSL_NOTYETVALID)
 		verboseCC("[%s] certificate is not yet valid\n", __func__);
 
@@ -327,6 +335,7 @@ static int verifyCert(void *trans, int failures, const ne_ssl_certificate *cert)
 		case ContactCards_DIGEST_TRUSTED:
 			ne_ssl_cert_digest(cert, digest);
 			dbDigest = getSingleChar(appBase.db, "certs", "digest", 1, "serverID", serverID, "", "", "", "", "", 0);
+	debugCC("%s - %s\n", dbDigest, digest);
 			if(dbDigest == NULL){
 				goto newCert;
 			}
