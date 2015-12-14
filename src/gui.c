@@ -2291,7 +2291,7 @@ void addressbookTreeUpdate(void){
 	gtk_tree_store_append(store, &toplevel, NULL);
 	gtk_tree_store_set(store, &toplevel, DESC_COL, _("Favorites"), ID_COL, 0, TYP_COL, 2,  -1);
 
-	if((appBase.flags & ~CONTACTCARDS_NO_LOCAL) == appBase.flags){
+	if((appBase.flags & CONTACTCARDS_NO_LOCAL) != CONTACTCARDS_NO_LOCAL){
 		gtk_tree_store_append(store, &toplevel, NULL);
 		gtk_tree_store_set(store, &toplevel, DESC_COL, _("Locales"), ID_COL, 0, TYP_COL, 3,  -1);
 	}
