@@ -1,15 +1,15 @@
 language: c
 
+sudo: required
+
+dist: trusty
+
 compiler:
     - gcc
 
 cache: apt
 
 before_install:
-    # Update repositories to not be shit.
-    - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ trusty main universe"
-    # gtk 3.12 | oh god I have no idea what im doing
-    - yes "" | sudo add-apt-repository "deb http://ppa.launchpad.net/gnome3-team/gnome3-staging/ubuntu/ trusty main"
     - sudo apt-get clean
     # Install dependancies
     - sudo apt-get update
