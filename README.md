@@ -6,7 +6,7 @@ ContactCards is a simple address book written in C.
 vCards are safed  in a local database and fetched from a remote server using the
 cardDav protocoll.
 
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/4212/badge.svg)](https://scan.coverity.com/projects/4212)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/4212/badge.svg)](https://scan.coverity.com/projects/4212) [![Build Status](https://travis-ci.org/florianl/ContactCards.svg?branch=master)](https://travis-ci.org/florianl/ContactCards)
 
 [Bugtracker](https://github.com/florianl/ContactCards/issues)
 
@@ -46,7 +46,7 @@ On Fedora run:
 
 On Ubuntu run:
 
-    $ apt-get install autoconf autopoint intltool gcc git libgtk-3-dev libsqlite3-dev libneon27-dev
+    $ apt-get install git automake autopoint intltool libneon27-dev libsqlite3-dev libglib2.0-dev libgtk-3-dev
 
 Now get it, build it and run it:
 
