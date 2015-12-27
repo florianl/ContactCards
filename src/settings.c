@@ -140,6 +140,16 @@ static void config_load_ui(GKeyFile *config){
 	int				tmp = 0;
 	int				flags = 0;
 	int				syncIntervall = 0;
+	gboolean		flag = FALSE;
+
+	flag = g_key_file_get_boolean(config, PACKAGE, "localAdressBook", &error);
+	if (error){
+			verboseCC("%s\n", error->message);
+			g_clear_error(&error);
+	} else {
+		if(flag == FALSE)
+			flags |= CONTACTCARDS_NO_LOCAL;
+	}
 
 	tmp |= g_key_file_get_integer(config, PACKAGE, "formation", &error);
 	if (error){
@@ -264,6 +274,12 @@ void saveSettings(char *confDir){
 	g_key_file_set_integer(config, PACKAGE, "formation", appBase.flags & DISPLAY_STYLE_MASK);
 	g_key_file_set_integer(config, PACKAGE, "map", appBase.flags & USE_MAP_MASK);
 	g_key_file_set_integer(config, PACKAGE, "syncIntervall", appBase.syncIntervall);
+	if((appBase.flags & CONTACTCARDS_NO_LOCAL) == CONTACTCARDS_NO_LOCAL){
+		debugCC("No local address book\n");
+		g_key_file_set_boolean(config, PACKAGE, "localAdressBook", FALSE);
+	} else {
+		g_key_file_set_boolean(config, PACKAGE, "localAdressBook", TRUE);
+	}
 
 	data = g_key_file_to_data(config, NULL, NULL);
 	writeConfigFile(confFile, data);

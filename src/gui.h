@@ -122,6 +122,7 @@ typedef struct ContactCards_genPref {
 	GtkWidget			*sort;
 	GtkWidget			*map;
 	GtkWidget			*interval;
+	GtkWidget			*locals;
 } ContactCards_genPref_t;
 
 /**

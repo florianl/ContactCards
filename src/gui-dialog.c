@@ -912,18 +912,29 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	ContactCards_genPref_t		*gen = trans;
-	int							newSort, newMap, newInterval;
+	int							newSort, newMap, newInterval, newLocal;
 	int							newFlag = 0;
 
 	/*	Delete old flags	*/
 	appBase.flags &= ~DISPLAY_STYLE_MASK;
 	appBase.flags &= ~USE_MAP_MASK;
+	appBase.flags &= ~CONTACTCARDS_NO_LOCAL;
 
 	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
 	newInterval = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->interval));
+	newLocal = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->locals));
 
-	debugCC("\t\tstyle:%d\tmap: %d\n", newSort, newMap);
+	debugCC("\t\tstyle:%d\tmap: %d\tlocal: %d\n", newSort, newMap, newLocal);
+
+	switch(newLocal){
+		case 1:
+			newFlag |= CONTACTCARDS_NO_LOCAL;
+			break;
+		default:
+			/*	Use a local adress book	*/
+			break;
+	}
 
 	switch(newSort){
 		case 0:
@@ -982,7 +993,7 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	GtkWidget			*layout = GTK_WIDGET(trans);
 	GtkWidget			*prefView;
 	GtkWidget			*txt;
-	GtkWidget			*sort, *map, *interval;
+	GtkWidget			*sort, *map, *interval, *localBook;
 	GtkWidget			*sBtn;
 	int					line = 2;
 	ContactCards_genPref_t		*gen;
@@ -1075,10 +1086,29 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_grid_attach(GTK_GRID(prefView), interval, 1, line++, 2, 1);
 	line++;
 
+	txt = gtk_label_new(_("Use local address book?"));
+	gtk_widget_set_margin_start(txt, 12);
+	gtk_widget_set_margin_end(txt, 12);
+	gtk_widget_set_margin_top(txt, 18);
+	gtk_widget_set_halign(txt, GTK_ALIGN_END);
+	localBook = gtk_combo_box_text_new();
+	gtk_widget_set_margin_top(localBook, 18);
+	gtk_widget_set_halign(localBook, GTK_ALIGN_START);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(localBook), "1", _("Yes"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(localBook), "2", _("No"));
+	if((appBase.flags & CONTACTCARDS_NO_LOCAL) == CONTACTCARDS_NO_LOCAL){
+		gtk_combo_box_set_active(GTK_COMBO_BOX(localBook), 1);
+	} else {
+		gtk_combo_box_set_active(GTK_COMBO_BOX(localBook), 0);
+	}
+	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(prefView), localBook, 1, line++, 2, 1);
+	line++;
 
 	gen->sort		= sort;
 	gen->map		= map;
 	gen->interval	= interval;
+	gen->locals		= localBook;
 
 	sBtn = gtk_button_new_with_label(_("Save changes"));
 	gtk_widget_set_margin_start(sBtn, 12);
