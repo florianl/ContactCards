@@ -108,14 +108,14 @@ static void selBook(GtkWidget *widget, gpointer trans){
 	int						selID = -1;
 	int						selTyp = -1;
 
-	if(g_mutex_trylock(&aBookTreeMutex) != TRUE){
-		return;
-	}
+	if(g_mutex_trylock(&aBookTreeMutex) != TRUE){return;}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.addressbookList)), &model, &iter)){
 		gtk_tree_model_get (model, &iter, ID_COL, &selID, TYP_COL, &selTyp, -1);
 		verboseCC("[%s] Typ: %d\tID:%d\n", __func__, selTyp, selID);
 		g_mutex_unlock(&aBookTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		switch(selTyp){
 			case 0:		/* Whole Server selected	*/
 				if(selID == 0){
@@ -201,7 +201,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 		if (resp != GTK_RESPONSE_YES) return;
 
 		while(g_mutex_trylock(&mutex) != TRUE){}
-
+        verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
 		if(isOAuth){
@@ -219,6 +219,7 @@ static void contactDel(GtkWidget *widget, gpointer trans){
 
 failure:
 		g_mutex_unlock(&mutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	} else {
 		feedbackDialog(GTK_MESSAGE_WARNING, _("There is no contact selected."));
 	}
@@ -452,13 +453,14 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
 	viewCleaner(appBase.contactView);
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
-
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", data->itemID, "", "", "", "");
 	if(isOAuth){
 		int 		ret = 0;
 		ret = oAuthUpdate(appBase.db,  data->itemID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
+            verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 			g_free(data);
 			g_free(colName);
 			return;
@@ -471,7 +473,7 @@ static void collectionCreate(GtkWidget *widget, gpointer trans){
 	addressbookTreeUpdate();
 
 	g_mutex_unlock(&mutex);
-
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	g_free(data);
 	g_free(colName);
 }
@@ -1235,7 +1237,7 @@ static void *pushingCard(void *trans){
 	int							addrID = value->aID;
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
-
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	if(oldID){
 		dbCard = getSingleChar(appBase.db, "contacts", "vCard", 1, "contactID", oldID, "", "", "", "", "", 0);
 		vCard = mergeCards(value->list, dbCard);
@@ -1255,6 +1257,7 @@ static void *pushingCard(void *trans){
 	g_free(dbCard);
 
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	return NULL;
 }
 
@@ -1970,6 +1973,7 @@ void *syncOneServer(void *trans){
 		if(ret != OAUTH_UP2DATE){
 			gtk_statusbar_pop(GTK_STATUSBAR(appBase.statusbar), ctxID);
 			g_mutex_unlock(&mutex);
+            verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 			g_free(srv);
 			g_free(msg);
 			return NULL;
@@ -1985,6 +1989,7 @@ void *syncOneServer(void *trans){
 	g_free(srv);
 	g_free(msg);
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	addressbookTreeUpdate();
 
@@ -2000,6 +2005,7 @@ void *importCards(void *trans){
 	GSList					*cards = data->element;
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	while(cards){
 		GSList				*next = cards->next;
 		if(cards->data == NULL){
@@ -2019,6 +2025,7 @@ void *importCards(void *trans){
 		cards = next;
 	}
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	g_slist_free_full(cards, g_free);
 	g_free(data);
 
@@ -2128,6 +2135,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	if (resp != GTK_RESPONSE_YES) return;
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", srvID, "", "", "", "");
 
@@ -2145,6 +2153,7 @@ static void addressbookDel(GtkMenuItem *menuitem, gpointer data){
 	addressbookTreeUpdate();
 
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -2268,12 +2277,13 @@ void addressbookTreeUpdate(void){
 	GtkTreeSelection	*selection;
 
 	while(g_mutex_trylock(&aBookTreeMutex) != TRUE){}
-
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.addressbookList)));
 	/*	something is wrong	*/
 	if(store == NULL){
 		g_mutex_unlock(&aBookTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 
@@ -2299,6 +2309,7 @@ void addressbookTreeUpdate(void){
 	if(g_slist_length(servers) <= 1){
 		debugCC("There are no servers actually\n");
 		g_mutex_unlock(&aBookTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 	while(servers){
@@ -2351,6 +2362,7 @@ void addressbookTreeUpdate(void){
 	}
 	g_slist_free(servers);
 	g_mutex_unlock(&aBookTreeMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	calendarUpdate(0,0);
 }
 
@@ -2615,12 +2627,13 @@ void contactsTreeUpdate(int type, int id){
 	GtkTreeSelection	*selection;
 
 	while(g_mutex_trylock(&contactsTreeMutex) != TRUE){}
-
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	/* Flush the tree	*/
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (appBase.contactList)));
 	/*	something is wrong	*/
 	if(store == NULL){
 		g_mutex_unlock(&contactsTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 
@@ -2668,6 +2681,7 @@ void contactsTreeUpdate(int type, int id){
 					contactsTreeSetSeperators();
 */
 				g_mutex_unlock(&contactsTreeMutex);
+                verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 				return;
 			}
 			break;
@@ -2691,6 +2705,7 @@ void contactsTreeUpdate(int type, int id){
 			contactsTreeSetSeperators();
 */
 		g_mutex_unlock(&contactsTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	} else {
 		contactsTreeFill(contacts);
 		g_slist_free(contacts);
@@ -2701,6 +2716,7 @@ void contactsTreeUpdate(int type, int id){
 		gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(store), LAST_COLUMN, GTK_SORT_ASCENDING);
 
 		g_mutex_unlock(&contactsTreeMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	}
 }
 
@@ -2938,11 +2954,13 @@ void syncServer(GtkWidget *widget, gpointer trans){
 			continue;
 		}
 		while(g_mutex_trylock(&mutex) != TRUE){ }
+        verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 		thread = g_thread_try_new("syncingServer", syncOneServer, GINT_TO_POINTER(serverID), &error);
 		if(error){
 			verboseCC("[%s] something has gone wrong with threads\n", __func__);
 			verboseCC("%s\n", error->message);
 			g_mutex_unlock(&mutex);
+            verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		}
 		g_thread_unref(thread);
 		retList = next;

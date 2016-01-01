@@ -906,7 +906,8 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	g_free(randomColor);
 	g_rand_free(rand);
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	serverConnectionTest(serverID);
 
 	oAuthAccess(ptr, serverID, oAuthEntity, DAV_REQ_GET_TOKEN);
@@ -916,6 +917,7 @@ void newServerOAuth(sqlite3 *ptr, char *desc, char *newuser, char *newGrant, int
 	}
 #endif
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	g_free(davBase);
 
@@ -995,7 +997,8 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 
 	setSingleInt(appBase.db, "cardServer", "flags", flags, "serverID", serverID);
 
-	g_mutex_lock(&mutex);
+	while(g_mutex_trylock(&mutex) != TRUE){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	serverConnectionTest(serverID);
 #ifdef _USE_DANE
 	if(validateDANE(serverID) == TRUE){
@@ -1003,6 +1006,7 @@ void newServer(sqlite3 *ptr, gboolean sPasswd, char *desc, char *user, char *pas
 	}
 #endif
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	ne_uri_free(&uri);
 
 }

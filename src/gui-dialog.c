@@ -474,14 +474,16 @@ void syncMenuSel(GtkWidget *widget, gpointer trans){
 
 	verboseCC("[%s] you selected %d\n", __func__, GPOINTER_TO_INT(trans));
 	while(g_mutex_trylock(&mutex) != TRUE){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	thread = g_thread_try_new("syncingServer", syncOneServer, trans, &error);
 	if(error){
 		verboseCC("[%s] something has gone wrong with threads\n", __func__);
 		verboseCC("%s\n", error->message);
 		g_mutex_unlock(&mutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 	}
 	g_thread_unref(thread);
-
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -665,7 +667,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 	}
 
 	while(g_mutex_trylock(&mutex) != TRUE){}
-
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", buffers->srvID, "", "", "", "");
 
 	if(isOAuth){
@@ -673,6 +675,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 		ret = oAuthUpdate(appBase.db, buffers->srvID);
 		if(ret != OAUTH_UP2DATE){
 			g_mutex_unlock(&mutex);
+            verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 			return;
 		}
 	}
@@ -682,6 +685,7 @@ void prefServerCheck(GtkWidget *widget, gpointer trans){
 	serverDisconnect(sess, appBase.db, buffers->srvID);
 
 	g_mutex_unlock(&mutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	/* Flush the list box before adding new items	*/
 	children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
