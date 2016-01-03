@@ -29,12 +29,14 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	int					ret;
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 
@@ -45,12 +47,14 @@ void doSimpleRequest(sqlite3 *ptr, char *sql_query, const char *func){
 	if (ret != SQLITE_DONE){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -64,12 +68,14 @@ int insertAndID(sqlite3 *ptr, char *sql_query, const char *func){
 	int					ret;
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return -1;
 	}
 
@@ -80,6 +86,7 @@ int insertAndID(sqlite3 *ptr, char *sql_query, const char *func){
 	if (ret != SQLITE_DONE){
 		verboseCC("[%s] %s caused %d - %s\n", __func__, func,  sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return -1;
 	}
 
@@ -89,6 +96,7 @@ int insertAndID(sqlite3 *ptr, char *sql_query, const char *func){
 	id = sqlite3_last_insert_rowid(ptr);
 
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	return id;
 }
@@ -509,12 +517,14 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 	}
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return 0;
 	}
 
@@ -525,6 +535,7 @@ int countElements(sqlite3 *ptr, char *tableName, int rows, char *row1, int value
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	return count;
 }
@@ -645,12 +656,14 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return list;
 	}
 
@@ -663,6 +676,7 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	return list;
 
@@ -724,12 +738,14 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return count;
 	}
 
@@ -747,12 +763,14 @@ int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char
 	if(count != 1){
 		verboseCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return -1;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	return retValue;
 }
@@ -815,12 +833,14 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	g_free(tmpValue3);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return NULL;
 	}
 
@@ -838,12 +858,14 @@ char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, c
 	if(count != 1){
 		verboseCC("[%s] there is more than one returning value. can't handle %d values'\n", __func__, count);
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return NULL;
 	}
 
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 	return retValue;
 }
@@ -1022,6 +1044,7 @@ void showServer(sqlite3 *ptr){
 	sqlite3_stmt		*vm;
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	if(sqlite3_prepare_v2(ptr, "SELECT * FROM cardServer", -1, &vm, NULL) == SQLITE_OK){
 		while(sqlite3_step(vm) != SQLITE_DONE){
@@ -1033,6 +1056,7 @@ void showServer(sqlite3 *ptr){
 
 	sqlite3_finalize(vm);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -1046,6 +1070,7 @@ void showAddressbooks(sqlite3 *ptr){
 	sqlite3_stmt		*vm;
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	if(sqlite3_prepare_v2(ptr, "SELECT * FROM addressbooks", -1, &vm, NULL)== SQLITE_OK){
 		while(sqlite3_step(vm) != SQLITE_DONE){
@@ -1057,6 +1082,7 @@ void showAddressbooks(sqlite3 *ptr){
 
 	sqlite3_finalize(vm);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -1081,14 +1107,17 @@ void cleanUpRequest(sqlite3 *ptr, int id, int type){
 	}
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 
 
 	while(sqlite3_step(vm) != SQLITE_DONE) {
@@ -1147,6 +1176,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	sql_query = sqlite3_mprintf("SELECT user, passwd FROM cardServer WHERE serverID = '%d';", serverID);
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
@@ -1166,6 +1196,7 @@ void readCardServerCredits(int serverID, credits_t *key, sqlite3 *ptr){
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
@@ -1325,6 +1356,7 @@ void showContacts(sqlite3 *ptr){
 	sqlite3_stmt		*vm;
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	if(sqlite3_prepare_v2(ptr, "SELECT * FROM contacts", -1, &vm, NULL) == SQLITE_OK){
 		while(sqlite3_step(vm) != SQLITE_DONE)
@@ -1337,6 +1369,7 @@ void showContacts(sqlite3 *ptr){
 
 	sqlite3_finalize(vm);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**

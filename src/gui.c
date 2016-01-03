@@ -1850,7 +1850,7 @@ static void selContact(GtkWidget *widget, gpointer trans){
 
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(appBase.contactList))), &model, &iter)) {
 		gtk_tree_model_get(model, &iter, SELECTION_COLUMN, &selID,  -1);
-		verboseCC("[%s] %d\n",__func__, selID);
+		debugCC("[%s] %d\n",__func__, selID);
 		card = buildNewCard(appBase.db, selID);
 		gtk_widget_show_all(card);
 		viewCleaner(appBase.contactView);

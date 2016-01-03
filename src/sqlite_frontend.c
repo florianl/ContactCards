@@ -110,12 +110,14 @@ void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list){
 	}
 
 	while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+    verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
 
 	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
 
 	if (ret != SQLITE_OK){
 		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
 		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 		return;
 	}
 
@@ -128,6 +130,7 @@ void fillList(sqlite3 *ptr, int type, int from, int id, GtkWidget *list){
 	sqlite3_finalize(vm);
 	sqlite3_free(sql_query);
 	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
 }
 
 /**
