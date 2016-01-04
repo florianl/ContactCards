@@ -763,7 +763,7 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 	int					selID;
 	GSList				*abList;
 	ContactCards_pref_t		*buffers = trans;
-	char				*frameTitle = NULL, *user = NULL, *passwd = NULL;
+	char				*frameTitle = NULL, *user = NULL, *passwd = NULL, *synctime = NULL;
 	char				*issued = NULL, *issuer = NULL, *url = NULL, *color = NULL;
 	int					isOAuth;
 	int					flags = 0;
@@ -801,6 +801,9 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
 		}
+
+        synctime = getSingleChar(appBase.db, "cardServer", "lastSynced", 1, "serverID", selID, "", "", "", "", "", 0);
+        gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->lastsynced), synctime, -1);
 
 		url = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
 		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
@@ -1143,7 +1146,7 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	GtkWidget			*sPasswd;
 	GtkWidget			*ablist, *colorBtn;
 	GSList				*aBooks = g_slist_alloc();
-	GtkEntryBuffer		*desc, *url, *user, *passwd;
+	GtkEntryBuffer		*desc, *url, *user, *passwd, *timestr;
 	GtkEntryBuffer		*issued, *issuer;
 	GtkTreeSelection	*srvSel;
 	int					line = 1;
@@ -1160,6 +1163,7 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	passwd = gtk_entry_buffer_new(NULL, -1);
 	issued = gtk_entry_buffer_new(NULL, -1);
 	issuer = gtk_entry_buffer_new(NULL, -1);
+    timestr = gtk_entry_buffer_new(NULL, -1);
 
 	buffers = g_new(ContactCards_pref_t, 1);
 	prefView = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -1207,8 +1211,8 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 
 	label = gtk_label_new(_("User"));
 	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
-	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
-	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+    gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+    gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
 	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
 	input = gtk_entry_new_with_buffer(user);
 	gtk_widget_set_margin_top(GTK_WIDGET(input), 6);
@@ -1230,6 +1234,17 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	gtk_grid_attach(GTK_GRID(box), sPasswd, 3, line++, 4, 1);
 
 	line++;
+
+    label = gtk_label_new(_("Last time synced"));
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_END);
+	gtk_widget_set_margin_start(GTK_WIDGET(label), 3);
+	gtk_grid_attach(GTK_GRID(box), label, 2, line, 1, 1);
+	input = gtk_entry_new_with_buffer(timestr);
+	gtk_widget_set_margin_start(GTK_WIDGET(input), 3);
+    gtk_editable_set_editable(GTK_EDITABLE(input), FALSE);
+	gtk_grid_attach(GTK_GRID(box), input, 3, line++, 4, 1);
+
+    line++;
 
 	label = gtk_label_new(_("Color"));
 	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
@@ -1359,6 +1374,7 @@ scroll = gtk_scrolled_window_new(NULL, NULL);
 	buffers->passwdBuf = passwd;
 	buffers->issuedBuf = issued;
 	buffers->issuerBuf = issuer;
+    buffers->lastsynced = timestr;
 	buffers->srvPrefList = srvList;
 	buffers->certSel = digSwitch;
 	buffers->syncSel = uploadSwitch;

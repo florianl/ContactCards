@@ -202,7 +202,8 @@ void dbCreate(sqlite3 *ptr){
 	oAuthType INTEGER,\
 	oAuthAccessGrant TEXT,\
 	oAuthAccessToken TEXT,\
-	oAuthRefreshToken TEXT);", NULL, NULL, errmsg);
+	oAuthRefreshToken TEXT, \
+    lastSynced TEXT);", NULL, NULL, errmsg);
 
 	if (ret != SQLITE_OK)	goto sqlError;
 
@@ -392,7 +393,10 @@ int dbCheck(sqlite3 *ptr){
 		case 13:
 			sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN oAuthRefreshToken TEXT;");
 			doSimpleRequest(ptr, sql_query, __func__);
-		case 14:
+        case 14:
+            sql_query = sqlite3_mprintf("ALTER TABLE cardServer ADD COLUMN lastSynced TEXT;");
+			doSimpleRequest(ptr, sql_query, __func__);
+		case 15:
 		default:
 			verboseCC("[%s] 'cardServer' is up to date\n", __func__);
 			break;
