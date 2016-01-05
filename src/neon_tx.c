@@ -1511,6 +1511,8 @@ sendAgain:
 void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
 	__PRINTFUNC__;
 
+    char        *timestr = NULL;
+
 	if(countElements(ptr, "addressbooks", 1, "cardServer", serverID, "", "", "", "") == 0){
 		/*
 		 * 	Initial request to find the base stuff
@@ -1521,4 +1523,8 @@ void syncContacts(sqlite3 *ptr, ne_session *sess, int serverID){
 	} else {
 		checkAddressbooks(ptr, serverID, 20, sess);
 	}
+
+    timestr = g_date_time_format(g_date_time_new_now_local(),"%d.%m.%Y %H:%M");
+    setSingleChar(ptr, "cardServer", "lastSynced", timestr, "serverID", serverID);
+    g_free(timestr);
 }
