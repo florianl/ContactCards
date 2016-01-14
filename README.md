@@ -42,7 +42,7 @@ Install the dependencies.
 
 On Fedora run:
 
-    $ yum install autoconf gettext-devel automake intltool gcc git gtk3-devel neon-devel sqlite-devel
+    $ dnf install autoconf gettext-devel automake intltool gcc git gtk3-devel neon-devel sqlite-devel
 
 On Ubuntu run:
 
