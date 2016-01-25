@@ -1082,6 +1082,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			if(value != NULL){
 				GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
 				GtkWidget		*scroller = NULL;
+                GtkRequisition  natSize;
 				scroller = gtk_scrolled_window_new(NULL, NULL);
 				gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 				gtk_text_buffer_set_text(val, g_strcompress(g_strstrip(value)), -1);
@@ -1091,7 +1092,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(scroller, 12);
 				gtk_widget_set_margin_end(scroller, 12);
 				gtk_widget_set_margin_top(scroller, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, -1);
+				gtk_widget_get_preferred_size(GTK_WIDGET(content), NULL, &natSize);
+				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, natSize.width + 35);
 				gtk_widget_set_hexpand(scroller, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(scroller), GTK_ALIGN_START);
 				gtk_container_add(GTK_CONTAINER(scroller), content);
@@ -1117,6 +1119,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 			if(value != NULL){
 				GtkTextBuffer	*val = gtk_text_buffer_new(NULL);
 				GtkWidget		*scroller = NULL;
+                GtkRequisition  natSize;
 				scroller = gtk_scrolled_window_new(NULL, NULL);
 				gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 				gtk_text_buffer_set_text(val, g_strcompress(g_strstrip(value)), -1);
@@ -1126,7 +1129,8 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(scroller, 12);
 				gtk_widget_set_margin_end(scroller, 12);
 				gtk_widget_set_margin_top(scroller, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, -1);
+                gtk_widget_get_preferred_size(GTK_WIDGET(content), NULL, &natSize);
+				gtk_widget_set_size_request(GTK_WIDGET(scroller), 322, natSize.height +35);
 				gtk_widget_set_hexpand(scroller, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(scroller), GTK_ALIGN_START);
 				gtk_container_add(GTK_CONTAINER(scroller), content);
