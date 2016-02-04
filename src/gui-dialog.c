@@ -1451,6 +1451,8 @@ void prefWindow(GtkWidget *widget, gpointer trans){
 
 	g_signal_connect(G_OBJECT(prefWindow), "key_press_event", G_CALLBACK(prefKeyHandler), NULL);
 
+    g_signal_connect(prefWindow, "show", G_CALLBACK(prefViewGen), prefView);
+
 	gtk_container_add(GTK_CONTAINER(prefWindow), prefLayout);
 	gtk_widget_show_all(prefWindow);
 }
