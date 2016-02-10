@@ -687,6 +687,61 @@ GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, ch
 }
 
 /**
+ * getSingleIntRand - returns a single integer value
+ *  @ptr                pointer to the database
+ *  @tableName          name of the table in the database
+ *  @selValue           name of the column which will be selected
+ */
+int getSingleIntRand(sqlite3 *ptr, char *tableName, char *selValue){
+	__PRINTFUNC__;
+
+	sqlite3_stmt 		*vm;
+	char 				*sql_query = NULL;
+	int					ret;
+	int					count = 0;
+	int					retValue = 0;
+
+    sql_query = sqlite3_mprintf("SELECT %q FROM %q ORDER BY RANDOM() LIMIT 1;", selValue, tableName);
+
+    while(sqlite3_mutex_try(dbMutex) != SQLITE_OK){}
+        verboseCC("%s():%d\tlocked mutex\n", __func__, __LINE__);
+
+	ret = sqlite3_prepare_v2(ptr, sql_query, strlen(sql_query), &vm, NULL);
+
+	if (ret != SQLITE_OK){
+		verboseCC("[%s] %d - %s\n", __func__, sqlite3_extended_errcode(ptr), sqlite3_errmsg(ptr));
+		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
+		return count;
+	}
+
+	debugCC("[%s] %s\n", __func__, sql_query);
+
+	while(sqlite3_step(vm) != SQLITE_DONE) {
+		if(sqlite3_column_text(vm, 0) == NULL){
+			retValue = 0;
+		} else {
+			retValue = sqlite3_column_int(vm, 0);
+		}
+		count++;
+	}
+
+	if(count != 1){
+		verboseCC("[%s] there is more than one returning value. can't handle %d values\n", __func__, count);
+		sqlite3_mutex_leave(dbMutex);
+        verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
+		return -1;
+	}
+
+	sqlite3_finalize(vm);
+	sqlite3_free(sql_query);
+	sqlite3_mutex_leave(dbMutex);
+    verboseCC("%s():%d\tunlocked mutex\n", __func__, __LINE__);
+
+	return retValue;
+}
+
+/**
  * getSingleInt - returns a single integer value
  *	@ptr			pointer to the database
  *	@tableName		name of the table in the database

@@ -760,6 +760,7 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 	GtkTreeIter			iter;
 	GtkTreeModel		*model;
 	GtkWidget			*prefFrame;
+	GList               *children, *iter2;
 	int					selID;
 	GSList				*abList;
 	ContactCards_pref_t		*buffers = trans;
@@ -772,117 +773,128 @@ void prefSrvSel(GtkWidget *widget, gpointer trans){
 
 	prefFrame = buffers->prefFrame;
 
-	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
-		GList *children, *iter2;
+    if(GTK_IS_TREE_SELECTION(widget)){
+        verboseCC("is tree selection\n");
+        if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)) {
+            gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
+        } else {
+            debugCC("[%s] Failed to get selection", __func__);
+            return;
+        }
+    } else {
+        selID = getSingleIntRand(appBase.db, "cardServer", "serverID");
+        if (selID < 1){
+            debugCC("[%s] Failed to get a random selection", __func__);
+            return;
+        }
+    }
 
-		gtk_tree_model_get(model, &iter, ID_COLUMN, &selID,  -1);
-		verboseCC("[%s] %d\n",__func__, selID);
-		frameTitle = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
-		if (frameTitle == NULL) return;
-		gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
-		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), frameTitle, -1);
+	verboseCC("[%s] %d\n",__func__, selID);
+	frameTitle = getSingleChar(appBase.db, "cardServer", "desc", 1, "serverID", selID, "", "", "", "", "", 0);
+	if (frameTitle == NULL) return;
+	gtk_frame_set_label(GTK_FRAME(prefFrame), frameTitle);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->descBuf), frameTitle, -1);
 
-		buffers->srvID = selID;
+	buffers->srvID = selID;
 
-		user = getSingleChar(appBase.db, "cardServer", "user", 1, "serverID", selID, "", "", "", "", "", 0);
-		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->userBuf), user, -1);
+	user = getSingleChar(appBase.db, "cardServer", "user", 1, "serverID", selID, "", "", "", "", "", 0);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->userBuf), user, -1);
 
-		isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", selID, "", "", "", "");
-		if(!isOAuth){
-			passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
-			flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
-			if(flags & CONTACTCARDS_NO_PASSWD){
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
-			} else {
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), TRUE);
-			}
-		} else {
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
+	isOAuth = getSingleInt(appBase.db, "cardServer", "isOAuth", 1, "serverID", selID, "", "", "", "");
+	if(!isOAuth){
+		passwd = getSingleChar(appBase.db, "cardServer", "passwd", 1, "serverID", selID, "", "", "", "", "", 0);
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), passwd, -1);
+		flags = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
+		if(flags & CONTACTCARDS_NO_PASSWD){
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
-		}
-
-        synctime = getSingleChar(appBase.db, "cardServer", "lastSynced", 1, "serverID", selID, "", "", "", "", "", 0);
-        gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->lastsynced), synctime, -1);
-
-		url = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
-		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
-
-		gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
-
-		color = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", selID, "", "", "", "", "", 0);
-		if(gdk_rgba_parse(&rgba, color) == TRUE)
-			gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
-		free(color);
-
-		if(countElements(appBase.db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
-
-			issued = getSingleChar(appBase.db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
-			if(issued == NULL) issued = "";
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
-
-			issuer = getSingleChar(appBase.db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
-			if(issuer == NULL) issuer = "";
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
-
-			res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "", "", "");
-			if((res & ContactCards_DIGEST_TRUSTED) == ContactCards_DIGEST_TRUSTED){
-				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
-			} else {
-				gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
-			}
-#ifdef _USE_DANE
-			if((res & ContactCards_DANE) == ContactCards_DANE){
-				gtk_label_set_text(GTK_LABEL(buffers->dane), _("Certificate seems to be trustworthy."));
-			} else {
-				gtk_label_set_text(GTK_LABEL(buffers->dane), _("No information available via DANE."));
-			}
-#endif
 		} else {
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
-			gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), TRUE);
+		}
+	} else {
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->passwdBuf), "", -1);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(buffers->sPasswd), FALSE);
+	}
+
+    synctime = getSingleChar(appBase.db, "cardServer", "lastSynced", 1, "serverID", selID, "", "", "", "", "", 0);
+    gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->lastsynced), synctime, -1);
+
+	url = getSingleChar(appBase.db, "cardServer", "srvUrl", 1, "serverID", selID, "", "", "", "", "", 0);
+	gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->urlBuf), url, -1);
+
+	gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
+
+	color = getSingleChar(appBase.db, "cardServer", "color", 1, "serverID", selID, "", "", "", "", "", 0);
+	if(gdk_rgba_parse(&rgba, color) == TRUE)
+		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(buffers->colorChooser), &rgba);
+	free(color);
+
+	if(countElements(appBase.db, "certs", 1, "serverID", selID, "", "", "", "") == 1){
+
+		issued = getSingleChar(appBase.db, "certs", "issued", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(issued == NULL) issued = "";
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), issued, -1);
+
+		issuer = getSingleChar(appBase.db, "certs", "issuer", 1, "serverID", selID, "", "", "", "", "", 0);
+		if(issuer == NULL) issuer = "";
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), issuer, -1);
+
+		res = getSingleInt(appBase.db, "certs", "trustFlag", 1, "serverID", selID, "", "", "", "");
+		if((res & ContactCards_DIGEST_TRUSTED) == ContactCards_DIGEST_TRUSTED){
+			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), TRUE);
+		} else {
 			gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 		}
-
-		res = 0;
-		res = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
-		if(res & CONTACTCARDS_ONE_WAY_SYNC){
-			gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), TRUE);
+#ifdef _USE_DANE
+		if((res & ContactCards_DANE) == ContactCards_DANE){
+			gtk_label_set_text(GTK_LABEL(buffers->dane), _("Certificate seems to be trustworthy."));
 		} else {
-			gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), FALSE);
+			gtk_label_set_text(GTK_LABEL(buffers->dane), _("No information available via DANE."));
 		}
-
-		abList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
-
-		/* Flush the list box before adding new items	*/
-		children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
-		for(iter2 = children; iter2 != NULL; iter2 = g_list_next(iter2)) {
-			gtk_widget_destroy(GTK_WIDGET(iter2->data));
-		}
-		g_list_free(children);
-
-		if (g_slist_length(buffers->aBooks) > 1){
-			/* Yes, you're right. It's really ugly	*/
-			g_slist_free_full(buffers->aBooks, g_free);
-			buffers->aBooks = g_slist_alloc();
-		}
-
-		while(abList){
-			GSList				*next = abList->next;
-			GtkWidget			*row;
-
-			if(GPOINTER_TO_INT(abList->data) == 0){
-				abList = next;
-				continue;
-			}
-
-			row = buildRow(appBase.db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
-			gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
-			abList = next;
-		}
-
-		g_slist_free(abList);
+#endif
+	} else {
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuedBuf), "", -1);
+		gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffers->issuerBuf), "", -1);
+		gtk_switch_set_active(GTK_SWITCH(buffers->certSel), FALSE);
 	}
+
+	res = 0;
+	res = getSingleInt(appBase.db, "cardServer", "flags", 1, "serverID", selID, "", "", "", "");
+	if(res & CONTACTCARDS_ONE_WAY_SYNC){
+		gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), TRUE);
+	} else {
+		gtk_switch_set_active(GTK_SWITCH(buffers->syncSel), FALSE);
+	}
+
+	abList = getListInt(appBase.db, "addressbooks", "addressbookID", 1, "cardServer", selID, "", "", "", "");
+
+	/* Flush the list box before adding new items	*/
+	children = gtk_container_get_children(GTK_CONTAINER(buffers->listbox));
+	for(iter2 = children; iter2 != NULL; iter2 = g_list_next(iter2)) {
+		gtk_widget_destroy(GTK_WIDGET(iter2->data));
+	}
+	g_list_free(children);
+
+	if (g_slist_length(buffers->aBooks) > 1){
+		/* Yes, you're right. It's really ugly	*/
+		g_slist_free_full(buffers->aBooks, g_free);
+		buffers->aBooks = g_slist_alloc();
+	}
+
+	while(abList){
+		GSList				*next = abList->next;
+		GtkWidget			*row;
+
+		if(GPOINTER_TO_INT(abList->data) == 0){
+			abList = next;
+			continue;
+		}
+
+		row = buildRow(appBase.db, GPOINTER_TO_INT(abList->data), buffers->aBooks);
+		gtk_list_box_insert(GTK_LIST_BOX(buffers->listbox), row, -1);
+		abList = next;
+	}
+
+	g_slist_free(abList);
 
 	g_free(frameTitle);
 	g_free(user);
@@ -1361,11 +1373,6 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	gtk_container_add(GTK_CONTAINER(scroll), box);
 	gtk_container_add(GTK_CONTAINER(prefFrame), scroll);
 
-	gtk_container_add(GTK_CONTAINER(prefView), prefList);
-	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
-	gtk_widget_show_all(prefView);
-	gtk_container_add(GTK_CONTAINER(layout), prefView);
-
 	buffers->prefFrame = prefFrame;
 	buffers->descBuf = desc;
 	buffers->urlBuf = url;
@@ -1399,6 +1406,12 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 #ifdef _USE_DANE
 	g_signal_connect(daneCheck, "clicked", G_CALLBACK(prefServerCheckDane), buffers);
 #endif	/*	_USE_DANE	*/
+    g_signal_connect(prefView, "show", G_CALLBACK(prefSrvSel), buffers);
+
+	gtk_container_add(GTK_CONTAINER(prefView), prefList);
+	gtk_container_add(GTK_CONTAINER(prefView), prefFrame);
+	gtk_widget_show_all(prefView);
+	gtk_container_add(GTK_CONTAINER(layout), prefView);
 }
 
 /**

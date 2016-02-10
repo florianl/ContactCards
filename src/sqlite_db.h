@@ -34,6 +34,7 @@ extern void dbFlagDel(sqlite3 *ptr, char *table, char *flagCol, char *selCol, in
 extern void dbFlagSet(sqlite3 *ptr, char *table, char *flagCol, char *selCol, int selId, int flag);
 extern char *getSingleChar(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3, char *row4, int value4);
 extern int getSingleInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3);
+extern int getSingleIntRand(sqlite3 *ptr, char *tableName, char *selValue);
 extern GSList *getListInt(sqlite3 *ptr, char *tableName, char *selValue, int selRow, char *row1, int value1, char *row2, char *value2, char *row3, char *value3);
 extern void handleServerOptions(char *val, int serverID);
 extern void newAddressbook(sqlite3 *ptr, int cardServer, char *displayname, char *path);
