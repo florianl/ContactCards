@@ -1185,9 +1185,8 @@ void prefViewSrv(GtkWidget *btn, gpointer *trans){
 	gtk_widget_set_margin_start(GTK_WIDGET(prefFrame), 3);
 	gtk_widget_set_margin_end(GTK_WIDGET(prefFrame), 3);
 
-scroll = gtk_scrolled_window_new(NULL, NULL);
+    scroll = gtk_scrolled_window_new(NULL, NULL);
 	box = gtk_grid_new();
-
 
 	label = gtk_label_new(_("Description"));
 	gtk_widget_set_margin_top(GTK_WIDGET(label), 6);
