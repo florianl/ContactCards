@@ -369,6 +369,17 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
 	input = gtk_entry_new_with_buffer(buf);
 	gtk_widget_set_margin_bottom(input, 4);
 	gtk_grid_attach(GTK_GRID(grid), input, 2, line++, 5, 1);
+    switch(type)
+    {
+        case CARDTYPE_TEL:
+            gtk_entry_set_input_purpose(GTK_ENTRY(input), GTK_INPUT_PURPOSE_PHONE);
+            break
+        case CARDTYPE_EMAIL:
+            gtk_entry_set_input_purpose(GTK_ENTRY(input), GTK_INPUT_PURPOSE_EMAIL);
+            break;
+        default:
+            break;
+    }
 	item->itemID = type;
 	item->element = buf;
 	elements = g_slist_append(elements, item);
