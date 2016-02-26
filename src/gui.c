@@ -373,7 +373,7 @@ static int contactEditSingleItem(GtkWidget *grid, GSList *list, int type, int li
     {
         case CARDTYPE_TEL:
             gtk_entry_set_input_purpose(GTK_ENTRY(input), GTK_INPUT_PURPOSE_PHONE);
-            break
+            break;
         case CARDTYPE_EMAIL:
             gtk_entry_set_input_purpose(GTK_ENTRY(input), GTK_INPUT_PURPOSE_EMAIL);
             break;
