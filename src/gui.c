@@ -828,6 +828,10 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 	ContactCards_pix_t	*tmp = NULL;
 
 	frame = gtk_frame_new(NULL);
+
+	gtk_widget_set_hexpand(GTK_WIDGET(frame), TRUE);
+	gtk_widget_set_vexpand(GTK_WIDGET(frame), TRUE);
+
 	card = gtk_grid_new();
 	vData = getSingleChar(ptr, "contacts", "vCard", 1, "contactID", selID, "", "", "", "", "", 0);
 	if(vData == NULL)
