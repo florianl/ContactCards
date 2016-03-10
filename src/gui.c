@@ -910,7 +910,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 				gtk_widget_set_margin_start(content, 12);
 				gtk_widget_set_margin_end(content, 12);
 				gtk_widget_set_margin_top(content, 6);
-				gtk_widget_set_size_request(GTK_WIDGET(content), 233, -1);
+				gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 				gtk_widget_set_hexpand(content, TRUE);
 				gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 				gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
@@ -950,7 +950,7 @@ static GtkWidget *buildNewCard(sqlite3 *ptr, int selID){
 					gtk_widget_set_margin_start(content, 12);
 					gtk_widget_set_margin_end(content, 12);
 					gtk_widget_set_margin_top(content, 6);
-					gtk_widget_set_size_request(GTK_WIDGET(content), 233, -1);
+					gtk_widget_set_size_request(GTK_WIDGET(content), 322, -1);
 					gtk_widget_set_hexpand(content, TRUE);
 					gtk_widget_set_halign(GTK_WIDGET(content), GTK_ALIGN_START);
 					gtk_grid_attach(GTK_GRID(card), content, 1, line++, 1, 1);
