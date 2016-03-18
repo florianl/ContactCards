@@ -3179,8 +3179,10 @@ void guiInit(void){
 	gtk_box_pack_start(GTK_BOX(mainVBox), mainToolbar, FALSE, TRUE, 0);
 	gtk_container_add(GTK_CONTAINER(addressbookWindow), appBase.addressbookList);
 	gtk_box_pack_start(GTK_BOX(leftBox), GTK_WIDGET(addressbookWindow), TRUE, TRUE, 2);
-	gtk_box_pack_end(GTK_BOX(leftBox), GTK_WIDGET(appBase.cal), FALSE, FALSE, 2);
-	gtk_container_add(GTK_CONTAINER(mainContent), leftBox);
+    if((appBase.flags & CONTACTCARDS_HIDE_CAL) != CONTACTCARDS_HIDE_CAL){
+        gtk_box_pack_end(GTK_BOX(leftBox), GTK_WIDGET(appBase.cal), FALSE, FALSE, 2);
+    }
+    gtk_container_add(GTK_CONTAINER(mainContent), leftBox);
 	gtk_container_add(GTK_CONTAINER(contactWindow), appBase.contactList);
 	gtk_container_add(GTK_CONTAINER(contactBox), contactsEdit);
 	gtk_container_add(GTK_CONTAINER(contactBox), scroll);

@@ -124,6 +124,7 @@ typedef struct ContactCards_genPref {
 	GtkWidget			*map;
 	GtkWidget			*interval;
 	GtkWidget			*locals;
+    GtkWidget           *hideCal;
 } ContactCards_genPref_t;
 
 /**

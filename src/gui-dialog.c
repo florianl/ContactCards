@@ -1013,7 +1013,7 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	GtkWidget			*layout = GTK_WIDGET(trans);
 	GtkWidget			*prefView;
 	GtkWidget			*txt;
-	GtkWidget			*sort, *map, *interval, *localBook;
+	GtkWidget			*sort, *map, *interval, *localBook, *hideCal;
 	GtkWidget			*sBtn;
 	int					line = 2;
 	ContactCards_genPref_t		*gen;
@@ -1125,10 +1125,30 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	gtk_grid_attach(GTK_GRID(prefView), localBook, 1, line++, 2, 1);
 	line++;
 
+	txt = gtk_label_new(_("Hide calendar?"));
+	gtk_widget_set_margin_start(txt, 12);
+	gtk_widget_set_margin_end(txt, 12);
+	gtk_widget_set_margin_top(txt, 18);
+	gtk_widget_set_halign(txt, GTK_ALIGN_END);
+	hideCal = gtk_combo_box_text_new();
+	gtk_widget_set_margin_top(hideCal, 18);
+	gtk_widget_set_halign(hideCal, GTK_ALIGN_START);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "1", _("No"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "2", _("Yes"));
+	if((appBase.flags & CONTACTCARDS_HIDE_CAL) == CONTACTCARDS_HIDE_CAL){
+		gtk_combo_box_set_active(GTK_COMBO_BOX(hideCal), 1);
+	} else {
+		gtk_combo_box_set_active(GTK_COMBO_BOX(hideCal), 0);
+	}
+	gtk_grid_attach(GTK_GRID(prefView), txt, 0, line, 1, 1);
+	gtk_grid_attach(GTK_GRID(prefView), hideCal, 1, line++, 2, 1);
+	line++;
+
 	gen->sort		= sort;
 	gen->map		= map;
 	gen->interval	= interval;
 	gen->locals		= localBook;
+    gen->hideCal    = hideCal;
 
 	sBtn = gtk_button_new_with_label(_("Save changes"));
 	gtk_widget_set_margin_start(sBtn, 12);

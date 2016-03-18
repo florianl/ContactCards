@@ -151,6 +151,15 @@ static void config_load_ui(GKeyFile *config){
 			flags |= CONTACTCARDS_NO_LOCAL;
 	}
 
+	flag = g_key_file_get_boolean(config, PACKAGE, "hideCalendar", &error);
+	if (error){
+			verboseCC("%s\n", error->message);
+			g_clear_error(&error);
+	} else {
+		if(flag == FALSE)
+			flags |= CONTACTCARDS_HIDE_CAL;
+	}
+
 	tmp |= g_key_file_get_integer(config, PACKAGE, "formation", &error);
 	if (error){
 			verboseCC("%s\n", error->message);
@@ -279,6 +288,12 @@ void saveSettings(char *confDir){
 		g_key_file_set_boolean(config, PACKAGE, "localAdressBook", FALSE);
 	} else {
 		g_key_file_set_boolean(config, PACKAGE, "localAdressBook", TRUE);
+	}
+    if((appBase.flags & CONTACTCARDS_HIDE_CAL) == CONTACTCARDS_HIDE_CAL){
+		debugCC("No local address book\n");
+		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", TRUE);
+	} else {
+		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", FALSE);
 	}
 
 	data = g_key_file_to_data(config, NULL, NULL);

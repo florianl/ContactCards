@@ -140,6 +140,7 @@ sqlite3_mutex			*dbMutex;
 #define	USE_GOOGLE					0x1004
 #define	USE_SEPARATOR				0x2004		/*	Unused so far	*/
 #define	CONTACTCARDS_NO_LOCAL		0x4004
+#define CONTACTCARDS_HIDE_CAL       0x8004
 
 
 #define	__PRINTFUNC__	g_log("ContactCards", G_LOG_LEVEL_DEBUG, "[%s]\n", __func__);
