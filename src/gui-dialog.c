@@ -932,18 +932,20 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 	__PRINTFUNC__;
 
 	ContactCards_genPref_t		*gen = trans;
-	int							newSort, newMap, newInterval, newLocal;
+	int							newSort, newMap, newInterval, newLocal, newHideCal;
 	int							newFlag = 0;
 
 	/*	Delete old flags	*/
 	appBase.flags &= ~DISPLAY_STYLE_MASK;
 	appBase.flags &= ~USE_MAP_MASK;
 	appBase.flags &= ~CONTACTCARDS_NO_LOCAL;
+    appBase.flags &= ~CONTACTCARDS_HIDE_CAL;
 
 	newSort	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->sort));
 	newMap	= gtk_combo_box_get_active(GTK_COMBO_BOX(gen->map));
 	newInterval = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->interval));
 	newLocal = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->locals));
+    newHideCal = gtk_combo_box_get_active(GTK_COMBO_BOX(gen->hideCal));
 
 	debugCC("\t\tstyle:%d\tmap: %d\tlocal: %d\n", newSort, newMap, newLocal);
 
@@ -955,6 +957,15 @@ void prefGenSave(GtkWidget *widget, gpointer trans){
 			/*	Use a local adress book	*/
 			break;
 	}
+
+    switch(newHideCal){
+        case 1:
+            newFlag |= CONTACTCARDS_HIDE_CAL;
+            break;
+        default:
+            /*  Display the calendar    */
+            break;
+    }
 
 	switch(newSort){
 		case 0:
@@ -1133,8 +1144,8 @@ void prefViewGen(GtkWidget *btn, gpointer *trans){
 	hideCal = gtk_combo_box_text_new();
 	gtk_widget_set_margin_top(hideCal, 18);
 	gtk_widget_set_halign(hideCal, GTK_ALIGN_START);
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "1", _("No"));
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "2", _("Yes"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "1", _("Show"));
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(hideCal), "2", _("Hide"));
 	if((appBase.flags & CONTACTCARDS_HIDE_CAL) == CONTACTCARDS_HIDE_CAL){
 		gtk_combo_box_set_active(GTK_COMBO_BOX(hideCal), 1);
 	} else {

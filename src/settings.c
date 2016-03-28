@@ -290,9 +290,10 @@ void saveSettings(char *confDir){
 		g_key_file_set_boolean(config, PACKAGE, "localAdressBook", TRUE);
 	}
     if((appBase.flags & CONTACTCARDS_HIDE_CAL) == CONTACTCARDS_HIDE_CAL){
-		debugCC("No local address book\n");
+		debugCC("Hide calendar\n");
 		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", TRUE);
 	} else {
+        debugCC("Show calendar\n");
 		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", FALSE);
 	}
 
