@@ -2502,7 +2502,7 @@ void contactsTreeContextMenu(GtkWidget *widget, GdkEvent *event, gpointer data){
 		g_signal_connect(exportItem, "activate", (GCallback)contactExportcb, NULL);
 		userflag = getSingleInt(appBase.db, "contacts", "flags", 1, "contactID", selID, "", "", "", "");
 		if((userflag & CONTACTCARDS_FAVORIT) == CONTACTCARDS_FAVORIT){
-			favItem = gtk_menu_item_new_with_label(_("Delete from Favorits"));
+			favItem = gtk_menu_item_new_with_label(_("Remove from Favorits"));
 			g_signal_connect(favItem, "activate", (GCallback)contactDelFavcb, NULL);
 		} else {
 			favItem = gtk_menu_item_new_with_label(_("Add to Favorits"));
