@@ -157,7 +157,7 @@ static void config_load_ui(GKeyFile *config){
 			g_clear_error(&error);
 	} else {
 		if(flag == FALSE)
-			flags |= CONTACTCARDS_HIDE_CAL;
+            flags |= CONTACTCARDS_HIDE_CAL;
 	}
 
 	tmp |= g_key_file_get_integer(config, PACKAGE, "formation", &error);
@@ -291,10 +291,10 @@ void saveSettings(char *confDir){
 	}
     if((appBase.flags & CONTACTCARDS_HIDE_CAL) == CONTACTCARDS_HIDE_CAL){
 		debugCC("Hide calendar\n");
-		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", TRUE);
+		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", FALSE);
 	} else {
         debugCC("Show calendar\n");
-		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", FALSE);
+		g_key_file_set_boolean(config, PACKAGE, "hideCalendar", TRUE);
 	}
 
 	data = g_key_file_to_data(config, NULL, NULL);
